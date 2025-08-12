@@ -1,0 +1,658 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DM Copilot - AI-ассистент для мастеров D&D</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: {
+                            50: '#eff6ff',
+                            500: '#3b82f6',
+                            600: '#2563eb',
+                            700: '#1d4ed8'
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        .card { @apply bg-white rounded-lg shadow-md border border-gray-200; }
+        .btn { @apply px-6 py-3 rounded-lg font-medium transition-colors text-base; }
+        .btn-primary { @apply bg-primary-600 text-white hover:bg-primary-700; }
+        .btn-outline { @apply border border-gray-300 text-gray-700 hover:bg-gray-50; }
+        .btn-sm { @apply px-4 py-2 text-sm; }
+        body { font-size: 16px; }
+        .container { max-width: 1200px; }
+        .loading { @apply animate-pulse bg-gray-200; }
+    </style>
+</head>
+<body class="bg-gray-50 min-h-screen">
+    <div class="container mx-auto px-8 py-6">
+        <!-- Header -->
+        <div class="text-center mb-8">
+            <h1 class="text-5xl font-bold text-gray-900 mb-4">🎲 DM Copilot</h1>
+            <p class="text-2xl text-gray-600">AI-ассистент для мастеров D&D</p>
+            <div class="mt-4 p-3 bg-green-100 rounded-lg inline-block">
+                <span class="text-green-800 font-medium">🤖 AI доступен для всех пользователей</span>
+            </div>
+        </div>
+
+        <!-- Navigation Tabs -->
+        <div class="flex justify-center mb-8">
+            <div class="flex space-x-2 bg-white rounded-lg p-2 shadow-sm">
+                <button onclick="showTab('home')" class="tab-btn active px-6 py-3 rounded-md text-lg">🏠 Главная</button>
+                <button onclick="showTab('tables')" class="tab-btn px-6 py-3 rounded-md text-lg">📊 Таблицы</button>
+                <button onclick="showTab('session')" class="tab-btn px-6 py-3 rounded-md text-lg">🎭 Сессия</button>
+                <button onclick="showTab('ai')" class="tab-btn px-6 py-3 rounded-md text-lg">🤖 AI Подсказки</button>
+            </div>
+        </div>
+
+        <!-- Home Tab -->
+        <div id="home" class="tab-content">
+            <div class="grid grid-cols-4 gap-8 mb-8">
+                <div class="card p-8 text-center">
+                    <div class="text-4xl mb-4">📚</div>
+                    <h3 class="text-xl font-semibold mb-3">Knowledge Ingestion</h3>
+                    <p class="text-base text-gray-600">Загрузка и обработка модулей</p>
+                </div>
+                <div class="card p-8 text-center">
+                    <div class="text-4xl mb-4">📊</div>
+                    <h3 class="text-xl font-semibold mb-3">Tables Engine</h3>
+                    <p class="text-base text-gray-600">Управление справочными данными</p>
+                </div>
+                <div class="card p-8 text-center">
+                    <div class="text-4xl mb-4">🎭</div>
+                    <h3 class="text-xl font-semibold mb-3">Session Runner</h3>
+                    <p class="text-base text-gray-600">Ведение D&D сессий</p>
+                </div>
+                <div class="card p-8 text-center">
+                    <div class="text-4xl mb-4">🤖</div>
+                    <h3 class="text-xl font-semibold mb-3">AI Assistant</h3>
+                    <p class="text-base text-gray-600">Умные подсказки от DeepSeek</p>
+                </div>
+            </div>
+
+            <div class="card p-8 mb-8">
+                <h2 class="text-3xl font-bold mb-6">Быстрые действия</h2>
+                <div class="grid grid-cols-4 gap-6">
+                    <button onclick="generateRandom('npc')" class="btn btn-outline flex flex-col items-center p-6 h-32">
+                        <span class="text-4xl mb-3">👤</span>
+                        <span class="text-base">Случайный NPC</span>
+                    </button>
+                    <button onclick="generateRandom('tavern')" class="btn btn-outline flex flex-col items-center p-6 h-32">
+                        <span class="text-4xl mb-3">🏪</span>
+                        <span class="text-base">Название таверны</span>
+                    </button>
+                    <button onclick="generateRandom('potion')" class="btn btn-outline flex flex-col items-center p-6 h-32">
+                        <span class="text-4xl mb-3">🧪</span>
+                        <span class="text-base">Случайное зелье</span>
+                    </button>
+                    <button onclick="rollDice()" class="btn btn-outline flex flex-col items-center p-6 h-32">
+                        <span class="text-4xl mb-3">🎲</span>
+                        <span class="text-base">Бросить кости</span>
+                    </button>
+                </div>
+            </div>
+
+            <div class="card p-8">
+                <h2 class="text-3xl font-bold mb-6">Статистика</h2>
+                <div class="grid grid-cols-3 gap-8 text-center">
+                    <div>
+                        <div class="text-4xl font-bold text-primary-600">5</div>
+                        <div class="text-lg text-gray-600">Таблиц данных</div>
+                    </div>
+                    <div>
+                        <div class="text-4xl font-bold text-green-600">25</div>
+                        <div class="text-lg text-gray-600">Записей</div>
+                    </div>
+                    <div>
+                        <div class="text-4xl font-bold text-purple-600">0</div>
+                        <div class="text-lg text-gray-600">Сессий</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tables Tab -->
+        <div id="tables" class="tab-content hidden">
+            <div class="card p-8 mb-8">
+                <h2 class="text-3xl font-bold mb-8">Таблицы данных</h2>
+                <div class="grid grid-cols-3 gap-6">
+                    <div class="border rounded-lg p-6">
+                        <h3 class="text-xl font-semibold mb-3">🍺 Напитки</h3>
+                        <p class="text-base text-gray-600 mb-4">Алкогольные и безалкогольные напитки</p>
+                        <div class="flex gap-3">
+                            <button onclick="showTableData('drinks')" class="btn btn-sm btn-primary">Просмотр</button>
+                            <button onclick="generateRandom('drink')" class="btn btn-sm btn-outline">Случайный</button>
+                        </div>
+                    </div>
+                    <div class="border rounded-lg p-6">
+                        <h3 class="text-xl font-semibold mb-3">👤 NPC</h3>
+                        <p class="text-base text-gray-600 mb-4">Неигровые персонажи</p>
+                        <div class="flex gap-3">
+                            <button onclick="showTableData('npcs')" class="btn btn-sm btn-primary">Просмотр</button>
+                            <button onclick="generateRandom('npc')" class="btn btn-sm btn-outline">Случайный</button>
+                        </div>
+                    </div>
+                    <div class="border rounded-lg p-6">
+                        <h3 class="text-xl font-semibold mb-3">🧪 Зелья</h3>
+                        <p class="text-base text-gray-600 mb-4">Магические зелья и их свойства</p>
+                        <div class="flex gap-3">
+                            <button onclick="showTableData('potions')" class="btn btn-sm btn-primary">Просмотр</button>
+                            <button onclick="generateRandom('potion')" class="btn btn-sm btn-outline">Случайный</button>
+                        </div>
+                    </div>
+                    <div class="border rounded-lg p-6">
+                        <h3 class="text-xl font-semibold mb-3">🗡️ События в пути</h3>
+                        <p class="text-base text-gray-600 mb-4">Случайные события во время путешествий</p>
+                        <div class="flex gap-3">
+                            <button onclick="showTableData('events')" class="btn btn-sm btn-primary">Просмотр</button>
+                            <button onclick="generateRandom('event')" class="btn btn-sm btn-outline">Случайный</button>
+                        </div>
+                    </div>
+                    <div class="border rounded-lg p-6">
+                        <h3 class="text-xl font-semibold mb-3">🏪 Названия таверн</h3>
+                        <p class="text-base text-gray-600 mb-4">Креативные названия для таверн</p>
+                        <div class="flex gap-3">
+                            <button onclick="showTableData('taverns')" class="btn btn-sm btn-primary">Просмотр</button>
+                            <button onclick="generateRandom('tavern')" class="btn btn-sm btn-outline">Случайный</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="tableData" class="card p-8 hidden">
+                <h3 id="tableTitle" class="text-2xl font-bold mb-6"></h3>
+                <div id="tableContent" class="space-y-3"></div>
+                <button onclick="hideTableData()" class="btn btn-outline mt-6">← Назад к таблицам</button>
+            </div>
+        </div>
+
+        <!-- Session Tab -->
+        <div id="session" class="tab-content hidden">
+            <div class="grid grid-cols-3 gap-8">
+                <!-- Session Stages -->
+                <div class="card p-6">
+                    <h3 class="text-xl font-semibold mb-6">Этап сессии</h3>
+                    <div class="space-y-3">
+                        <button onclick="setStage('hook')" class="stage-btn active w-full text-left p-4 rounded-lg">
+                            <div class="font-medium text-lg">🎣 Зацепка</div>
+                            <div class="text-base opacity-75">Начало приключения</div>
+                        </button>
+                        <button onclick="setStage('exploration')" class="stage-btn w-full text-left p-4 rounded-lg">
+                            <div class="font-medium text-lg">🗺️ Исследование</div>
+                            <div class="text-base opacity-75">Изучение мира</div>
+                        </button>
+                        <button onclick="setStage('combat')" class="stage-btn w-full text-left p-4 rounded-lg">
+                            <div class="font-medium text-lg">⚔️ Бой</div>
+                            <div class="text-base opacity-75">Сражения и конфликты</div>
+                        </button>
+                        <button onclick="setStage('social')" class="stage-btn w-full text-left p-4 rounded-lg">
+                            <div class="font-medium text-lg">🤝 Социальное</div>
+                            <div class="text-base opacity-75">Дипломатия и торговля</div>
+                        </button>
+                        <button onclick="setStage('puzzle')" class="stage-btn w-full text-left p-4 rounded-lg">
+                            <div class="font-medium text-lg">🧩 Головоломка</div>
+                            <div class="text-base opacity-75">Загадки и ловушки</div>
+                        </button>
+                        <button onclick="setStage('climax')" class="stage-btn w-full text-left p-4 rounded-lg">
+                            <div class="font-medium text-lg">🔥 Кульминация</div>
+                            <div class="text-base opacity-75">Финальное противостояние</div>
+                        </button>
+                        <button onclick="setStage('resolution')" class="stage-btn w-full text-left p-4 rounded-lg">
+                            <div class="font-medium text-lg">🏁 Развязка</div>
+                            <div class="text-base opacity-75">Завершение приключения</div>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Master Notes -->
+                <div class="card p-6">
+                    <h3 class="text-xl font-semibold mb-6">Заметки мастера</h3>
+                    <textarea id="masterNotes" placeholder="Запишите важные детали, планы, идеи..." 
+                              class="w-full h-48 p-4 border rounded-lg resize-none focus:ring-2 focus:ring-primary-500 text-base"></textarea>
+                    <div class="mt-4 text-base text-gray-600">
+                        Текущий этап: <span id="currentStage" class="font-medium">🎣 Зацепка</span>
+                    </div>
+                </div>
+
+                <!-- Quick Actions -->
+                <div class="card p-6">
+                    <h3 class="text-xl font-semibold mb-6">Быстрые действия</h3>
+                    <div class="space-y-3">
+                        <button onclick="rollDice()" class="btn btn-outline w-full justify-start text-base">
+                            🎲 Бросить кости (d20)
+                        </button>
+                        <button onclick="generateRandom('tavern')" class="btn btn-outline w-full justify-start text-base">
+                            🏪 Случайная таверна
+                        </button>
+                        <button onclick="generateRandom('potion')" class="btn btn-outline w-full justify-start text-base">
+                            🧪 Случайное зелье
+                        </button>
+                        <button onclick="generateRandom('npc')" class="btn btn-outline w-full justify-start text-base">
+                            🗣️ Случайный NPC
+                        </button>
+                        <button onclick="generateRandom('drink')" class="btn btn-outline w-full justify-start text-base">
+                            🍺 Случайный напиток
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- AI Tab -->
+        <div id="ai" class="tab-content hidden">
+            <div class="card p-8 mb-8">
+                <h2 class="text-3xl font-bold mb-8">🤖 AI Подсказки</h2>
+                
+                <!-- Context Input -->
+                <div class="mb-6">
+                    <label class="block text-lg font-medium mb-3">Контекст сессии:</label>
+                    <textarea id="sessionContext" placeholder="Опишите текущую ситуацию, персонажей, локацию..." 
+                              class="w-full h-24 p-4 border rounded-lg resize-none focus:ring-2 focus:ring-primary-500 text-base"></textarea>
+                </div>
+
+                <!-- AI Type Selection -->
+                <div class="grid grid-cols-3 gap-6 mb-8">
+                    <button onclick="setAIType('plot_twist')" class="ai-type-btn active p-6 border rounded-lg text-center">
+                        <div class="text-4xl mb-3">🎭</div>
+                        <div class="font-medium text-lg">Поворот сюжета</div>
+                        <div class="text-base text-gray-600">Неожиданные повороты</div>
+                    </button>
+                    <button onclick="setAIType('npc_dialogue')" class="ai-type-btn p-6 border rounded-lg text-center">
+                        <div class="text-4xl mb-3">🗣️</div>
+                        <div class="font-medium text-lg">Диалог NPC</div>
+                        <div class="text-base text-gray-600">Живые диалоги</div>
+                    </button>
+                    <button onclick="setAIType('scene_description')" class="ai-type-btn p-6 border rounded-lg text-center">
+                        <div class="text-4xl mb-3">🏰</div>
+                        <div class="font-medium text-lg">Описание сцены</div>
+                        <div class="text-base text-gray-600">Атмосферные описания</div>
+                    </button>
+                    <button onclick="setAIType('loot_suggestion')" class="ai-type-btn p-6 border rounded-lg text-center">
+                        <div class="text-4xl mb-3">💎</div>
+                        <div class="font-medium text-lg">Предложение лута</div>
+                        <div class="text-base text-gray-600">Сбалансированные награды</div>
+                    </button>
+                    <button onclick="setAIType('skill_check')" class="ai-type-btn p-6 border rounded-lg text-center">
+                        <div class="text-4xl mb-3">🎲</div>
+                        <div class="font-medium text-lg">Проверка навыков</div>
+                        <div class="text-base text-gray-600">Логичные проверки</div>
+                    </button>
+                    <button onclick="setAIType('combat_encounter')" class="ai-type-btn p-6 border rounded-lg text-center">
+                        <div class="text-4xl mb-3">⚔️</div>
+                        <div class="font-medium text-lg">Боевая встреча</div>
+                        <div class="text-base text-gray-600">Тактика и монстры</div>
+                    </button>
+                </div>
+
+                <!-- Generate Button -->
+                <button onclick="generateAISuggestion()" id="generateBtn" class="btn btn-primary w-full text-lg">
+                    🤖 Сгенерировать с помощью AI
+                </button>
+            </div>
+
+            <!-- AI Result -->
+            <div id="aiResult" class="card p-8 hidden">
+                <h3 class="text-xl font-semibold mb-6">Результат генерации AI</h3>
+                <div id="aiContent" class="bg-gray-50 p-6 rounded-lg mb-6 text-base"></div>
+                <div class="flex gap-4">
+                    <button onclick="copyToClipboard()" class="btn btn-outline">📋 Копировать</button>
+                    <button onclick="regenerateAI()" class="btn btn-primary">🔄 Сгенерировать еще раз</button>
+                </div>
+            </div>
+
+            <!-- Usage Stats -->
+            <div class="card p-6 mt-8">
+                <h3 class="text-lg font-semibold mb-4">📊 Статистика использования</h3>
+                <div class="grid grid-cols-3 gap-4 text-center">
+                    <div>
+                        <div class="text-2xl font-bold text-primary-600" id="requestsCount">0</div>
+                        <div class="text-sm text-gray-600">Запросов к AI</div>
+                    </div>
+                    <div>
+                        <div class="text-2xl font-bold text-green-600" id="tokensUsed">0</div>
+                        <div class="text-sm text-gray-600">Токенов использовано</div>
+                    </div>
+                    <div>
+                        <div class="text-2xl font-bold text-purple-600" id="avgResponseTime">0s</div>
+                        <div class="text-sm text-gray-600">Среднее время ответа</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Results Modal -->
+        <div id="resultModal" class="fixed inset-0 bg-black bg-opacity-50 hidden flex items-center justify-center z-50">
+            <div class="bg-white rounded-lg p-8 max-w-lg mx-4">
+                <h3 class="text-xl font-semibold mb-6">Результат</h3>
+                <div id="modalContent" class="mb-6 text-base"></div>
+                <div class="flex gap-4">
+                    <button onclick="copyToClipboard()" class="btn btn-primary flex-1">📋 Копировать</button>
+                    <button onclick="closeModal()" class="btn btn-outline flex-1">Закрыть</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Demo data
+        const demoData = {
+            drinks: [
+                { name: "Эльфовское вино", effect: "Восстанавливает 1d4 HP", price: "5 золотых" },
+                { name: "Огненный эль", effect: "Дает сопротивление огню на 1 час", price: "3 золотых" },
+                { name: "Лунный нектар", effect: "Улучшает зрение в темноте", price: "8 золотых" },
+                { name: "Гномский эль", effect: "Увеличивает силу на +2 на 10 минут", price: "4 золотых" },
+                { name: "Драконье пиво", effect: "Дыхание огнем 1 раз", price: "15 золотых" }
+            ],
+            npcs: [
+                { name: "Торин Железнобород", race: "Дварф", profession: "Кузнец", personality: "Упрямый, но честный" },
+                { name: "Элара Светлая", race: "Эльф", profession: "Маг", personality: "Мудрая и загадочная" },
+                { name: "Грог Силач", race: "Полуорк", profession: "Охранник", personality: "Грубый, но верный" },
+                { name: "Зара Тень", race: "Полуэльф", profession: "Вор", personality: "Хитрый и осторожный" },
+                { name: "Маркус Добросерд", race: "Человек", profession: "Торговец", personality: "Дружелюбный и щедрый" }
+            ],
+            potions: [
+                { name: "Зелье лечения", effect: "Восстанавливает 2d4+2 HP", rarity: "Обычное" },
+                { name: "Зелье невидимости", effect: "Невидимость на 1 час", rarity: "Редкое" },
+                { name: "Зелье полета", effect: "Полет на 10 минут", rarity: "Редкое" },
+                { name: "Зелье гигантской силы", effect: "Сила +4 на 1 час", rarity: "Необычное" },
+                { name: "Зелье истинного зрения", effect: "Видит скрытое на 1 час", rarity: "Очень редкое" }
+            ],
+            events: [
+                { name: "Встреча с торговцем", description: "Одинокий торговец предлагает редкие товары", difficulty: "Легкое" },
+                { name: "Нападение бандитов", description: "Группа разбойников блокирует дорогу", difficulty: "Среднее" },
+                { name: "Заблудившийся путник", description: "Путник просит помощи найти дорогу", difficulty: "Легкое" },
+                { name: "Древние руины", description: "Обнаружены остатки древнего сооружения", difficulty: "Сложное" },
+                { name: "Магическая буря", description: "Странные погодные явления", difficulty: "Очень сложное" }
+            ],
+            taverns: [
+                { name: "Пьяный дракон", description: "Шумная таверна для авантюристов", atmosphere: "Бойкая" },
+                { name: "Тихая гавань", description: "Спокойное место для отдыха", atmosphere: "Уютная" },
+                { name: "Кузница и кружка", description: "Таверна рядом с кузницей", atmosphere: "Рабочая" },
+                { name: "Лунный свет", description: "Элегантная таверна для знати", atmosphere: "Аристократичная" },
+                { name: "Подземелье", description: "Таверна в подвале старого здания", atmosphere: "Мрачная" }
+            ]
+        };
+
+        let currentAIType = 'plot_twist';
+        let requestCount = 0;
+        let totalTokens = 0;
+        let responseTimes = [];
+
+        // Tab management
+        function showTab(tabName) {
+            document.querySelectorAll('.tab-content').forEach(tab => tab.classList.add('hidden'));
+            document.getElementById(tabName).classList.remove('hidden');
+            
+            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active', 'bg-primary-600', 'text-white'));
+            event.target.classList.add('active', 'bg-primary-600', 'text-white');
+        }
+
+        // Stage management
+        function setStage(stage) {
+            document.querySelectorAll('.stage-btn').forEach(btn => btn.classList.remove('active', 'bg-primary-600', 'text-white'));
+            event.target.classList.add('active', 'bg-primary-600', 'text-white');
+            
+            const stageNames = {
+                hook: '🎣 Зацепка',
+                exploration: '🗺️ Исследование',
+                combat: '⚔️ Бой',
+                social: '🤝 Социальное',
+                puzzle: '🧩 Головоломка',
+                climax: '🔥 Кульминация',
+                resolution: '🏁 Развязка'
+            };
+            document.getElementById('currentStage').textContent = stageNames[stage];
+        }
+
+        // AI type management
+        function setAIType(type) {
+            currentAIType = type;
+            document.querySelectorAll('.ai-type-btn').forEach(btn => btn.classList.remove('active', 'bg-primary-600', 'text-white'));
+            event.target.classList.add('active', 'bg-primary-600', 'text-white');
+        }
+
+        // Random generation with better randomization
+        function generateRandom(type) {
+            let data, title, content;
+            
+            // Add timestamp to make randomization more unpredictable
+            const seed = Date.now() + Math.random();
+            const randomIndex = Math.floor((seed % 1000) % demoData[type].length);
+            
+            switch(type) {
+                case 'npc':
+                    data = demoData.npcs[randomIndex];
+                    title = '👤 Случайный NPC';
+                    content = `
+                        <strong>Имя:</strong> ${data.name}<br>
+                        <strong>Раса:</strong> ${data.race}<br>
+                        <strong>Профессия:</strong> ${data.profession}<br>
+                        <strong>Характер:</strong> ${data.personality}
+                    `;
+                    break;
+                case 'tavern':
+                    data = demoData.taverns[randomIndex];
+                    title = '🏪 Название таверны';
+                    content = `
+                        <strong>Название:</strong> ${data.name}<br>
+                        <strong>Описание:</strong> ${data.description}<br>
+                        <strong>Атмосфера:</strong> ${data.atmosphere}
+                    `;
+                    break;
+                case 'potion':
+                    data = demoData.potions[randomIndex];
+                    title = '🧪 Случайное зелье';
+                    content = `
+                        <strong>Название:</strong> ${data.name}<br>
+                        <strong>Эффект:</strong> ${data.effect}<br>
+                        <strong>Редкость:</strong> ${data.rarity}
+                    `;
+                    break;
+                case 'drink':
+                    data = demoData.drinks[randomIndex];
+                    title = '🍺 Случайный напиток';
+                    content = `
+                        <strong>Название:</strong> ${data.name}<br>
+                        <strong>Эффект:</strong> ${data.effect}<br>
+                        <strong>Цена:</strong> ${data.price}
+                    `;
+                    break;
+                case 'event':
+                    data = demoData.events[randomIndex];
+                    title = '🗡️ Случайное событие';
+                    content = `
+                        <strong>Событие:</strong> ${data.name}<br>
+                        <strong>Описание:</strong> ${data.description}<br>
+                        <strong>Сложность:</strong> ${data.difficulty}
+                    `;
+                    break;
+            }
+            
+            showModal(title, content);
+        }
+
+        // Show table data
+        function showTableData(table) {
+            const tableNames = {
+                drinks: '🍺 Напитки',
+                npcs: '👤 NPC',
+                potions: '🧪 Зелья',
+                events: '🗡️ События в пути',
+                taverns: '🏪 Названия таверн'
+            };
+            
+            document.getElementById('tableTitle').textContent = tableNames[table];
+            const content = document.getElementById('tableContent');
+            content.innerHTML = '';
+            
+            demoData[table].forEach((item, index) => {
+                const div = document.createElement('div');
+                div.className = 'border rounded p-4 text-base';
+                div.innerHTML = `<strong>${index + 1}.</strong> ${Object.values(item).join(' | ')}`;
+                content.appendChild(div);
+            });
+            
+            document.getElementById('tableData').classList.remove('hidden');
+        }
+
+        function hideTableData() {
+            document.getElementById('tableData').classList.add('hidden');
+        }
+
+        // Dice rolling
+        function rollDice() {
+            const result = Math.floor(Math.random() * 20) + 1;
+            showModal('🎲 Бросок костей', `Выпало: <strong>${result}</strong>`);
+        }
+
+        // Generate AI suggestion (with backend proxy)
+        async function generateAISuggestion() {
+            const context = document.getElementById('sessionContext').value;
+            const generateBtn = document.getElementById('generateBtn');
+            const aiContent = document.getElementById('aiContent');
+
+            // Show loading
+            generateBtn.disabled = true;
+            generateBtn.innerHTML = '🔄 Генерируем...';
+            aiContent.innerHTML = '<div class="loading h-8 rounded"></div>';
+            document.getElementById('aiResult').classList.remove('hidden');
+
+            const startTime = Date.now();
+
+            try {
+                // Try to use backend proxy first
+                const response = await fetch('/api/orchestrate', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        type: currentAIType,
+                        context: context,
+                        sessionStage: 'general'
+                    })
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    const endTime = Date.now();
+                    const responseTime = (endTime - startTime) / 1000;
+
+                    aiContent.innerHTML = data.suggestion.replace(/\n/g, '<br>');
+                    updateStats(data.tokens || 0, responseTime);
+                } else {
+                    // Fallback to demo suggestions
+                    generateDemoSuggestion();
+                }
+
+            } catch (error) {
+                // Fallback to demo suggestions
+                generateDemoSuggestion();
+            }
+
+            // Reset button
+            generateBtn.disabled = false;
+            generateBtn.innerHTML = '🤖 Сгенерировать с помощью AI';
+        }
+
+        // Fallback demo suggestion generation
+        function generateDemoSuggestion() {
+            const suggestions = {
+                plot_twist: [
+                    "Внезапно оказывается, что главный антагонист - это давно потерянный брат одного из игроков, который был проклят и превращен в монстра.",
+                    "Древний артефакт, который ищут герои, на самом деле является ключом к пробуждению спящего бога, который может уничтожить мир.",
+                    "Один из NPC, которому доверяют игроки, оказывается шпионом противника, собирающим информацию о группе."
+                ],
+                npc_dialogue: [
+                    "\"Я видел, как твои глаза светятся в темноте... Ты не совсем человек, не так ли?\" - говорит старый мудрец, пристально глядя на игрока.",
+                    "\"В этих землях каждый камень помнит древние войны. Будьте осторожны, ибо прошлое имеет привычку возвращаться.\"",
+                    "\"Мой отец говорил, что настоящая сила не в мече, а в том, как ты его используешь. Но иногда... иногда нужен просто очень острый меч.\""
+                ],
+                scene_description: [
+                    "Лунный свет пробивается сквозь густые облака, создавая призрачные тени на древних стенах замка. Воздух наполнен запахом влажной земли и чего-то более древнего, более темного. Вдалеке слышится вой волка, а ветер шепчет забытые секреты между колоннами.",
+                    "Таверна гудит от голосов и смеха. Дым от труб создает мистическую атмосферу, а свет факелов танцует на стенах, украшенных трофеями и старыми картами. За одним из столов группа авантюристов горячо обсуждает последние слухи о сокровищах.",
+                    "Древний лес окружает вас со всех сторон, его ветви сплетаются над головой, создавая естественный свод. Воздух наполнен ароматом хвои и цветов, а вдалеке слышится журчание ручья. Здесь чувствуется древняя магия, которая пронизывает каждое дерево и каждый камень."
+                ],
+                loot_suggestion: [
+                    "В сундуке вы находите: магический кинжал +1, 50 золотых монет, свиток с заклинанием 'Огненный шар', и странный амулет с неизвестными рунами.",
+                    "После победы над боссом вы получаете: кольцо защиты +1, зелье лечения, древнюю карту сокровищ, и ключ от потайной двери в подземелье.",
+                    "Исследуя руины, вы находите: эльфийский лук +2, мешок с драгоценными камнями (100 золотых), свиток телепортации, и дневник с важной информацией."
+                ],
+                skill_check: [
+                    "Проверка Ловкости (DC 15): Прыжок через пропасть требует точного расчета и грации. При успехе - безопасное приземление, при неудаче - падение и урон.",
+                    "Проверка Мудрости (DC 12): Заметить скрытые следы на земле, которые могут привести к тайному убежищу бандитов или к сокровищам.",
+                    "Проверка Харизмы (DC 14): Убедить местных жителей поделиться информацией о странных событиях в деревне, которые могут быть связаны с вашим квестом."
+                ],
+                combat_encounter: [
+                    "Боевая встреча: Группа гоблинов (4 шт.) засадила дорогу. Они используют тактику засады и стреляют из луков из укрытий. Окружение: густой лес, узкая тропа, валуны для укрытия.",
+                    "Боевая встреча: Два огра-берсерка атакуют из засады. Они используют ярость и атакуют ближайших противников. Окружение: каменистая местность, пещера поблизости.",
+                    "Боевая встреча: Стая волков (6 шт.) окружает группу. Они используют тактику стаи и пытаются отрезать отступление. Окружение: открытая равнина, ночь, полная луна."
+                ]
+            };
+
+            const seed = Date.now() + Math.random();
+            const randomIndex = Math.floor((seed % 1000) % suggestions[currentAIType].length);
+            const suggestion = suggestions[currentAIType][randomIndex];
+            
+            document.getElementById('aiContent').innerHTML = suggestion;
+            updateStats(50, 0.5); // Demo stats
+        }
+
+        // Regenerate AI response
+        function regenerateAI() {
+            generateAISuggestion();
+        }
+
+        // Update usage statistics
+        function updateStats(tokens, responseTime) {
+            requestCount++;
+            totalTokens += tokens;
+            responseTimes.push(responseTime);
+            
+            const avgTime = responseTimes.reduce((a, b) => a + b, 0) / responseTimes.length;
+            
+            document.getElementById('requestsCount').textContent = requestCount;
+            document.getElementById('tokensUsed').textContent = totalTokens;
+            document.getElementById('avgResponseTime').textContent = avgTime.toFixed(1) + 's';
+        }
+
+        // Modal management
+        function showModal(title, content) {
+            document.getElementById('modalContent').innerHTML = content;
+            document.getElementById('resultModal').classList.remove('hidden');
+        }
+
+        function closeModal() {
+            document.getElementById('resultModal').classList.add('hidden');
+        }
+
+        // Clipboard functionality
+        function copyToClipboard() {
+            const content = document.getElementById('aiContent') || document.getElementById('modalContent');
+            if (content) {
+                navigator.clipboard.writeText(content.textContent || content.innerText);
+                alert('Скопировано в буфер обмена!');
+            }
+        }
+
+        // Close modal when clicking outside
+        document.getElementById('resultModal').addEventListener('click', function(e) {
+            if (e.target === this) {
+                closeModal();
+            }
+        });
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            // Set default active tab
+            document.querySelector('.tab-btn').classList.add('active', 'bg-primary-600', 'text-white');
+        });
+    </script>
+</body>
+</html>

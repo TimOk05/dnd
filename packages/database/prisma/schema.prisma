@@ -1,0 +1,100 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// Основные таблицы для DM Copilot
+
+model Table {
+  id        String   @id @default(cuid())
+  name      String   @unique
+  schema    Json     // Схема таблицы (колонки, типы)
+  rows      Json[]   // Данные таблицы
+  updatedAt DateTime @updatedAt
+  createdAt DateTime @default(now())
+
+  @@map("tables")
+}
+
+model Document {
+  id        String   @id @default(cuid())
+  title     String
+  meta      Json     // Метаданные документа (автор, версия, тип)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  chunks Chunk[]
+
+  @@map("documents")
+}
+
+model Chunk {
+  id         String   @id @default(cuid())
+  documentId String
+  text       String
+  embedding  Unsupported("vector(384)") // pgvector embedding
+  meta       Json     // Метаданные чанка (позиция, тип)
+  createdAt  DateTime @default(now())
+
+  document Document @relation(fields: [documentId], references: [id], onDelete: Cascade)
+
+  @@map("chunks")
+}
+
+model Session {
+  id        String      @id @default(cuid())
+  title     String
+  mode      SessionMode
+  stage     SessionStage
+  notes     String?     // Заметки мастера
+  createdAt DateTime    @default(now())
+  updatedAt DateTime    @updatedAt
+
+  events Event[]
+
+  @@map("sessions")
+}
+
+model Event {
+  id        String      @id @default(cuid())
+  sessionId String
+  type      EventType
+  payload   Json        // Данные события
+  createdAt DateTime    @default(now())
+
+  session Session @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+
+  @@map("events")
+}
+
+// Enums
+
+enum SessionMode {
+  MANUAL
+  LIVE
+}
+
+enum SessionStage {
+  HOOK
+  INTRO
+  TRAVEL
+  DUNGEON
+  ENCOUNTER
+  ROLEPLAY
+  CLIMAX
+  AFTERMATH
+}
+
+enum EventType {
+  USER
+  STT
+  SYSTEM
+  AI
+}
