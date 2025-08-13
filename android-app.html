@@ -1,0 +1,701 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+    <meta name="format-detection" content="telephone=no">
+    <meta name="msapplication-tap-highlight" content="no">
+    <title>👑 Исторический портрет</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+            -webkit-touch-callout: none;
+            -webkit-user-select: none;
+            user-select: none;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #1e293b, #374151);
+            color: white;
+            font-family: -apple-system, BlinkMacSystemFont, 'Roboto', sans-serif;
+            height: 100vh;
+            overflow-x: hidden;
+            padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
+        }
+        
+        .android-header {
+            background: rgba(15, 23, 42, 0.95);
+            padding: 15px 20px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .header-title {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .app-icon-small {
+            width: 32px;
+            height: 32px;
+            background: linear-gradient(135deg, #d4af37, #fbbf24);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+        }
+        
+        .container {
+            padding: 20px;
+            height: calc(100vh - 70px);
+            overflow-y: auto;
+        }
+        
+        .step-indicator {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 30px;
+        }
+        
+        .step-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.3);
+            margin: 0 5px;
+            transition: all 0.3s;
+        }
+        
+        .step-dot.active {
+            background: #d4af37;
+            transform: scale(1.2);
+        }
+        
+        .upload-zone {
+            border: 3px dashed #d4af37;
+            border-radius: 20px;
+            padding: 40px 20px;
+            text-align: center;
+            margin: 20px 0;
+            background: rgba(255, 255, 255, 0.05);
+            transition: all 0.3s ease;
+        }
+        
+        .upload-zone.active {
+            background: rgba(212, 175, 55, 0.1);
+            border-color: #fbbf24;
+        }
+        
+        input[type="file"] {
+            display: none;
+        }
+        
+        .camera-preview {
+            max-width: 100%;
+            max-height: 300px;
+            border-radius: 15px;
+            margin: 20px 0;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+        }
+        
+        .roles-container {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+            margin: 20px 0;
+        }
+        
+        .role-item {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            padding: 20px;
+            text-align: center;
+            border: 2px solid transparent;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+        
+        .role-item:active {
+            transform: scale(0.95);
+        }
+        
+        .role-item.selected {
+            background: rgba(212, 175, 55, 0.2);
+            border-color: #fbbf24;
+        }
+        
+        .role-emoji {
+            font-size: 36px;
+            margin-bottom: 10px;
+            display: block;
+        }
+        
+        .role-title {
+            font-size: 14px;
+            font-weight: 600;
+            line-height: 1.3;
+        }
+        
+        .android-btn {
+            background: linear-gradient(135deg, #d4af37, #cd7f32);
+            color: #1e293b;
+            border: none;
+            padding: 18px 30px;
+            border-radius: 15px;
+            font-weight: bold;
+            font-size: 16px;
+            width: 100%;
+            margin: 15px 0;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .android-btn:active {
+            transform: scale(0.98);
+        }
+        
+        .android-btn:disabled {
+            opacity: 0.5;
+            transform: none;
+        }
+        
+        .android-btn::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            background: rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            transform: translate(-50%, -50%);
+            transition: width 0.6s, height 0.6s;
+        }
+        
+        .android-btn:active::before {
+            width: 300px;
+            height: 300px;
+        }
+        
+        .secondary-btn {
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+        }
+        
+        .progress-container {
+            margin: 30px 0;
+        }
+        
+        .progress-bar {
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 25px;
+            height: 30px;
+            overflow: hidden;
+            position: relative;
+        }
+        
+        .progress-fill {
+            background: linear-gradient(90deg, #d4af37, #fbbf24);
+            height: 100%;
+            transition: width 0.8s ease;
+            border-radius: 25px;
+            position: relative;
+        }
+        
+        .progress-text {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 14px;
+            font-weight: 600;
+            color: #1e293b;
+            z-index: 2;
+        }
+        
+        .result-canvas {
+            max-width: 100%;
+            border-radius: 20px;
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.4);
+            margin: 20px 0;
+        }
+        
+        .action-buttons {
+            display: flex;
+            gap: 10px;
+            margin: 20px 0;
+        }
+        
+        .hidden {
+            display: none !important;
+        }
+        
+        .step {
+            animation: slideInUp 0.5s ease;
+        }
+        
+        @keyframes slideInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .status-message {
+            text-align: center;
+            font-size: 16px;
+            color: #fbbf24;
+            margin: 20px 0;
+            font-weight: 600;
+        }
+        
+        .feature-chip {
+            background: rgba(34, 197, 94, 0.2);
+            border: 1px solid rgba(34, 197, 94, 0.4);
+            border-radius: 20px;
+            padding: 5px 12px;
+            font-size: 11px;
+            color: #10b981;
+            display: inline-block;
+            margin: 3px;
+        }
+        
+        .vibrate-on-tap {
+            transition: transform 0.1s;
+        }
+        
+        .vibrate-on-tap:active {
+            transform: scale(0.95);
+        }
+    </style>
+</head>
+
+<body>
+    <div class="android-header">
+        <div class="header-title">
+            <div class="app-icon-small">👑</div>
+            <div>
+                <div style="font-weight: 600;">Исторический портрет</div>
+                <div style="font-size: 12px; opacity: 0.7;">Android Edition</div>
+            </div>
+        </div>
+        <div style="font-size: 12px; opacity: 0.6;">v1.0</div>
+    </div>
+
+    <div class="container">
+        <div class="step-indicator">
+            <div class="step-dot active" id="dot1"></div>
+            <div class="step-dot" id="dot2"></div>
+            <div class="step-dot" id="dot3"></div>
+            <div class="step-dot" id="dot4"></div>
+        </div>
+
+        <!-- Шаг 1: Загрузка фото -->
+        <div id="step-photo" class="step">
+            <h2 style="text-align: center; margin-bottom: 20px;">📸 Выберите фото</h2>
+            <div style="text-align: center; margin-bottom: 20px;">
+                <span class="feature-chip">📷 Камера</span>
+                <span class="feature-chip">🖼️ Галерея</span>
+                <span class="feature-chip">🎨 AI обработка</span>
+            </div>
+
+            <div class="upload-zone vibrate-on-tap" id="upload-zone">
+                <div id="upload-content">
+                    <p style="font-size: 48px; margin-bottom: 15px;">📱</p>
+                    <h3>Нажмите для выбора</h3>
+                    <p style="margin-top: 10px; opacity: 0.8; font-size: 14px;">
+                        Сделайте фото или выберите из галереи
+                    </p>
+                </div>
+                <img id="photo-preview" class="camera-preview hidden" />
+            </div>
+
+            <input type="file" id="file-input" accept="image/*" capture="environment">
+
+            <div class="action-buttons">
+                <button class="android-btn vibrate-on-tap" onclick="takePhoto()">
+                    📷 Камера
+                </button>
+                <button class="android-btn secondary-btn vibrate-on-tap" onclick="selectFromGallery()">
+                    🖼️ Галерея
+                </button>
+            </div>
+
+            <button id="next-to-roles" class="android-btn hidden vibrate-on-tap" onclick="goToRoles()">
+                Продолжить 🎭
+            </button>
+        </div>
+
+        <!-- Шаг 2: Выбор роли -->
+        <div id="step-roles" class="step hidden">
+            <h2 style="text-align: center; margin-bottom: 20px;">🎭 Историческая роль</h2>
+
+            <div class="roles-container">
+                <div class="role-item vibrate-on-tap" data-role="hussar">
+                    <span class="role-emoji">⚔️</span>
+                    <div class="role-title">Крылатый гусар</div>
+                </div>
+                <div class="role-item vibrate-on-tap" data-role="boyar">
+                    <span class="role-emoji">🏰</span>
+                    <div class="role-title">Литовский боярин</div>
+                </div>
+                <div class="role-item vibrate-on-tap" data-role="prince">
+                    <span class="role-emoji">👑</span>
+                    <div class="role-title">Князь</div>
+                </div>
+                <div class="role-item vibrate-on-tap" data-role="merchant">
+                    <span class="role-emoji">💰</span>
+                    <div class="role-title">Купец</div>
+                </div>
+                <div class="role-item vibrate-on-tap" data-role="monk">
+                    <span class="role-emoji">⛪</span>
+                    <div class="role-title">Монах</div>
+                </div>
+                <div class="role-item vibrate-on-tap" data-role="hunter">
+                    <span class="role-emoji">🏹</span>
+                    <div class="role-title">Охотник</div>
+                </div>
+            </div>
+
+            <button id="create-portrait" class="android-btn vibrate-on-tap" disabled onclick="createPortrait()">
+                Создать портрет 🎨
+            </button>
+
+            <button class="android-btn secondary-btn vibrate-on-tap" onclick="backToPhoto()">
+                ⬅️ Назад
+            </button>
+        </div>
+
+        <!-- Шаг 3: Генерация -->
+        <div id="step-generation" class="step hidden">
+            <h2 style="text-align: center; margin-bottom: 30px;">🎨 Создание портрета</h2>
+
+            <div class="progress-container">
+                <div class="progress-bar">
+                    <div id="progress-fill" class="progress-fill" style="width: 0%;"></div>
+                    <div class="progress-text" id="progress-text">0%</div>
+                </div>
+            </div>
+
+            <div id="generation-status" class="status-message">
+                Инициализация...
+            </div>
+        </div>
+
+        <!-- Шаг 4: Результат -->
+        <div id="step-result" class="step hidden">
+            <h2 style="text-align: center; margin-bottom: 20px;">🎉 Ваш портрет готов!</h2>
+
+            <div style="text-align: center;">
+                <canvas id="result-canvas" class="result-canvas"></canvas>
+            </div>
+
+            <div class="action-buttons">
+                <button class="android-btn vibrate-on-tap" onclick="savePortrait()">
+                    💾 Сохранить
+                </button>
+                <button class="android-btn secondary-btn vibrate-on-tap" onclick="sharePortrait()">
+                    📤 Поделиться
+                </button>
+            </div>
+
+            <button class="android-btn vibrate-on-tap" onclick="createNewPortrait()">
+                🔄 Создать новый
+            </button>
+
+            <button class="android-btn secondary-btn vibrate-on-tap" onclick="tryAnother()">
+                🎲 Другой вариант
+            </button>
+        </div>
+    </div>
+
+    <script type="text/javascript" src="cordova.js"></script>
+    <script>
+        let uploadedImage = null;
+        let selectedRole = null;
+
+        const roles = {
+            hussar: {
+                name: 'Крылатый гусар',
+                color: '#8B4513'
+            },
+            boyar: {
+                name: 'Литовский боярин',
+                color: '#654321'
+            },
+            prince: {
+                name: 'Князь',
+                color: '#4A0E4E'
+            },
+            merchant: {
+                name: 'Купец',
+                color: '#2F4F4F'
+            },
+            monk: {
+                name: 'Монах',
+                color: '#2C1810'
+            },
+            hunter: {
+                name: 'Охотник',
+                color: '#556B2F'
+            }
+        };
+
+        // Cordova ready
+        document.addEventListener('deviceready', function() {
+            console.log('Cordova готов!');
+
+            // Настройка статус бара
+            if (window.StatusBar) {
+                StatusBar.styleDefault();
+            }
+        }, false);
+
+        // Вибрация при нажатии
+        function vibrate() {
+            if (navigator.vibrate) {
+                navigator.vibrate(50);
+            }
+        }
+
+        // Добавляем вибрацию ко всем кнопкам
+        document.addEventListener('click', function(e) {
+            if (e.target.classList.contains('vibrate-on-tap')) {
+                vibrate();
+            }
+        });
+
+        // Фото функции
+        function takePhoto() {
+            if (navigator.camera) {
+                navigator.camera.getPicture(onPhotoSuccess, onPhotoError, {
+                    quality: 75,
+                    destinationType: Camera.DestinationType.DATA_URL,
+                    sourceType: Camera.PictureSourceType.CAMERA,
+                    encodingType: Camera.EncodingType.JPEG,
+                    targetWidth: 800,
+                    targetHeight: 800
+                });
+            } else {
+                // Fallback для браузера
+                document.getElementById('file-input').click();
+            }
+        }
+
+        function selectFromGallery() {
+            if (navigator.camera) {
+                navigator.camera.getPicture(onPhotoSuccess, onPhotoError, {
+                    quality: 75,
+                    destinationType: Camera.DestinationType.DATA_URL,
+                    sourceType: Camera.PictureSourceType.PHOTOLIBRARY,
+                    encodingType: Camera.EncodingType.JPEG,
+                    targetWidth: 800,
+                    targetHeight: 800
+                });
+            } else {
+                // Fallback для браузера
+                document.getElementById('file-input').click();
+            }
+        }
+
+        function onPhotoSuccess(imageData) {
+            uploadedImage = "data:image/jpeg;base64," + imageData;
+            const preview = document.getElementById('photo-preview');
+            preview.src = uploadedImage;
+            preview.classList.remove('hidden');
+            document.getElementById('upload-content').classList.add('hidden');
+            document.getElementById('next-to-roles').classList.remove('hidden');
+            document.getElementById('upload-zone').classList.add('active');
+        }
+
+        function onPhotoError(message) {
+            alert('Ошибка: ' + message);
+        }
+
+        // Fallback для файлового инпута
+        document.getElementById('file-input').addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    onPhotoSuccess(e.target.result.split(',')[1]);
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+
+        // Навигация
+        function goToRoles() {
+            updateStepIndicator(2);
+            document.getElementById('step-photo').classList.add('hidden');
+            document.getElementById('step-roles').classList.remove('hidden');
+        }
+
+        function backToPhoto() {
+            updateStepIndicator(1);
+            document.getElementById('step-roles').classList.add('hidden');
+            document.getElementById('step-photo').classList.remove('hidden');
+        }
+
+        function updateStepIndicator(step) {
+            document.querySelectorAll('.step-dot').forEach((dot, index) => {
+                dot.classList.toggle('active', index < step);
+            });
+        }
+
+        // Выбор роли
+        document.querySelectorAll('.role-item').forEach(item => {
+            item.addEventListener('click', function() {
+                document.querySelectorAll('.role-item').forEach(r => r.classList.remove('selected'));
+                this.classList.add('selected');
+                selectedRole = this.dataset.role;
+                document.getElementById('create-portrait').disabled = false;
+            });
+        });
+
+        // Создание портрета
+        async function createPortrait() {
+            updateStepIndicator(3);
+            document.getElementById('step-roles').classList.add('hidden');
+            document.getElementById('step-generation').classList.remove('hidden');
+
+            const progressFill = document.getElementById('progress-fill');
+            const progressText = document.getElementById('progress-text');
+            const statusEl = document.getElementById('generation-status');
+
+            const stages = [{
+                progress: 15,
+                text: 'Анализ изображения...'
+            }, {
+                progress: 35,
+                text: 'Выбор исторического стиля...'
+            }, {
+                progress: 55,
+                text: 'Генерация портрета...'
+            }, {
+                progress: 75,
+                text: 'Применение эффектов...'
+            }, {
+                progress: 95,
+                text: 'Финальная обработка...'
+            }, {
+                progress: 100,
+                text: 'Готово!'
+            }];
+
+            for (const stage of stages) {
+                progressFill.style.width = stage.progress + '%';
+                progressText.textContent = stage.progress + '%';
+                statusEl.textContent = stage.text;
+                await new Promise(resolve => setTimeout(resolve, 1200 + Math.random() * 800));
+            }
+
+            generateResult();
+        }
+
+        function generateResult() {
+            const canvas = document.getElementById('result-canvas');
+            const ctx = canvas.getContext('2d');
+            canvas.width = 350;
+            canvas.height = 500;
+
+            const role = roles[selectedRole];
+
+            // Фон
+            const gradient = ctx.createLinearGradient(0, 0, 0, canvas.height);
+            gradient.addColorStop(0, role.color);
+            gradient.addColorStop(1, '#2C1810');
+            ctx.fillStyle = gradient;
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            // Рамка
+            ctx.strokeStyle = '#d4af37';
+            ctx.lineWidth = 10;
+            ctx.strokeRect(15, 15, canvas.width - 30, canvas.height - 30);
+
+            // Заголовок
+            ctx.fillStyle = '#d4af37';
+            ctx.font = 'bold 24px serif';
+            ctx.textAlign = 'center';
+            ctx.fillText(role.name, canvas.width / 2, canvas.height / 2 - 30);
+
+            // Подзаголовок
+            ctx.font = '16px serif';
+            ctx.fillStyle = '#f4e4bc';
+            ctx.fillText('XVI-XVII век', canvas.width / 2, canvas.height / 2);
+            ctx.fillText('Android Edition', canvas.width / 2, canvas.height / 2 + 20);
+
+            // Корона
+            ctx.fillStyle = '#ffd700';
+            ctx.font = '60px serif';
+            ctx.fillText('👑', canvas.width / 2, canvas.height / 2 - 100);
+
+            updateStepIndicator(4);
+            document.getElementById('step-generation').classList.add('hidden');
+            document.getElementById('step-result').classList.remove('hidden');
+        }
+
+        // Результат действия
+        function savePortrait() {
+            const canvas = document.getElementById('result-canvas');
+            const imageData = canvas.toDataURL('image/png');
+
+            // Сохранение через Cordova File API
+            if (window.cordova) {
+                const fileName = `portrait-${Date.now()}.png`;
+                // Здесь была бы реализация сохранения файла
+                alert('Портрет сохранен в галерею!');
+            } else {
+                // Fallback для браузера
+                const link = document.createElement('a');
+                link.download = `historical-portrait-${roles[selectedRole].name.replace(/\s+/g, '-').toLowerCase()}.png`;
+                link.href = imageData;
+                link.click();
+            }
+        }
+
+        function sharePortrait() {
+            if (navigator.share) {
+                const canvas = document.getElementById('result-canvas');
+                canvas.toBlob(function(blob) {
+                    const file = new File([blob], 'portrait.png', {
+                        type: 'image/png'
+                    });
+                    navigator.share({
+                        title: 'Мой исторический портрет',
+                        text: `Я создал портрет в роли "${roles[selectedRole].name}"!`,
+                        files: [file]
+                    });
+                });
+            } else {
+                alert('Поделиться через социальные сети');
+            }
+        }
+
+        function createNewPortrait() {
+            location.reload();
+        }
+
+        function tryAnother() {
+            if (selectedRole) {
+                createPortrait();
+            }
+        }
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="ru">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🎨 Генератор фонов для исторических ролей</title>
+    <style>
+        body {
+            background: linear-gradient(135deg, #0d0907 0%, #2d1810 50%, #0d0907 100%);
+            color: #F4E4BC;
+            font-family: Arial, sans-serif;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        
+        .role-section {
+            margin: 30px 0;
+            padding: 20px;
+            background: rgba(45, 31, 21, 0.8);
+            border: 2px solid #B8860B;
+            border-radius: 10px;
+        }
+        
+        .background-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin: 15px 0;
+        }
+        
+        .bg-card {
+            background: rgba(26, 15, 10, 0.8);
+            border: 1px solid #B8860B;
+            border-radius: 8px;
+            padding: 10px;
+            text-align: center;
+        }
+        
+        .bg-preview {
+            width: 100%;
+            height: 120px;
+            border-radius: 5px;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 40px;
+        }
+        
+        canvas {
+            border: 2px solid #FFD700;
+            border-radius: 8px;
+            margin: 10px;
+        }
+        
+        button {
+            background: linear-gradient(145deg, #B8860B, #DAA520);
+            color: #1a0f0a;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+        
+        button:hover {
+            transform: translateY(-2px);
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <h1>🎨 Генератор исторических фонов</h1>
+        <p>Создает фоны для каждой роли в стиле эпохи</p>
+
+        <div class="role-section">
+            <h2>🏇 Крылатый гусар</h2>
+            <div class="background-grid" id="hussar-grid"></div>
+            <button onclick="generateBackgrounds('hussar')">Генерировать фоны</button>
+        </div>
+
+        <div class="role-section">
+            <h2>👑 Литовский боярин</h2>
+            <div class="background-grid" id="boyar-grid"></div>
+            <button onclick="generateBackgrounds('boyar')">Генерировать фоны</button>
+        </div>
+
+        <div class="role-section">
+            <h2>🔨 Кузнец</h2>
+            <div class="background-grid" id="blacksmith-grid"></div>
+            <button onclick="generateBackgrounds('blacksmith')">Генерировать фоны</button>
+        </div>
+
+        <div class="role-section">
+            <h2>⚔️ Тевтонский рыцарь</h2>
+            <div class="background-grid" id="knight-grid"></div>
+            <button onclick="generateBackgrounds('knight')">Генерировать фоны</button>
+        </div>
+
+        <div class="role-section">
+            <h2>💰 Ганзейский купец</h2>
+            <div class="background-grid" id="merchant-grid"></div>
+            <button onclick="generateBackgrounds('merchant')">Генерировать фоны</button>
+        </div>
+
+        <div class="role-section">
+            <h2>🌾 Крестьянин</h2>
+            <div class="background-grid" id="peasant-grid"></div>
+            <button onclick="generateBackgrounds('peasant')">Генерировать фоны</button>
+        </div>
+    </div>
+
+    <script>
+        const backgroundPrompts = {
+            hussar: [{
+                name: 'Поле битвы',
+                colors: ['#4a3d2f', '#6b5b47', '#8b7355'],
+                elements: '🏇⚔️🛡️'
+            }, {
+                name: 'Замковый двор',
+                colors: ['#5c4d3f', '#7a6b5d', '#8f8073'],
+                elements: '🏰🏛️🗿'
+            }, {
+                name: 'Военный лагерь',
+                colors: ['#3d2f1f', '#5c453a', '#6b544a'],
+                elements: '⛺🔥🗡️'
+            }],
+            boyar: [{
+                name: 'Тронный зал',
+                colors: ['#2f1b69', '#4b2f82', '#654395'],
+                elements: '👑💎🏛️'
+            }, {
+                name: 'Библиотека',
+                colors: ['#3d2a1c', '#5c453a', '#7a6048'],
+                elements: '📚🕯️📜'
+            }, {
+                name: 'Сад усадьбы',
+                colors: ['#2d4d2d', '#4a6b4a', '#5c8b5c'],
+                elements: '🌳🌹🏛️'
+            }],
+            blacksmith: [{
+                name: 'Кузница',
+                colors: ['#1c1c1c', '#ff4500', '#ffa500'],
+                elements: '🔥⚒️🔨'
+            }, {
+                name: 'Мастерская',
+                colors: ['#2f2f2f', '#654321', '#8b4513'],
+                elements: '⚙️🛠️🗡️'
+            }, {
+                name: 'Рудник',
+                colors: ['#1a1a1a', '#4a3d2f', '#6b5b47'],
+                elements: '⛏️💎🏔️'
+            }],
+            knight: [{
+                name: 'Собор',
+                colors: ['#36454f', '#5c6b73', '#7a8b95'],
+                elements: '⛪✝️🕯️'
+            }, {
+                name: 'Крепость',
+                colors: ['#4a4a4a', '#6b6b6b', '#8b8b8b'],
+                elements: '🏰🛡️⚔️'
+            }, {
+                name: 'Монастырь',
+                colors: ['#3d3d3d', '#5c5c5c', '#7a7a7a'],
+                elements: '📿⛪📖'
+            }],
+            merchant: [{
+                name: 'Торговая площадь',
+                colors: ['#5c1a1a', '#8b2f2f', '#a54545'],
+                elements: '🏺💰🗝️'
+            }, {
+                name: 'Порт',
+                colors: ['#2a3a4a', '#4a5a6a', '#6a7a8a'],
+                elements: '⛵🌊📦'
+            }, {
+                name: 'Склад',
+                colors: ['#3d2a1c', '#5c453a', '#7a6048'],
+                elements: '📦💎🗝️'
+            }],
+            peasant: [{
+                name: 'Поле',
+                colors: ['#4a2c2a', '#6b453a', '#8b6348'],
+                elements: '🌾🏡🐄'
+            }, {
+                name: 'Деревня',
+                colors: ['#3d2f1f', '#5c453a', '#7a6048'],
+                elements: '🏘️🌳🚿'
+            }, {
+                name: 'Лес',
+                colors: ['#2d4d2d', '#4a6b4a', '#5c8b5c'],
+                elements: '🌲🍄🦉'
+            }]
+        };
+
+        function generateBackgrounds(role) {
+            const grid = document.getElementById(`${role}-grid`);
+            const prompts = backgroundPrompts[role];
+
+            grid.innerHTML = '';
+
+            prompts.forEach((prompt, index) => {
+                const card = document.createElement('div');
+                card.className = 'bg-card';
+
+                const canvas = document.createElement('canvas');
+                canvas.width = 400;
+                canvas.height = 300;
+                canvas.style.width = '100%';
+                canvas.style.height = '120px';
+
+                const ctx = canvas.getContext('2d');
+
+                // Создаем градиентный фон
+                const gradient = ctx.createLinearGradient(0, 0, canvas.width, canvas.height);
+                prompt.colors.forEach((color, i) => {
+                    gradient.addColorStop(i / (prompt.colors.length - 1), color);
+                });
+
+                ctx.fillStyle = gradient;
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+                // Добавляем текстуру
+                ctx.globalAlpha = 0.3;
+                for (let i = 0; i < 200; i++) {
+                    ctx.fillStyle = `rgba(${Math.random() * 100}, ${Math.random() * 50}, ${Math.random() * 25}, 0.1)`;
+                    ctx.fillRect(Math.random() * canvas.width, Math.random() * canvas.height, 2, 2);
+                }
+                ctx.globalAlpha = 1;
+
+                // Добавляем декоративные элементы
+                ctx.font = '40px serif';
+                ctx.textAlign = 'center';
+                ctx.fillStyle = 'rgba(255, 255, 255, 0.2)';
+                ctx.fillText(prompt.elements, canvas.width / 2, canvas.height / 2);
+
+                card.innerHTML = `
+                    <h4>${prompt.name}</h4>
+                    <button onclick="downloadBackground('${role}', ${index}, '${prompt.name}')">
+                        💾 Скачать
+                    </button>
+                `;
+                card.insertBefore(canvas, card.firstChild.nextSibling);
+
+                grid.appendChild(card);
+            });
+        }
+
+        function downloadBackground(role, index, name) {
+            const canvas = document.querySelectorAll(`#${role}-grid canvas`)[index];
+            const link = document.createElement('a');
+            link.download = `${role}-${name.toLowerCase().replace(/\s+/g, '-')}.png`;
+            link.href = canvas.toDataURL();
+            link.click();
+        }
+
+        // Генерируем фоны для всех ролей при загрузке
+        document.addEventListener('DOMContentLoaded', function() {
+            Object.keys(backgroundPrompts).forEach(role => {
+                generateBackgrounds(role);
+            });
+        });
+    </script>
+</body>
+
+</html>

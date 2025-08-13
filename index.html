@@ -4,953 +4,940 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>DM Copilot - AI-ассистент для мастеров D&D</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=MedievalSharp&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <title>⚜️ Исторический портрет</title>
     <style>
-        .medieval {
-            font-family: 'MedievalSharp', cursive;
+        body {
+            font-family: Arial, sans-serif;
+            background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 50%, #1a1a1a 100%);
+            color: #FFE55C;
+            min-height: 100vh;
+            margin: 0;
+            padding: 15px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
         }
         
-        .modern {
-            font-family: 'Inter', sans-serif;
-        }
-        
-        .game-bg {
-            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
-            background-attachment: fixed;
-        }
-        
-        .card-game {
-            background: linear-gradient(145deg, #2a2a3e 0%, #1e1e2e 100%);
-            border: 2px solid #4a5568;
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+        .container {
+            max-width: 450px;
+            background: rgba(20, 20, 20, 0.95);
+            border-radius: 20px;
+            padding: 25px;
+            text-align: center;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.8), inset 0 1px 0 rgba(255, 229, 92, 0.1), 0 0 60px rgba(255, 229, 92, 0.05);
             backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 229, 92, 0.2);
         }
         
-        .btn-game {
-            background: linear-gradient(145deg, #4a5568 0%, #2d3748 100%);
-            border: 2px solid #718096;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+        h1 {
+            font-size: 26px;
+            margin-bottom: 8px;
+            color: #FFE55C;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.8), 0 0 20px rgba(255, 229, 92, 0.3);
+            font-weight: 700;
+            letter-spacing: 1px;
+        }
+        
+        .subtitle {
+            font-size: 14px;
+            margin-bottom: 20px;
+            color: #D4AF37;
+            opacity: 0.9;
+            font-style: italic;
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.7);
+        }
+        
+        .badges {
+            display: flex;
+            gap: 8px;
+            justify-content: center;
+            margin-bottom: 25px;
+            flex-wrap: wrap;
+        }
+        
+        .badge {
+            background: linear-gradient(135deg, #8B4513 0%, #D2691E 100%);
+            color: white;
+            padding: 5px 10px;
+            border-radius: 12px;
+            font-size: 11px;
+            font-weight: 500;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.2);
+            border: 1px solid rgba(255, 229, 92, 0.3);
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.8);
+        }
+        
+        .roles-section {
+            margin: 25px 0;
+            padding: 20px;
+            background: rgba(139, 69, 19, 0.1);
+            border-radius: 15px;
+            border: 1px solid rgba(255, 229, 92, 0.2);
+        }
+        
+        .roles-title {
+            color: #FFE55C;
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: 15px;
+        }
+        
+        .roles-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+        
+        .role-card {
+            padding: 12px;
+            background: linear-gradient(135deg, rgba(139, 69, 19, 0.3) 0%, rgba(101, 67, 33, 0.3) 100%);
+            border-radius: 10px;
+            border: 1px solid rgba(255, 229, 92, 0.3);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-align: center;
+        }
+        
+        .role-card:hover {
+            background: linear-gradient(135deg, rgba(255, 229, 92, 0.2) 0%, rgba(139, 69, 19, 0.3) 100%);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(255, 229, 92, 0.2);
+        }
+        
+        .role-card.selected {
+            background: linear-gradient(135deg, #DAA520 0%, #FFD700 100%);
+            color: #1a1a1a;
+            border-color: #FFE55C;
+            box-shadow: 0 4px 15px rgba(255, 229, 92, 0.4);
+        }
+        
+        .role-emoji {
+            font-size: 20px;
+            display: block;
+            margin-bottom: 5px;
+        }
+        
+        .role-name {
+            font-size: 12px;
+            font-weight: 600;
+        }
+        
+        .random-role {
+            width: 100%;
+            padding: 10px;
+            background: linear-gradient(135deg, #2F4F4F 0%, #708090 100%);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 13px;
+            cursor: pointer;
             transition: all 0.3s ease;
         }
         
-        .btn-game:hover {
-            background: linear-gradient(145deg, #718096 0%, #4a5568 100%);
+        .random-role:hover {
+            background: linear-gradient(135deg, #4682B4 0%, #87CEEB 100%);
+            transform: translateY(-1px);
+        }
+        
+        .upload-area {
+            border: 2px dashed #8B4513;
+            border-radius: 15px;
+            padding: 30px 20px;
+            cursor: pointer;
+            margin: 20px 0;
+            transition: all 0.3s ease;
+            background: linear-gradient(135deg, rgba(139, 69, 19, 0.1) 0%, rgba(210, 105, 30, 0.1) 100%);
+            box-shadow: inset 0 2px 8px rgba(0, 0, 0, 0.3);
+        }
+        
+        .upload-area:hover {
+            border-color: #FFE55C;
+            background: linear-gradient(135deg, rgba(255, 229, 92, 0.1) 0%, rgba(139, 69, 19, 0.1) 100%);
             transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+            box-shadow: inset 0 2px 8px rgba(0, 0, 0, 0.3), 0 4px 16px rgba(255, 229, 92, 0.2);
         }
         
-        .btn-primary-game {
-            background: linear-gradient(145deg, #d69e2e 0%, #b7791f 100%);
-            border: 2px solid #f6ad55;
-            color: #1a202c;
+        .upload-area p {
+            color: #FFE55C;
+            font-weight: 600;
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.8);
+            line-height: 1.4;
+            margin: 5px 0;
         }
         
-        .btn-primary-game:hover {
-            background: linear-gradient(145deg, #f6ad55 0%, #d69e2e 100%);
+        .btn {
+            width: 100%;
+            padding: 15px;
+            background: linear-gradient(135deg, #8B4513 0%, #D2691E 50%, #8B4513 100%);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            margin: 15px 0;
+            transition: all 0.3s ease;
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.8);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.2), 0 0 20px rgba(255, 229, 92, 0.1);
+            border: 1px solid rgba(255, 229, 92, 0.3);
+        }
+        
+        .btn:hover {
+            background: linear-gradient(135deg, #A0522D 0%, #F4A460 50%, #A0522D 100%);
             transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.3), 0 0 30px rgba(255, 229, 92, 0.2);
         }
         
-        .tab-game {
-            background: rgba(45, 55, 72, 0.8);
-            border: 1px solid #4a5568;
-            backdrop-filter: blur(5px);
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
         }
         
-        .tab-game.active {
-            background: linear-gradient(145deg, #d69e2e 0%, #b7791f 100%);
-            border-color: #f6ad55;
-            color: #1a202c;
+        .preview-img,
+        .result-img {
+            max-width: 100%;
+            max-height: 280px;
+            border-radius: 10px;
+            margin: 10px 0;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.6);
+            border: 2px solid rgba(255, 229, 92, 0.3);
         }
         
-        .loading-game {
-            background: linear-gradient(90deg, #4a5568 25%, #718096 50%, #4a5568 75%);
-            background-size: 200% 100%;
-            animation: loading 1.5s infinite;
+        .status-text {
+            margin: 15px 0;
+            font-weight: 500;
+            color: #FFE55C;
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.8);
+            min-height: 20px;
         }
         
-        @keyframes loading {
-            0% {
-                background-position: 200% 0;
-            }
+        .loading {
+            color: #DAA520;
+            animation: pulse 1.5s infinite;
+        }
+        
+        @keyframes pulse {
+            0%,
             100% {
-                background-position: -200% 0;
+                opacity: 1;
             }
+            50% {
+                opacity: 0.6;
+            }
+        }
+        
+        .result-container {
+            margin-top: 25px;
+            padding: 20px;
+            background: rgba(139, 69, 19, 0.1);
+            border-radius: 15px;
+            border: 1px solid rgba(255, 229, 92, 0.2);
+        }
+        
+        .download-buttons {
+            margin-top: 15px;
+            display: flex;
+            gap: 10px;
+        }
+        
+        .secondary-btn {
+            flex: 1;
+            padding: 12px;
+            background: linear-gradient(135deg, #2F4F4F 0%, #708090 50%, #2F4F4F 100%);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.8);
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.2);
+            border: 1px solid rgba(255, 229, 92, 0.2);
+        }
+        
+        .secondary-btn:hover {
+            background: linear-gradient(135deg, #4682B4 0%, #87CEEB 50%, #4682B4 100%);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.3);
         }
     </style>
 </head>
 
-<body class="game-bg min-h-screen text-gray-100">
-    <div class="container mx-auto px-4 py-6 max-w-7xl">
-        <!-- Header -->
-        <div class="text-center mb-8">
-            <h1 class="medieval text-6xl font-bold text-yellow-400 mb-4 drop-shadow-lg">
-                ⚔️ DM Copilot ⚔️
-            </h1>
-            <p class="modern text-xl text-gray-300 mb-4">
-                AI-ассистент для мастеров D&D
-            </p>
-            <div class="inline-block p-3 bg-green-900/50 border border-green-500 rounded-lg">
-                <span class="text-green-400 font-medium">🤖 AI доступен для всех авантюристов</span>
-            </div>
+<body>
+    <div class="container">
+        <h1>⚜️ Исторический портрет</h1>
+        <p class="subtitle">Речь Посполитая • Великое Княжество Литовское</p>
+
+        <div class="badges">
+            <span class="badge">👑 6 исторических ролей</span>
+            <span class="badge">🎨 Реальные фоны</span>
+            <span class="badge">📱 Быстро</span>
         </div>
 
-        <!-- Navigation Tabs -->
-        <div class="flex justify-center mb-8">
-            <div class="flex space-x-2 bg-gray-800/50 rounded-lg p-2 backdrop-blur-sm">
-                <button onclick="showTab('home')" class="tab-game active px-6 py-3 rounded-md text-lg modern">
-                    🏰 Главная
-                </button>
-                <button onclick="showTab('tables')" class="tab-game px-6 py-3 rounded-md text-lg modern">
-                    📜 Таблицы
-                </button>
-                <button onclick="showTab('session')" class="tab-game px-6 py-3 rounded-md text-lg modern">
-                    🎭 Сессия
-                </button>
-                <button onclick="showTab('ai')" class="tab-game px-6 py-3 rounded-md text-lg modern">
-                    🔮 AI Подсказки
-                </button>
-                <button onclick="showTab('chat')" class="tab-game px-6 py-3 rounded-md text-lg modern">
-                    💬 Чат с AI
-                </button>
+        <div class="roles-section">
+            <div class="roles-title">👑 Выберите историческую роль:</div>
+            <div class="roles-grid" id="rolesGrid">
+                <!-- Роли будут добавлены через JavaScript -->
             </div>
+            <button class="random-role" onclick="selectRandomRole()">🎲 Случайная роль</button>
         </div>
 
-        <!-- Home Tab -->
-        <div id="home" class="tab-content">
-            <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-                <div class="card-game p-6 text-center">
-                    <div class="text-4xl mb-4">📚</div>
-                    <h3 class="text-xl font-semibold mb-3 modern">Knowledge Ingestion</h3>
-                    <p class="text-base text-gray-300 modern">Загрузка и обработка модулей</p>
-                </div>
-                <div class="card-game p-6 text-center">
-                    <div class="text-4xl mb-4">📊</div>
-                    <h3 class="text-xl font-semibold mb-3 modern">Tables Engine</h3>
-                    <p class="text-base text-gray-300 modern">Управление справочными данными</p>
-                </div>
-                <div class="card-game p-6 text-center">
-                    <div class="text-4xl mb-4">🎭</div>
-                    <h3 class="text-xl font-semibold mb-3 modern">Session Runner</h3>
-                    <p class="text-base text-gray-300 modern">Ведение D&D сессий</p>
-                </div>
-                <div class="card-game p-6 text-center">
-                    <div class="text-4xl mb-4">🤖</div>
-                    <h3 class="text-xl font-semibold mb-3 modern">AI Assistant</h3>
-                    <p class="text-base text-gray-300 modern">Умные подсказки от DeepSeek</p>
-                </div>
-            </div>
-
-            <div class="card-game p-8 mb-8">
-                <h2 class="medieval text-3xl font-bold mb-6 text-yellow-400">⚡ Быстрые действия</h2>
-                <div class="grid grid-cols-2 md:grid-cols-4 gap-6">
-                    <button onclick="generateRandom('npc')" class="btn-game flex flex-col items-center p-6 h-32 rounded-lg">
-                        <span class="text-4xl mb-3">👤</span>
-                        <span class="text-base modern">Случайный NPC</span>
-                    </button>
-                    <button onclick="generateRandom('tavern')" class="btn-game flex flex-col items-center p-6 h-32 rounded-lg">
-                        <span class="text-4xl mb-3">🏪</span>
-                        <span class="text-base modern">Название таверны</span>
-                    </button>
-                    <button onclick="generateRandom('potion')" class="btn-game flex flex-col items-center p-6 h-32 rounded-lg">
-                        <span class="text-4xl mb-3">🧪</span>
-                        <span class="text-base modern">Случайное зелье</span>
-                    </button>
-                    <button onclick="rollDice()" class="btn-game flex flex-col items-center p-6 h-32 rounded-lg">
-                        <span class="text-4xl mb-3">🎲</span>
-                        <span class="text-base modern">Бросить кости</span>
-                    </button>
-                </div>
-            </div>
-
-            <div class="card-game p-8">
-                <h2 class="medieval text-3xl font-bold mb-6 text-yellow-400">📊 Статистика</h2>
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-8 text-center">
-                    <div>
-                        <div class="text-4xl font-bold text-yellow-400">5</div>
-                        <div class="text-lg text-gray-300 modern">Таблиц данных</div>
-                    </div>
-                    <div>
-                        <div class="text-4xl font-bold text-green-400">25</div>
-                        <div class="text-lg text-gray-300 modern">Записей</div>
-                    </div>
-                    <div>
-                        <div class="text-4xl font-bold text-purple-400">0</div>
-                        <div class="text-lg text-gray-300 modern">Сессий</div>
-                    </div>
-                </div>
-            </div>
+        <div class="upload-area" onclick="document.getElementById('fileInput').click()">
+            <p>📸 <strong>Выберите фото</strong></p>
+            <p style="opacity: 0.8; font-style: italic;">Создайте портрет в историческом стиле</p>
+            <p style="opacity: 0.6; font-size: 12px;">JPG, PNG • До 5MB</p>
         </div>
 
-        <!-- Tables Tab -->
-        <div id="tables" class="tab-content hidden">
-            <div class="card-game p-8 mb-8">
-                <h2 class="medieval text-3xl font-bold mb-8 text-yellow-400">📜 Таблицы данных</h2>
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                    <div class="card-game p-6">
-                        <h3 class="text-xl font-semibold mb-3 modern">🍺 Напитки</h3>
-                        <p class="text-base text-gray-300 mb-4 modern">Алкогольные и безалкогольные напитки</p>
-                        <div class="flex gap-3">
-                            <button onclick="showTableData('drinks')" class="btn-primary-game px-4 py-2 rounded text-sm modern">Просмотр</button>
-                            <button onclick="generateRandom('drink')" class="btn-game px-4 py-2 rounded text-sm modern">Случайный</button>
-                        </div>
-                    </div>
-                    <div class="card-game p-6">
-                        <h3 class="text-xl font-semibold mb-3 modern">👤 NPC</h3>
-                        <p class="text-base text-gray-300 mb-4 modern">Неигровые персонажи</p>
-                        <div class="flex gap-3">
-                            <button onclick="showTableData('npcs')" class="btn-primary-game px-4 py-2 rounded text-sm modern">Просмотр</button>
-                            <button onclick="generateRandom('npc')" class="btn-game px-4 py-2 rounded text-sm modern">Случайный</button>
-                        </div>
-                    </div>
-                    <div class="card-game p-6">
-                        <h3 class="text-xl font-semibold mb-3 modern">🧪 Зелья</h3>
-                        <p class="text-base text-gray-300 mb-4 modern">Магические зелья и их свойства</p>
-                        <div class="flex gap-3">
-                            <button onclick="showTableData('potions')" class="btn-primary-game px-4 py-2 rounded text-sm modern">Просмотр</button>
-                            <button onclick="generateRandom('potion')" class="btn-game px-4 py-2 rounded text-sm modern">Случайный</button>
-                        </div>
-                    </div>
-                    <div class="card-game p-6">
-                        <h3 class="text-xl font-semibold mb-3 modern">🗡️ События в пути</h3>
-                        <p class="text-base text-gray-300 mb-4 modern">Случайные события во время путешествий</p>
-                        <div class="flex gap-3">
-                            <button onclick="showTableData('events')" class="btn-primary-game px-4 py-2 rounded text-sm modern">Просмотр</button>
-                            <button onclick="generateRandom('event')" class="btn-game px-4 py-2 rounded text-sm modern">Случайный</button>
-                        </div>
-                    </div>
-                    <div class="card-game p-6">
-                        <h3 class="text-xl font-semibold mb-3 modern">🏪 Названия таверн</h3>
-                        <p class="text-base text-gray-300 mb-4 modern">Креативные названия для таверн</p>
-                        <div class="flex gap-3">
-                            <button onclick="showTableData('taverns')" class="btn-primary-game px-4 py-2 rounded text-sm modern">Просмотр</button>
-                            <button onclick="generateRandom('tavern')" class="btn-game px-4 py-2 rounded text-sm modern">Случайный</button>
-                        </div>
-                    </div>
-                </div>
-            </div>
+        <input type="file" id="fileInput" accept="image/*" style="display: none;">
 
-            <div id="tableData" class="card-game p-8 hidden">
-                <h3 id="tableTitle" class="medieval text-2xl font-bold mb-6 text-yellow-400"></h3>
-                <div id="tableContent" class="space-y-3"></div>
-                <button onclick="hideTableData()" class="btn-game mt-6 px-6 py-3 rounded modern">← Назад к таблицам</button>
-            </div>
-        </div>
+        <div id="preview" style="margin: 15px 0;"></div>
 
-        <!-- Session Tab -->
-        <div id="session" class="tab-content hidden">
-            <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
-                <!-- Session Stages -->
-                <div class="card-game p-6">
-                    <h3 class="medieval text-xl font-semibold mb-6 text-yellow-400">🎭 Этап сессии</h3>
-                    <div class="space-y-3">
-                        <button onclick="setStage('hook')" class="stage-btn active w-full text-left p-4 rounded-lg card-game">
-                            <div class="font-medium text-lg modern">🎣 Зацепка</div>
-                            <div class="text-base opacity-75 modern">Начало приключения</div>
-                        </button>
-                        <button onclick="setStage('exploration')" class="stage-btn w-full text-left p-4 rounded-lg card-game">
-                            <div class="font-medium text-lg modern">🗺️ Исследование</div>
-                            <div class="text-base opacity-75 modern">Изучение мира</div>
-                        </button>
-                        <button onclick="setStage('combat')" class="stage-btn w-full text-left p-4 rounded-lg card-game">
-                            <div class="font-medium text-lg modern">⚔️ Бой</div>
-                            <div class="text-base opacity-75 modern">Сражения и конфликты</div>
-                        </button>
-                        <button onclick="setStage('social')" class="stage-btn w-full text-left p-4 rounded-lg card-game">
-                            <div class="font-medium text-lg modern">🤝 Социальное</div>
-                            <div class="text-base opacity-75 modern">Дипломатия и торговля</div>
-                        </button>
-                        <button onclick="setStage('puzzle')" class="stage-btn w-full text-left p-4 rounded-lg card-game">
-                            <div class="font-medium text-lg modern">🧩 Головоломка</div>
-                            <div class="text-base opacity-75 modern">Загадки и ловушки</div>
-                        </button>
-                        <button onclick="setStage('climax')" class="stage-btn w-full text-left p-4 rounded-lg card-game">
-                            <div class="font-medium text-lg modern">🔥 Кульминация</div>
-                            <div class="text-base opacity-75 modern">Финальное противостояние</div>
-                        </button>
-                        <button onclick="setStage('resolution')" class="stage-btn w-full text-left p-4 rounded-lg card-game">
-                            <div class="font-medium text-lg modern">🏁 Развязка</div>
-                            <div class="text-base opacity-75 modern">Завершение приключения</div>
-                        </button>
-                    </div>
-                </div>
+        <button class="btn" id="generateBtn" style="display: none;">
+            🎨 Создать исторический портрет
+        </button>
 
-                <!-- Master Notes -->
-                <div class="card-game p-6">
-                    <h3 class="medieval text-xl font-semibold mb-6 text-yellow-400">📝 Заметки мастера</h3>
-                    <textarea id="masterNotes" placeholder="Запишите важные детали, планы, идеи..." class="w-full h-48 p-4 border border-gray-600 rounded-lg resize-none focus:ring-2 focus:ring-yellow-500 bg-gray-800 text-gray-100 modern"></textarea>
-                    <div class="mt-4 text-base text-gray-300 modern">
-                        Текущий этап: <span id="currentStage" class="font-medium text-yellow-400">🎣 Зацепка</span>
-                    </div>
-                </div>
+        <div class="status-text" id="statusText"></div>
 
-                <!-- Quick Actions -->
-                <div class="card-game p-6">
-                    <h3 class="medieval text-xl font-semibold mb-6 text-yellow-400">⚡ Быстрые действия</h3>
-                    <div class="space-y-3">
-                        <button onclick="rollDice()" class="btn-game w-full justify-start text-base modern">
-                            🎲 Бросить кости (d20)
-                        </button>
-                        <button onclick="generateRandom('tavern')" class="btn-game w-full justify-start text-base modern">
-                            🏪 Случайная таверна
-                        </button>
-                        <button onclick="generateRandom('potion')" class="btn-game w-full justify-start text-base modern">
-                            🧪 Случайное зелье
-                        </button>
-                        <button onclick="generateRandom('npc')" class="btn-game w-full justify-start text-base modern">
-                            🗣️ Случайный NPC
-                        </button>
-                        <button onclick="generateRandom('drink')" class="btn-game w-full justify-start text-base modern">
-                            🍺 Случайный напиток
-                        </button>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- AI Tab -->
-        <div id="ai" class="tab-content hidden">
-            <div class="card-game p-8 mb-8">
-                <h2 class="medieval text-3xl font-bold mb-8 text-yellow-400">🔮 AI Подсказки</h2>
-
-                <!-- Context Input -->
-                <div class="mb-6">
-                    <label class="block text-lg font-medium mb-3 modern">Контекст сессии:</label>
-                    <textarea id="sessionContext" placeholder="Опишите текущую ситуацию, персонажей, локацию..." class="w-full h-24 p-4 border border-gray-600 rounded-lg resize-none focus:ring-2 focus:ring-yellow-500 bg-gray-800 text-gray-100 modern"></textarea>
-                </div>
-
-                <!-- AI Type Selection -->
-                <div class="grid grid-cols-2 md:grid-cols-3 gap-6 mb-8">
-                    <button onclick="setAIType('plot_twist')" class="ai-type-btn active p-6 border border-gray-600 rounded-lg text-center card-game">
-                        <div class="text-4xl mb-3">🎭</div>
-                        <div class="font-medium text-lg modern">Поворот сюжета</div>
-                        <div class="text-base text-gray-400 modern">Неожиданные повороты</div>
-                    </button>
-                    <button onclick="setAIType('npc_dialogue')" class="ai-type-btn p-6 border border-gray-600 rounded-lg text-center card-game">
-                        <div class="text-4xl mb-3">🗣️</div>
-                        <div class="font-medium text-lg modern">Диалог NPC</div>
-                        <div class="text-base text-gray-400 modern">Живые диалоги</div>
-                    </button>
-                    <button onclick="setAIType('scene_description')" class="ai-type-btn p-6 border border-gray-600 rounded-lg text-center card-game">
-                        <div class="text-4xl mb-3">🏰</div>
-                        <div class="font-medium text-lg modern">Описание сцены</div>
-                        <div class="text-base text-gray-400 modern">Атмосферные описания</div>
-                    </button>
-                    <button onclick="setAIType('loot_suggestion')" class="ai-type-btn p-6 border border-gray-600 rounded-lg text-center card-game">
-                        <div class="text-4xl mb-3">💎</div>
-                        <div class="font-medium text-lg modern">Предложение лута</div>
-                        <div class="text-base text-gray-400 modern">Сбалансированные награды</div>
-                    </button>
-                    <button onclick="setAIType('skill_check')" class="ai-type-btn p-6 border border-gray-600 rounded-lg text-center card-game">
-                        <div class="text-4xl mb-3">🎲</div>
-                        <div class="font-medium text-lg modern">Проверка навыков</div>
-                        <div class="text-base text-gray-400 modern">Логичные проверки</div>
-                    </button>
-                    <button onclick="setAIType('combat_encounter')" class="ai-type-btn p-6 border border-gray-600 rounded-lg text-center card-game">
-                        <div class="text-4xl mb-3">⚔️</div>
-                        <div class="font-medium text-lg modern">Боевая встреча</div>
-                        <div class="text-base text-gray-400 modern">Тактика и монстры</div>
-                    </button>
-                </div>
-
-                <!-- Generate Button -->
-                <button onclick="generateAISuggestion()" id="generateBtn" class="btn-primary-game w-full text-lg py-4 rounded-lg modern">
-                    🔮 Сгенерировать с помощью AI
-                </button>
-            </div>
-
-            <!-- AI Result -->
-            <div id="aiResult" class="card-game p-8 hidden">
-                <h3 class="medieval text-xl font-semibold mb-6 text-yellow-400">Результат генерации AI</h3>
-                <div id="aiContent" class="bg-gray-800 p-6 rounded-lg mb-6 text-base modern border border-gray-600"></div>
-                <div class="flex gap-4">
-                    <button onclick="copyToClipboard()" class="btn-game px-6 py-3 rounded modern">📋 Копировать</button>
-                    <button onclick="regenerateAI()" class="btn-primary-game px-6 py-3 rounded modern">🔄 Сгенерировать еще раз</button>
-                </div>
-            </div>
-
-            <!-- Usage Stats -->
-            <div class="card-game p-6 mt-8">
-                <h3 class="medieval text-lg font-semibold mb-4 text-yellow-400">📊 Статистика использования</h3>
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-center">
-                    <div>
-                        <div class="text-2xl font-bold text-yellow-400" id="requestsCount">0</div>
-                        <div class="text-sm text-gray-400 modern">Запросов к AI</div>
-                    </div>
-                    <div>
-                        <div class="text-2xl font-bold text-green-400" id="tokensUsed">0</div>
-                        <div class="text-sm text-gray-400 modern">Токенов использовано</div>
-                    </div>
-                    <div>
-                        <div class="text-2xl font-bold text-purple-400" id="avgResponseTime">0s</div>
-                        <div class="text-sm text-gray-400 modern">Среднее время ответа</div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Chat Tab -->
-        <div id="chat" class="tab-content hidden">
-            <div class="card-game p-8 mb-8">
-                <h2 class="medieval text-3xl font-bold mb-8 text-yellow-400">💬 Чат с DeepSeek</h2>
-                <p class="text-base text-gray-300 mb-6 modern">
-                    Общайтесь с AI-помощником мастера. Задавайте вопросы о D&D, просите советы по ведению игры, идеи для сюжета или помощь с правилами.
-                </p>
-
-                <!-- Chat Interface -->
-                <div class="bg-gray-800 border border-gray-600 rounded-lg h-96 mb-6">
-                    <div id="chatContent" class="h-full p-4 overflow-y-auto space-y-4">
-                        <!-- Приветственное сообщение -->
-                        <div class="mb-4 text-left">
-                            <div class="inline-block bg-gray-700 text-gray-100 p-3 rounded-lg max-w-xs lg:max-w-md">
-                                <div class="text-sm">
-                                    Привет! Я DeepSeek, ваш AI-помощник для D&D. Могу помочь с советами по ведению игры, идеями для сюжета, балансировкой встреч и многим другим. Просто напишите ваш вопрос!
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Chat Input -->
-                <div class="flex gap-4">
-                    <input type="text" id="chatMessage" placeholder="Введите ваш вопрос или сообщение..." class="flex-1 p-3 border border-gray-600 rounded-lg bg-gray-800 text-gray-100 modern focus:ring-2 focus:ring-yellow-500 focus:border-transparent" onkeypress="handleChatKeyPress(event)">
-                    <button id="sendChatBtn" onclick="sendChatMessage()" class="btn-primary-game px-6 py-3 rounded modern">
-                        📤 Отправить
-                    </button>
-                </div>
-
-                <!-- Chat Tips -->
-                <div class="mt-6 p-4 bg-gray-800/50 border border-gray-600 rounded-lg">
-                    <h4 class="text-lg font-semibold mb-3 text-yellow-400 modern">💡 Примеры вопросов:</h4>
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-3 text-sm text-gray-300">
-                        <div>• "Как создать интересного NPC?"</div>
-                        <div>• "Помоги сбалансировать боевую встречу"</div>
-                        <div>• "Идеи для поворота сюжета"</div>
-                        <div>• "Объясни правило заклинания"</div>
-                        <div>• "Как описать локацию?"</div>
-                        <div>• "Советы для новых мастеров"</div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Results Modal -->
-        <div id="resultModal" class="fixed inset-0 bg-black bg-opacity-75 hidden flex items-center justify-center z-50">
-            <div class="card-game p-8 max-w-lg mx-4">
-                <h3 class="medieval text-xl font-semibold mb-6 text-yellow-400">Результат</h3>
-                <div id="modalContent" class="mb-6 text-base modern"></div>
-                <div class="flex gap-4">
-                    <button onclick="copyToClipboard()" class="btn-primary-game flex-1 px-6 py-3 rounded modern">📋 Копировать</button>
-                    <button onclick="closeModal()" class="btn-game flex-1 px-6 py-3 rounded modern">Закрыть</button>
-                </div>
-            </div>
-        </div>
+        <div id="result"></div>
     </div>
 
     <script>
-        // Конфигурация API
-        const API_BASE_URL = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' ?
-            '' // Локальная разработка
-            :
-            'https://your-netlify-app.netlify.app'; // Замените на ваш Netlify URL
+        let uploadedImage = null;
+        let resultCanvas = null;
+        let selectedRole = null;
 
-        // Demo data
-        const demoData = {
-            drinks: [{
-                name: "Эльфовское вино",
-                effect: "Восстанавливает 1d4 HP",
-                price: "5 золотых"
-            }, {
-                name: "Огненный эль",
-                effect: "Дает сопротивление огню на 1 час",
-                price: "3 золотых"
-            }, {
-                name: "Лунный нектар",
-                effect: "Улучшает зрение в темноте",
-                price: "8 золотых"
-            }, {
-                name: "Гномский эль",
-                effect: "Увеличивает силу на +2 на 10 минут",
-                price: "4 золотых"
-            }, {
-                name: "Драконье пиво",
-                effect: "Дыхание огнем 1 раз",
-                price: "15 золотых"
-            }],
-            npcs: [{
-                name: "Торин Железнобород",
-                race: "Дварф",
-                profession: "Кузнец",
-                personality: "Упрямый, но честный"
-            }, {
-                name: "Элара Светлая",
-                race: "Эльф",
-                profession: "Маг",
-                personality: "Мудрая и загадочная"
-            }, {
-                name: "Грог Силач",
-                race: "Полуорк",
-                profession: "Охранник",
-                personality: "Грубый, но верный"
-            }, {
-                name: "Зара Тень",
-                race: "Полуэльф",
-                profession: "Вор",
-                personality: "Хитрый и осторожный"
-            }, {
-                name: "Маркус Добросерд",
-                race: "Человек",
-                profession: "Торговец",
-                personality: "Дружелюбный и щедрый"
-            }],
-            potions: [{
-                name: "Зелье лечения",
-                effect: "Восстанавливает 2d4+2 HP",
-                rarity: "Обычное"
-            }, {
-                name: "Зелье невидимости",
-                effect: "Невидимость на 1 час",
-                rarity: "Редкое"
-            }, {
-                name: "Зелье полета",
-                effect: "Полет на 10 минут",
-                rarity: "Редкое"
-            }, {
-                name: "Зелье гигантской силы",
-                effect: "Сила +4 на 1 час",
-                rarity: "Необычное"
-            }, {
-                name: "Зелье истинного зрения",
-                effect: "Видит скрытое на 1 час",
-                rarity: "Очень редкое"
-            }],
-            events: [{
-                name: "Встреча с торговцем",
-                description: "Одинокий торговец предлагает редкие товары",
-                difficulty: "Легкое"
-            }, {
-                name: "Нападение бандитов",
-                description: "Группа разбойников блокирует дорогу",
-                difficulty: "Среднее"
-            }, {
-                name: "Заблудившийся путник",
-                description: "Путник просит помощи найти дорогу",
-                difficulty: "Легкое"
-            }, {
-                name: "Древние руины",
-                description: "Обнаружены остатки древнего сооружения",
-                difficulty: "Сложное"
-            }, {
-                name: "Магическая буря",
-                description: "Странные погодные явления",
-                difficulty: "Очень сложное"
-            }],
-            taverns: [{
-                name: "Пьяный дракон",
-                description: "Шумная таверна для авантюристов",
-                atmosphere: "Бойкая"
-            }, {
-                name: "Тихая гавань",
-                description: "Спокойное место для отдыха",
-                atmosphere: "Уютная"
-            }, {
-                name: "Кузница и кружка",
-                description: "Таверна рядом с кузницей",
-                atmosphere: "Рабочая"
-            }, {
-                name: "Лунный свет",
-                description: "Элегантная таверна для знати",
-                atmosphere: "Аристократичная"
-            }, {
-                name: "Подземелье",
-                description: "Таверна в подвале старого здания",
-                atmosphere: "Мрачная"
-            }]
-        };
+        // Исторические роли
+        const roles = [{
+            id: 'peasant',
+            name: 'Крестьянин',
+            emoji: '🌾',
+            background: 'peasant.jpg',
+            fallback: null,
+            description: 'Простой труженик земли'
+        }, {
+            id: 'hussar',
+            name: 'Крылатый гусар',
+            emoji: '⚔️',
+            background: 'generated',
+            description: 'Элитная кавалерия'
+        }, {
+            id: 'boyar',
+            name: 'Боярин',
+            emoji: '🏰',
+            background: 'generated',
+            description: 'Знатный вельможа'
+        }, {
+            id: 'prince',
+            name: 'Князь',
+            emoji: '👑',
+            background: 'generated',
+            description: 'Правитель княжества'
+        }, {
+            id: 'merchant',
+            name: 'Купец',
+            emoji: '💰',
+            background: 'generated',
+            description: 'Торговец'
+        }, {
+            id: 'monk',
+            name: 'Монах',
+            emoji: '⛪',
+            background: 'generated',
+            description: 'Духовное лицо'
+        }];
 
-        let currentAIType = 'plot_twist';
-        let requestCount = 0;
-        let totalTokens = 0;
-        let responseTimes = [];
+        console.log('⚜️ Исторический портрет v9.4 - Canvas без toDataURL');
+        console.log('👑 6 исторических ролей с уникальными фонами');
+        console.log('🎨 Реальные фоны из папки background/ + процедурные для остальных');
 
-        // Tab management
-        function showTab(tabName) {
-            document.querySelectorAll('.tab-content').forEach(tab => tab.classList.add('hidden'));
-            document.getElementById(tabName).classList.remove('hidden');
-
-            document.querySelectorAll('.tab-game').forEach(btn => btn.classList.remove('active', 'bg-yellow-500', 'text-gray-900'));
-            event.target.classList.add('active', 'bg-yellow-500', 'text-gray-900');
-        }
-
-        // Stage management
-        function setStage(stage) {
-            document.querySelectorAll('.stage-btn').forEach(btn => btn.classList.remove('active', 'bg-yellow-500', 'text-gray-900'));
-            event.target.classList.add('active', 'bg-yellow-500', 'text-gray-900');
-
-            const stageNames = {
-                hook: '🎣 Зацепка',
-                exploration: '🗺️ Исследование',
-                combat: '⚔️ Бой',
-                social: '🤝 Социальное',
-                puzzle: '🧩 Головоломка',
-                climax: '🔥 Кульминация',
-                resolution: '🏁 Развязка'
-            };
-            document.getElementById('currentStage').textContent = stageNames[stage];
-        }
-
-        // AI type management
-        function setAIType(type) {
-            currentAIType = type;
-            document.querySelectorAll('.ai-type-btn').forEach(btn => btn.classList.remove('active', 'bg-yellow-500', 'text-gray-900'));
-            event.target.classList.add('active', 'bg-yellow-500', 'text-gray-900');
-        }
-
-        // Random generation with better randomization
-        function generateRandom(type) {
-            let data, title, content;
-
-            const seed = Date.now() + Math.random();
-            const randomIndex = Math.floor((seed % 1000) % demoData[type].length);
-
-            switch (type) {
-                case 'npc':
-                    data = demoData.npcs[randomIndex];
-                    title = '👤 Случайный NPC';
-                    content = `
-                        <strong>Имя:</strong> ${data.name}<br>
-                        <strong>Раса:</strong> ${data.race}<br>
-                        <strong>Профессия:</strong> ${data.profession}<br>
-                        <strong>Характер:</strong> ${data.personality}
-                    `;
-                    break;
-                case 'tavern':
-                    data = demoData.taverns[randomIndex];
-                    title = '🏪 Название таверны';
-                    content = `
-                        <strong>Название:</strong> ${data.name}<br>
-                        <strong>Описание:</strong> ${data.description}<br>
-                        <strong>Атмосфера:</strong> ${data.atmosphere}
-                    `;
-                    break;
-                case 'potion':
-                    data = demoData.potions[randomIndex];
-                    title = '🧪 Случайное зелье';
-                    content = `
-                        <strong>Название:</strong> ${data.name}<br>
-                        <strong>Эффект:</strong> ${data.effect}<br>
-                        <strong>Редкость:</strong> ${data.rarity}
-                    `;
-                    break;
-                case 'drink':
-                    data = demoData.drinks[randomIndex];
-                    title = '🍺 Случайный напиток';
-                    content = `
-                        <strong>Название:</strong> ${data.name}<br>
-                        <strong>Эффект:</strong> ${data.effect}<br>
-                        <strong>Цена:</strong> ${data.price}
-                    `;
-                    break;
-                case 'event':
-                    data = demoData.events[randomIndex];
-                    title = '🗡️ Случайное событие';
-                    content = `
-                        <strong>Событие:</strong> ${data.name}<br>
-                        <strong>Описание:</strong> ${data.description}<br>
-                        <strong>Сложность:</strong> ${data.difficulty}
-                    `;
-                    break;
-            }
-
-            showModal(title, content);
-        }
-
-        // Show table data
-        function showTableData(table) {
-            const tableNames = {
-                drinks: '🍺 Напитки',
-                npcs: '👤 NPC',
-                potions: '🧪 Зелья',
-                events: '🗡️ События в пути',
-                taverns: '🏪 Названия таверн'
-            };
-
-            document.getElementById('tableTitle').textContent = tableNames[table];
-            const content = document.getElementById('tableContent');
-            content.innerHTML = '';
-
-            demoData[table].forEach((item, index) => {
-                const div = document.createElement('div');
-                div.className = 'card-game p-4 text-base modern';
-                div.innerHTML = `<strong>${index + 1}.</strong> ${Object.values(item).join(' | ')}`;
-                content.appendChild(div);
+        // Инициализация ролей
+        function initializeRoles() {
+            const rolesGrid = document.getElementById('rolesGrid');
+            roles.forEach(role => {
+                const roleCard = document.createElement('div');
+                roleCard.className = 'role-card';
+                roleCard.onclick = () => selectRole(role.id);
+                roleCard.innerHTML = `
+                    <span class="role-emoji">${role.emoji}</span>
+                    <div class="role-name">${role.name}</div>
+                `;
+                roleCard.id = `role-${role.id}`;
+                rolesGrid.appendChild(roleCard);
             });
 
-            document.getElementById('tableData').classList.remove('hidden');
+            // Выбираем крестьянина по умолчанию
+            selectRole('peasant');
         }
 
-        function hideTableData() {
-            document.getElementById('tableData').classList.add('hidden');
+        function selectRole(roleId) {
+            // Снимаем выделение со всех ролей
+            document.querySelectorAll('.role-card').forEach(card => {
+                card.classList.remove('selected');
+            });
+
+            // Выделяем выбранную роль
+            document.getElementById(`role-${roleId}`).classList.add('selected');
+
+            selectedRole = roles.find(role => role.id === roleId);
+            console.log('👑 Выбрана роль:', selectedRole.name);
+
+            updateGenerateButton();
         }
 
-        // Dice rolling
-        function rollDice() {
-            const result = Math.floor(Math.random() * 20) + 1;
-            showModal('🎲 Бросок костей', `Выпало: <strong>${result}</strong>`);
+        function selectRandomRole() {
+            const randomRole = roles[Math.floor(Math.random() * roles.length)];
+            selectRole(randomRole.id);
         }
 
-        // Generate AI suggestion (with backend proxy)
-        async function generateAISuggestion() {
-            const context = document.getElementById('sessionContext').value;
-            const generateBtn = document.getElementById('generateBtn');
-            const aiContent = document.getElementById('aiContent');
-
-            generateBtn.disabled = true;
-            generateBtn.innerHTML = '🔄 Генерируем...';
-            aiContent.innerHTML = '<div class="loading-game h-8 rounded"></div>';
-            document.getElementById('aiResult').classList.remove('hidden');
-
-            const startTime = Date.now();
-
-            try {
-                const response = await fetch(`${API_BASE_URL}/api/orchestrate`, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({
-                        templateType: currentAIType,
-                        context: {
-                            sessionStage: 'general',
-                            masterNotes: context,
-                            moduleSummary: '',
-                            recentEvents: [],
-                            relevantChunks: [],
-                            tableData: []
-                        }
-                    })
-                });
-
-                if (response.ok) {
-                    const data = await response.json();
-                    const endTime = Date.now();
-                    const responseTime = (endTime - startTime) / 1000;
-
-                    aiContent.innerHTML = data.suggestion.replace(/\n/g, '<br>');
-                    updateStats(data.tokens || 0, responseTime);
-                } else {
-                    generateDemoSuggestion();
-                }
-
-            } catch (error) {
-                generateDemoSuggestion();
+        function updateGenerateButton() {
+            const btn = document.getElementById('generateBtn');
+            if (uploadedImage && selectedRole) {
+                btn.style.display = 'block';
+                btn.textContent = `🎨 Создать портрет: ${selectedRole.name}`;
+            } else {
+                btn.style.display = 'none';
             }
-
-            generateBtn.disabled = false;
-            generateBtn.innerHTML = '🔮 Сгенерировать с помощью AI';
         }
 
-        // Chat with DeepSeek
-        async function sendChatMessage() {
-            const messageInput = document.getElementById('chatMessage');
-            const message = messageInput.value.trim();
+        document.getElementById('fileInput').addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (!file) return;
 
-            if (!message) return;
+            console.log('📁 Загружен файл:', file.name, file.size, 'bytes');
 
-            const chatContent = document.getElementById('chatContent');
-            const sendBtn = document.getElementById('sendChatBtn');
-            const context = document.getElementById('sessionContext').value;
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                uploadedImage = new Image();
+                uploadedImage.onload = function() {
+                    document.getElementById('preview').innerHTML = `
+                        <img src="${e.target.result}" class="preview-img">
+                        <p style="color: #D4AF37; font-size: 13px; margin-top: 8px;">
+                            ✅ Изображение: ${uploadedImage.width}×${uploadedImage.height}px
+                        </p>
+                    `;
+                    updateGenerateButton();
 
-            // Добавляем сообщение пользователя
-            const userMessageDiv = document.createElement('div');
-            userMessageDiv.className = 'mb-4 text-right';
-            userMessageDiv.innerHTML = `
-                <div class="inline-block bg-blue-600 text-white p-3 rounded-lg max-w-xs lg:max-w-md">
-                    <div class="text-sm">${message}</div>
-                </div>
-            `;
-            chatContent.appendChild(userMessageDiv);
+                    console.log('✅ Изображение готово:', uploadedImage.width + 'x' + uploadedImage.height);
+                };
+                uploadedImage.src = e.target.result;
+            };
+            reader.readAsDataURL(file);
+        });
 
-            // Очищаем поле ввода
-            messageInput.value = '';
+        document.getElementById('generateBtn').addEventListener('click', async function() {
+            if (!uploadedImage || !selectedRole) return;
 
-            // Показываем индикатор загрузки
-            const loadingDiv = document.createElement('div');
-            loadingDiv.className = 'mb-4 text-left';
-            loadingDiv.innerHTML = `
-                <div class="inline-block bg-gray-700 text-gray-300 p-3 rounded-lg">
-                    <div class="flex items-center">
-                        <div class="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
-                        <span>DeepSeek думает...</span>
-                    </div>
-                </div>
-            `;
-            chatContent.appendChild(loadingDiv);
-
-            // Отключаем кнопку
-            sendBtn.disabled = true;
+            const statusEl = document.getElementById('statusText');
+            const btn = this;
 
             try {
-                const response = await fetch(`${API_BASE_URL}/api/orchestrate`, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({
-                        message: message,
-                        context: context,
-                        isChat: true
-                    })
-                });
+                btn.disabled = true;
+                statusEl.className = 'loading';
 
-                // Удаляем индикатор загрузки
-                chatContent.removeChild(loadingDiv);
+                statusEl.textContent = `🔍 Анализ изображения для роли ${selectedRole.name}...`;
+                await delay(500);
 
-                if (response.ok) {
-                    const data = await response.json();
+                statusEl.textContent = '✂️ Сегментация персонажа...';
+                await delay(800);
 
-                    // Добавляем ответ AI
-                    const aiMessageDiv = document.createElement('div');
-                    aiMessageDiv.className = 'mb-4 text-left';
-                    aiMessageDiv.innerHTML = `
-                        <div class="inline-block bg-gray-700 text-gray-100 p-3 rounded-lg max-w-xs lg:max-w-md">
-                            <div class="text-sm">${data.suggestion.replace(/\n/g, '<br>')}</div>
+                statusEl.textContent = `🏰 Загрузка исторического фона...`;
+                await delay(600);
+
+                statusEl.textContent = `🎨 Применение эффектов ${selectedRole.name}...`;
+
+                // Создание портрета для выбранной роли
+                const canvas = await createRolePortrait(uploadedImage, selectedRole);
+                resultCanvas = canvas;
+
+                // Простое отображение без toDataURL
+                document.getElementById('result').innerHTML = `
+                    <div class="result-container">
+                        <h3 style="color: #FFE55C; margin-bottom: 15px; font-size: 18px;">
+                            ${selectedRole.emoji} ${selectedRole.name}
+                        </h3>
+                        <canvas id="resultCanvas" width="600" height="800" style="max-width: 100%; max-height: 280px; border-radius: 10px; margin: 10px 0; box-shadow: 0 8px 20px rgba(0, 0, 0, 0.6); border: 2px solid rgba(255, 229, 92, 0.3);"></canvas>
+                        <div class="download-buttons">
+                            <button class="secondary-btn" onclick="downloadResult()">
+                                💾 Скачать
+                            </button>
+                            <button class="secondary-btn" onclick="shareResult()">
+                                📤 Поделиться
+                            </button>
                         </div>
-                    `;
-                    chatContent.appendChild(aiMessageDiv);
-                } else {
-                    // Показываем ошибку
-                    const errorDiv = document.createElement('div');
-                    errorDiv.className = 'mb-4 text-left';
-                    errorDiv.innerHTML = `
-                        <div class="inline-block bg-red-600 text-white p-3 rounded-lg">
-                            <div class="text-sm">Ошибка: Не удалось получить ответ от AI</div>
-                        </div>
-                    `;
-                    chatContent.appendChild(errorDiv);
-                }
-
-            } catch (error) {
-                // Удаляем индикатор загрузки
-                chatContent.removeChild(loadingDiv);
-
-                // Показываем ошибку
-                const errorDiv = document.createElement('div');
-                errorDiv.className = 'mb-4 text-left';
-                errorDiv.innerHTML = `
-                    <div class="inline-block bg-red-600 text-white p-3 rounded-lg">
-                        <div class="text-sm">Ошибка: Не удалось подключиться к серверу</div>
+                        <button class="secondary-btn" onclick="createNewPortrait()" style="width: 100%; margin-top: 10px;">
+                            🎲 Другая роль
+                        </button>
                     </div>
                 `;
-                chatContent.appendChild(errorDiv);
-            }
 
-            // Включаем кнопку обратно
-            sendBtn.disabled = false;
+                // Рисуем результат на canvas
+                const resultCanvasEl = document.getElementById('resultCanvas');
+                const resultCtx = resultCanvasEl.getContext('2d');
+                resultCtx.drawImage(canvas, 0, 0);
 
-            // Прокручиваем к последнему сообщению
-            chatContent.scrollTop = chatContent.scrollHeight;
-        }
+                statusEl.textContent = `🎉 Портрет ${selectedRole.name} готов!`;
+                statusEl.className = '';
 
-        // Обработчик Enter в чате
-        function handleChatKeyPress(event) {
-            if (event.key === 'Enter' && !event.shiftKey) {
-                event.preventDefault();
-                sendChatMessage();
-            }
-        }
+                console.log('🎉 Портрет создан успешно!');
 
-        // Fallback demo suggestion generation
-        function generateDemoSuggestion() {
-            const suggestions = {
-                plot_twist: [
-                    "Внезапно оказывается, что главный антагонист - это давно потерянный брат одного из игроков, который был проклят и превращен в монстра.",
-                    "Древний артефакт, который ищут герои, на самом деле является ключом к пробуждению спящего бога, который может уничтожить мир.",
-                    "Один из NPC, которому доверяют игроки, оказывается шпионом противника, собирающим информацию о группе."
-                ],
-                npc_dialogue: [
-                    "\"Я видел, как твои глаза светятся в темноте... Ты не совсем человек, не так ли?\" - говорит старый мудрец, пристально глядя на игрока.",
-                    "\"В этих землях каждый камень помнит древние войны. Будьте осторожны, ибо прошлое имеет привычку возвращаться.\"",
-                    "\"Мой отец говорил, что настоящая сила не в мече, а в том, как ты его используешь. Но иногда... иногда нужен просто очень острый меч.\""
-                ],
-                scene_description: [
-                    "Лунный свет пробивается сквозь густые облака, создавая призрачные тени на древних стенах замка. Воздух наполнен запахом влажной земли и чего-то более древнего, более темного. Вдалеке слышится вой волка, а ветер шепчет забытые секреты между колоннами.",
-                    "Таверна гудит от голосов и смеха. Дым от труб создает мистическую атмосферу, а свет факелов танцует на стенах, украшенных трофеями и старыми картами. За одним из столов группа авантюристов горячо обсуждает последние слухи о сокровищах.",
-                    "Древний лес окружает вас со всех сторон, его ветви сплетаются над головой, создавая естественный свод. Воздух наполнен ароматом хвои и цветов, а вдалеке слышится журчание ручья. Здесь чувствуется древняя магия, которая пронизывает каждое дерево и каждый камень."
-                ],
-                loot_suggestion: [
-                    "В сундуке вы находите: магический кинжал +1, 50 золотых монет, свиток с заклинанием 'Огненный шар', и странный амулет с неизвестными рунами.",
-                    "После победы над боссом вы получаете: кольцо защиты +1, зелье лечения, древнюю карту сокровищ, и ключ от потайной двери в подземелье.",
-                    "Исследуя руины, вы находите: эльфийский лук +2, мешок с драгоценными камнями (100 золотых), свиток телепортации, и дневник с важной информацией."
-                ],
-                skill_check: [
-                    "Проверка Ловкости (DC 15): Прыжок через пропасть требует точного расчета и грации. При успехе - безопасное приземление, при неудаче - падение и урон.",
-                    "Проверка Мудрости (DC 12): Заметить скрытые следы на земле, которые могут привести к тайному убежищу бандитов или к сокровищам.",
-                    "Проверка Харизмы (DC 14): Убедить местных жителей поделиться информацией о странных событиях в деревне, которые могут быть связаны с вашим квестом."
-                ],
-                combat_encounter: [
-                    "Боевая встреча: Группа гоблинов (4 шт.) засадила дорогу. Они используют тактику засады и стреляют из луков из укрытий. Окружение: густой лес, узкая тропа, валуны для укрытия.",
-                    "Боевая встреча: Два огра-берсерка атакуют из засады. Они используют ярость и атакуют ближайших противников. Окружение: каменистая местность, пещера поблизости.",
-                    "Боевая встреча: Стая волков (6 шт.) окружает группу. Они используют тактику стаи и пытаются отрезать отступление. Окружение: открытая равнина, ночь, полная луна."
-                ]
-            };
-
-            const seed = Date.now() + Math.random();
-            const randomIndex = Math.floor((seed % 1000) % suggestions[currentAIType].length);
-            const suggestion = suggestions[currentAIType][randomIndex];
-
-            document.getElementById('aiContent').innerHTML = suggestion;
-            updateStats(50, 0.5);
-        }
-
-        // Regenerate AI response
-        function regenerateAI() {
-            generateAISuggestion();
-        }
-
-        // Update usage statistics
-        function updateStats(tokens, responseTime) {
-            requestCount++;
-            totalTokens += tokens;
-            responseTimes.push(responseTime);
-
-            const avgTime = responseTimes.reduce((a, b) => a + b, 0) / responseTimes.length;
-
-            document.getElementById('requestsCount').textContent = requestCount;
-            document.getElementById('tokensUsed').textContent = totalTokens;
-            document.getElementById('avgResponseTime').textContent = avgTime.toFixed(1) + 's';
-        }
-
-        // Modal management
-        function showModal(title, content) {
-            document.getElementById('modalContent').innerHTML = content;
-            document.getElementById('resultModal').classList.remove('hidden');
-        }
-
-        function closeModal() {
-            document.getElementById('resultModal').classList.add('hidden');
-        }
-
-        // Clipboard functionality
-        function copyToClipboard() {
-            const content = document.getElementById('aiContent') || document.getElementById('modalContent');
-            if (content) {
-                navigator.clipboard.writeText(content.textContent || content.innerText);
-                alert('Скопировано в буфер обмена!');
-            }
-        }
-
-        // Close modal when clicking outside
-        document.getElementById('resultModal').addEventListener('click', function(e) {
-            if (e.target === this) {
-                closeModal();
+            } catch (error) {
+                console.error('❌ Ошибка:', error);
+                statusEl.textContent = '❌ Ошибка создания портрета';
+                statusEl.className = '';
+            } finally {
+                btn.disabled = false;
             }
         });
 
-        // Initialize
-        document.addEventListener('DOMContentLoaded', function() {
-            document.querySelector('.tab-game').classList.add('active', 'bg-yellow-500', 'text-gray-900');
+        async function createRolePortrait(userImage, role) {
+            const canvas = document.createElement('canvas');
+            canvas.width = 600;
+            canvas.height = 800;
+            const ctx = canvas.getContext('2d');
+
+            // 1. Создание фона для роли
+            await createRoleBackground(ctx, canvas.width, canvas.height, role);
+
+            // 2. Применение эффектов роли
+            applyRoleEffects(ctx, canvas.width, canvas.height, role);
+
+            // 3. Добавление декораций роли
+            addRoleDecorations(ctx, canvas.width, canvas.height, role);
+
+            // 4. Создаем финальный чистый canvas БЕЗ пользователя
+            const finalCanvas = document.createElement('canvas');
+            const finalCtx = finalCanvas.getContext('2d');
+            finalCanvas.width = canvas.width;
+            finalCanvas.height = canvas.height;
+
+            // Копируем только фон и декорации (БЕЗ пользователя)
+            finalCtx.drawImage(canvas, 0, 0);
+
+            return finalCanvas;
+        }
+
+        async function createRoleBackground(ctx, width, height, role) {
+            // Пытаемся загрузить реальный фон для крестьянина
+            if (role.background !== 'generated') {
+                try {
+                    const cleanCanvas = await loadBackgroundAsCleanCanvas(role.background, role.fallback, width, height);
+                    if (cleanCanvas) {
+                        // Рисуем чистый canvas БЕЗ затемнения
+                        ctx.drawImage(cleanCanvas, 0, 0);
+
+                        console.log('✅ Загружен реальный фон для роли:', role.name);
+                        console.log('🚀 ВЫХОДИМ ИЗ ФУНКЦИИ - НЕ СОЗДАЕМ ПРОЦЕДУРНЫЙ ФОН');
+                        return;
+                    } else {
+                        console.log('❌ cleanCanvas is null - фон не загружен');
+                    }
+                } catch (error) {
+                    console.warn('⚠️ Не удалось загрузить фон для роли:', role.name, error);
+                }
+            }
+
+            // Если не удалось загрузить - используем процедурный фон
+            console.log('🎨 Создан процедурный фон для роли:', role.name);
+            createEnhancedBackground(ctx, width, height, role);
+        }
+
+        function loadBackgroundAsCleanCanvas(filename, fallback, targetWidth, targetHeight) {
+            console.log('🔍 ПЫТАЕМСЯ ЗАГРУЗИТЬ:', `background/${filename}`);
+            return new Promise((resolve) => {
+                const img = new Image();
+
+                img.onload = () => {
+                    console.log('🔥 УСПЕШНО ЗАГРУЖЕН ФАЙЛ:', filename);
+                    console.log('📸 Размер изображения:', img.width, 'x', img.height);
+                    try {
+                        // Создаем чистый canvas и копируем пиксели
+                        const cleanCanvas = document.createElement('canvas');
+                        const cleanCtx = cleanCanvas.getContext('2d');
+                        cleanCanvas.width = targetWidth;
+                        cleanCanvas.height = targetHeight;
+
+                        // УПРОЩЕННЫЙ ПОДХОД: заполняем фон и рисуем изображение напрямую
+                        cleanCtx.fillStyle = '#654321'; // Коричневый фон
+                        cleanCtx.fillRect(0, 0, targetWidth, targetHeight);
+
+                        // Вычисляем масштаб для вписывания изображения
+                        const scaleX = targetWidth / img.width;
+                        const scaleY = targetHeight / img.height;
+                        const scale = Math.min(scaleX, scaleY);
+
+                        const scaledWidth = img.width * scale;
+                        const scaledHeight = img.height * scale;
+                        const offsetX = (targetWidth - scaledWidth) / 2;
+                        const offsetY = (targetHeight - scaledHeight) / 2;
+
+                        // Рисуем изображение с масштабированием НАПРЯМУЮ
+                        cleanCtx.drawImage(img, offsetX, offsetY, scaledWidth, scaledHeight);
+
+                        console.log('📐 Масштаб:', scale, 'Размещение:', Math.round(offsetX), Math.round(offsetY));
+                        console.log('✅ Фон загружен как чистый canvas:', filename);
+                        resolve(cleanCanvas);
+
+                    } catch (error) {
+                        console.warn('⚠️ Ошибка создания чистого canvas:', error);
+                        resolve(null);
+                    }
+                };
+
+                img.onerror = () => {
+                    console.warn('⚠️ Не удалось загрузить:', filename);
+                    if (fallback && fallback !== filename) {
+                        // Пытаемся загрузить fallback
+                        loadBackgroundAsCleanCanvas(fallback, null, targetWidth, targetHeight).then(resolve);
+                    } else {
+                        resolve(null);
+                    }
+                };
+
+                img.src = `background/${filename}`;
+            });
+        }
+
+        function createEnhancedBackground(ctx, width, height, role) {
+            if (role.id === 'peasant') {
+                createPeasantBackground(ctx, width, height);
+            } else {
+                createGenericRoleBackground(ctx, width, height, role);
+            }
+        }
+
+        function createPeasantBackground(ctx, width, height) {
+            // Небо с облаками
+            const skyGradient = ctx.createLinearGradient(0, 0, 0, height * 0.6);
+            skyGradient.addColorStop(0, '#87CEEB');
+            skyGradient.addColorStop(0.5, '#B0C4DE');
+            skyGradient.addColorStop(1, '#D2B48C');
+
+            ctx.fillStyle = skyGradient;
+            ctx.fillRect(0, 0, width, height * 0.6);
+
+            // Поля
+            const fieldGradient = ctx.createLinearGradient(0, height * 0.6, 0, height);
+            fieldGradient.addColorStop(0, '#8FBC8F');
+            fieldGradient.addColorStop(0.5, '#6B8E23');
+            fieldGradient.addColorStop(1, '#556B2F');
+
+            ctx.fillStyle = fieldGradient;
+            ctx.fillRect(0, height * 0.6, width, height * 0.4);
+
+            // Облака
+            ctx.globalAlpha = 0.3;
+            ctx.fillStyle = '#FFFFFF';
+            for (let i = 0; i < 8; i++) {
+                const x = Math.random() * width;
+                const y = Math.random() * height * 0.4;
+                const radius = Math.random() * 30 + 20;
+
+                ctx.beginPath();
+                ctx.arc(x, y, radius, 0, Math.PI * 2);
+                ctx.fill();
+
+                ctx.beginPath();
+                ctx.arc(x + radius * 0.7, y, radius * 0.8, 0, Math.PI * 2);
+                ctx.fill();
+            }
+
+            // Деревья на горизонте
+            ctx.globalAlpha = 0.4;
+            ctx.fillStyle = '#2F4F2F';
+            for (let i = 0; i < 12; i++) {
+                const x = Math.random() * width;
+                const treeHeight = Math.random() * 60 + 40;
+                const treeWidth = treeHeight * 0.3;
+
+                // Ствол
+                ctx.fillRect(x - 2, height * 0.6 - treeHeight * 0.3, 4, treeHeight * 0.3);
+
+                // Крона
+                ctx.beginPath();
+                ctx.arc(x, height * 0.6 - treeHeight * 0.7, treeWidth, 0, Math.PI * 2);
+                ctx.fill();
+            }
+
+            // Пшеничное поле (текстура)
+            ctx.globalAlpha = 0.15;
+            ctx.strokeStyle = '#DAA520';
+            ctx.lineWidth = 1;
+            for (let i = 0; i < 200; i++) {
+                const x = Math.random() * width;
+                const y = height * 0.6 + Math.random() * height * 0.4;
+                const waveHeight = Math.random() * 8 + 3;
+
+                ctx.beginPath();
+                ctx.moveTo(x, y);
+                ctx.lineTo(x, y - waveHeight);
+                ctx.stroke();
+            }
+
+            ctx.globalAlpha = 1;
+        }
+
+        function createGenericRoleBackground(ctx, width, height, role) {
+            // Цветовые схемы для разных ролей
+            const colorSchemes = {
+                hussar: ['#8B0000', '#654321', '#2F1B14', '#1A0F0A'],
+                boyar: ['#4B0082', '#301934', '#1E0F21', '#0F070E'],
+                prince: ['#FFD700', '#B8860B', '#8B7355', '#654321'],
+                merchant: ['#228B22', '#1E5E1E', '#143414', '#0A1A0A'],
+                monk: ['#696969', '#4A4A4A', '#2F2F2F', '#1A1A1A']
+            };
+
+            const colors = colorSchemes[role.id] || ['#6B4423', '#5A3A1E', '#4A301A', '#3A2515'];
+
+            const gradient = ctx.createLinearGradient(0, 0, 0, height);
+            gradient.addColorStop(0, colors[0]);
+            gradient.addColorStop(0.3, colors[1]);
+            gradient.addColorStop(0.7, colors[2]);
+            gradient.addColorStop(1, colors[3]);
+
+            ctx.fillStyle = gradient;
+            ctx.fillRect(0, 0, width, height);
+
+            // Добавляем текстуру
+            ctx.globalAlpha = 0.1;
+            for (let i = 0; i < 300; i++) {
+                const x = Math.random() * width;
+                const y = Math.random() * height;
+                const size = Math.random() * 3 + 1;
+                const brightness = Math.random() * 100 + 50;
+
+                ctx.fillStyle = `rgba(${brightness}, ${brightness * 0.9}, ${brightness * 0.7}, 0.5)`;
+                ctx.fillRect(x, y, size, size);
+            }
+            ctx.globalAlpha = 1;
+        }
+
+        function processUserForRole(userImage, role) {
+            const tempCanvas = document.createElement('canvas');
+            const tempCtx = tempCanvas.getContext('2d');
+
+            const scale = Math.min(350 / userImage.width, 350 / userImage.height);
+            tempCanvas.width = userImage.width * scale;
+            tempCanvas.height = userImage.height * scale;
+
+            tempCtx.drawImage(userImage, 0, 0, tempCanvas.width, tempCanvas.height);
+
+            const imageData = tempCtx.getImageData(0, 0, tempCanvas.width, tempCanvas.height);
+            const data = imageData.data;
+
+            // Анализ углов для определения фона
+            const corners = [{
+                x: 0,
+                y: 0
+            }, {
+                x: tempCanvas.width - 1,
+                y: 0
+            }, {
+                x: 0,
+                y: tempCanvas.height - 1
+            }, {
+                x: tempCanvas.width - 1,
+                y: tempCanvas.height - 1
+            }];
+
+            const bgColors = corners.map(corner => {
+                const index = (corner.y * tempCanvas.width + corner.x) * 4;
+                return {
+                    r: data[index],
+                    g: data[index + 1],
+                    b: data[index + 2]
+                };
+            });
+
+            // Сегментация с учетом роли
+            for (let i = 0; i < data.length; i += 4) {
+                const r = data[i];
+                const g = data[i + 1];
+                const b = data[i + 2];
+                const alpha = data[i + 3];
+
+                if (alpha < 50) continue;
+
+                let isBackground = false;
+                for (const bgColor of bgColors) {
+                    const diff = Math.abs(r - bgColor.r) + Math.abs(g - bgColor.g) + Math.abs(b - bgColor.b);
+                    if (diff < 70) {
+                        isBackground = true;
+                        break;
+                    }
+                }
+
+                if (isBackground) {
+                    data[i + 3] = Math.floor(alpha * 0.2);
+                } else {
+                    // Применяем цветовую коррекцию для роли
+                    applyRoleColorCorrection(data, i, role);
+                }
+            }
+
+            tempCtx.putImageData(imageData, 0, 0);
+            return tempCanvas;
+        }
+
+        function applyRoleColorCorrection(data, index, role) {
+            const r = data[index];
+            const g = data[index + 1];
+            const b = data[index + 2];
+
+            // Разные эффекты для разных ролей
+            switch (role.id) {
+                case 'peasant':
+                    // Теплые земляные тона
+                    data[index] = Math.floor(r * 0.9 + g * 0.1);
+                    data[index + 1] = Math.floor(g * 0.95);
+                    data[index + 2] = Math.floor(b * 0.8);
+                    break;
+                case 'hussar':
+                    // Более контрастные, военные тона
+                    data[index] = Math.min(255, r * 1.1);
+                    data[index + 1] = Math.floor(g * 0.9);
+                    data[index + 2] = Math.floor(b * 0.8);
+                    break;
+                case 'prince':
+                    // Золотистые оттенки
+                    data[index] = Math.min(255, r * 1.05 + 10);
+                    data[index + 1] = Math.min(255, g * 1.02 + 5);
+                    data[index + 2] = Math.floor(b * 0.95);
+                    break;
+                default:
+                    // Легкая сепия для остальных
+                    data[index] = Math.floor(r * 0.95 + r * 0.393 * 0.05);
+                    data[index + 1] = Math.floor(g * 0.95 + (r * 0.349 + g * 0.686 + b * 0.168) * 0.05);
+                    data[index + 2] = Math.floor(b * 0.95 + (r * 0.272 + g * 0.534 + b * 0.131) * 0.05);
+            }
+        }
+
+        function composeRolePortrait(ctx, processedUser, width, height, role) {
+            const portraitX = (width - processedUser.width) / 2;
+            const portraitY = height * 0.3;
+
+            // Тень подходящая для роли
+            const shadowIntensity = role.id === 'prince' ? 0.6 : 0.4;
+            ctx.shadowColor = `rgba(0, 0, 0, ${shadowIntensity})`;
+            ctx.shadowBlur = 15;
+            ctx.shadowOffsetX = 2;
+            ctx.shadowOffsetY = 2;
+
+            ctx.drawImage(processedUser, portraitX, portraitY);
+
+            ctx.shadowColor = 'transparent';
+            ctx.shadowBlur = 0;
+            ctx.shadowOffsetX = 0;
+            ctx.shadowOffsetY = 0;
+        }
+
+        function applyRoleEffects(ctx, width, height, role) {
+            // Виньетирование только для ролей без реального фона
+            if (role.background === 'generated') {
+                ctx.globalAlpha = role.id === 'monk' ? 0.3 : 0.15;
+                const vignette = ctx.createRadialGradient(width / 2, height / 2, 0, width / 2, height / 2, Math.max(width, height) / 1.8);
+                vignette.addColorStop(0, 'rgba(0,0,0,0)');
+                vignette.addColorStop(1, 'rgba(0,0,0,0.6)');
+
+                ctx.fillStyle = vignette;
+                ctx.fillRect(0, 0, width, height);
+                ctx.globalAlpha = 1;
+            }
+            // Для крестьянина с реальным фоном - никаких эффектов поверх
+        }
+
+        function addRoleDecorations(ctx, width, height, role) {
+            // Заголовок
+            ctx.fillStyle = role.id === 'prince' ? '#FFD700' : '#DAA520';
+            ctx.font = 'bold 28px serif';
+            ctx.textAlign = 'center';
+
+            ctx.shadowColor = 'rgba(0, 0, 0, 0.5)';
+            ctx.shadowBlur = 3;
+            ctx.shadowOffsetX = 1;
+            ctx.shadowOffsetY = 1;
+
+            ctx.fillText(role.name.toUpperCase(), width / 2, 50);
+
+            // Подпись
+            ctx.font = '14px serif';
+            ctx.fillStyle = '#B8860B';
+            ctx.fillText('XVI век • Речь Посполитая', width / 2, height - 25);
+
+            ctx.shadowColor = 'transparent';
+            ctx.shadowBlur = 0;
+            ctx.shadowOffsetX = 0;
+            ctx.shadowOffsetY = 0;
+
+            // Рамка
+            ctx.strokeStyle = role.id === 'prince' ? '#FFD700' : '#B8860B';
+            ctx.lineWidth = role.id === 'prince' ? 2 : 1.5;
+            ctx.strokeRect(8, 8, width - 16, height - 16);
+        }
+
+        function downloadResult() {
+            if (selectedRole) {
+                try {
+                    const resultCanvasEl = document.getElementById('resultCanvas');
+                    if (resultCanvasEl) {
+                        const link = document.createElement('a');
+                        link.download = `исторический_портрет_${selectedRole.name}.png`;
+                        link.href = resultCanvasEl.toDataURL();
+                        link.click();
+                    }
+                } catch (error) {
+                    console.error('❌ Ошибка при скачивании:', error);
+                    alert('Ошибка при скачивании. Попробуйте еще раз.');
+                }
+            }
+        }
+
+        function shareResult() {
+            if (resultCanvas && navigator.share && selectedRole) {
+                resultCanvas.toBlob(blob => {
+                    const file = new File([blob], `портрет_${selectedRole.name}.png`, {
+                        type: 'image/png'
+                    });
+                    navigator.share({
+                        files: [file],
+                        title: `Исторический портрет: ${selectedRole.name}`,
+                        text: `Мой портрет в роли ${selectedRole.name} XVI века`
+                    });
+                });
+            }
+        }
+
+        function createNewPortrait() {
+            // Сбрасываем результат, но оставляем фото и роль
+            document.getElementById('result').innerHTML = '';
+            document.getElementById('statusText').textContent = '';
+            selectRandomRole(); // Выбираем случайную роль
+        }
+
+        function resetApp() {
+            uploadedImage = null;
+            resultCanvas = null;
+            selectedRole = null;
+            document.getElementById('fileInput').value = '';
+            document.getElementById('preview').innerHTML = '';
+            document.getElementById('generateBtn').style.display = 'none';
+            document.getElementById('result').innerHTML = '';
+            document.getElementById('statusText').textContent = '';
+            document.querySelectorAll('.role-card').forEach(card => {
+                card.classList.remove('selected');
+            });
+            selectRole('peasant'); // Возвращаемся к крестьянину
+        }
+
+        function delay(ms) {
+            return new Promise(resolve => setTimeout(resolve, ms));
+        }
+
+        // Инициализация при загрузке
+        window.addEventListener('load', () => {
+            initializeRoles();
         });
     </script>
 </body>

@@ -1,0 +1,412 @@
+<!DOCTYPE html>
+<html lang="ru">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>👑 Исторический портрет</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #1e293b, #374151);
+            color: white;
+            font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 400px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            padding: 30px;
+            backdrop-filter: blur(10px);
+        }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        
+        .upload-area {
+            border: 3px dashed #d4af37;
+            border-radius: 15px;
+            padding: 40px 20px;
+            text-align: center;
+            margin: 20px 0;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .upload-area:hover {
+            background: rgba(212, 175, 55, 0.1);
+        }
+        
+        .upload-area.dragover {
+            background: rgba(212, 175, 55, 0.2);
+            border-color: #fbbf24;
+        }
+        
+        input[type="file"] {
+            display: none;
+        }
+        
+        .preview {
+            max-width: 100%;
+            border-radius: 10px;
+            margin: 20px 0;
+        }
+        
+        .roles {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+            margin: 20px 0;
+        }
+        
+        .role-card {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            padding: 15px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+            border: 2px solid transparent;
+        }
+        
+        .role-card:hover {
+            background: rgba(212, 175, 55, 0.2);
+            border-color: #d4af37;
+        }
+        
+        .role-card.selected {
+            background: rgba(212, 175, 55, 0.3);
+            border-color: #fbbf24;
+        }
+        
+        .btn {
+            background: linear-gradient(135deg, #d4af37, #cd7f32);
+            color: #1e293b;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 10px;
+            font-weight: bold;
+            cursor: pointer;
+            width: 100%;
+            margin: 10px 0;
+            font-size: 16px;
+        }
+        
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        
+        .progress-bar {
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 10px;
+            height: 20px;
+            margin: 20px 0;
+            overflow: hidden;
+        }
+        
+        .progress-fill {
+            background: linear-gradient(90deg, #d4af37, #fbbf24);
+            height: 100%;
+            transition: width 0.5s ease;
+            border-radius: 10px;
+        }
+        
+        .result {
+            text-align: center;
+            margin: 20px 0;
+        }
+        
+        .hidden {
+            display: none;
+        }
+        
+        .step {
+            margin: 20px 0;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>👑 Исторический портрет</h1>
+            <p>Создайте исторический портрет в стиле Речи Посполитой</p>
+        </div>
+
+        <!-- Шаг 1: Загрузка фото -->
+        <div id="step-upload" class="step">
+            <h2>📸 Загрузите ваше фото</h2>
+            <div class="upload-area" onclick="document.getElementById('fileInput').click()">
+                <div id="upload-text">
+                    <p style="font-size: 48px;">📷</p>
+                    <p>Нажмите для выбора фото</p>
+                    <p style="font-size: 14px; opacity: 0.8;">или перетащите файл сюда</p>
+                </div>
+                <img id="preview" class="preview hidden" />
+            </div>
+            <input type="file" id="fileInput" accept="image/*" capture="camera">
+            <button id="nextToRoles" class="btn hidden">Выбрать роль</button>
+        </div>
+
+        <!-- Шаг 2: Выбор роли -->
+        <div id="step-roles" class="step hidden">
+            <h2>🎭 Выберите историческую роль</h2>
+            <div class="roles">
+                <div class="role-card" data-role="hussar">
+                    <div style="font-size: 32px;">⚔️</div>
+                    <div>Крылатый гусар</div>
+                </div>
+                <div class="role-card" data-role="boyar">
+                    <div style="font-size: 32px;">🏰</div>
+                    <div>Литовский боярин</div>
+                </div>
+                <div class="role-card" data-role="prince">
+                    <div style="font-size: 32px;">👑</div>
+                    <div>Князь</div>
+                </div>
+                <div class="role-card" data-role="merchant">
+                    <div style="font-size: 32px;">💰</div>
+                    <div>Купец</div>
+                </div>
+                <div class="role-card" data-role="monk">
+                    <div style="font-size: 32px;">⛪</div>
+                    <div>Монах</div>
+                </div>
+                <div class="role-card" data-role="hunter">
+                    <div style="font-size: 32px;">🏹</div>
+                    <div>Охотник</div>
+                </div>
+            </div>
+            <button id="generateBtn" class="btn" disabled>Создать портрет</button>
+        </div>
+
+        <!-- Шаг 3: Генерация -->
+        <div id="step-generation" class="step hidden">
+            <h2>🎨 Создание портрета...</h2>
+            <div class="progress-bar">
+                <div id="progress" class="progress-fill" style="width: 0%"></div>
+            </div>
+            <p id="status">Инициализация...</p>
+        </div>
+
+        <!-- Шаг 4: Результат -->
+        <div id="step-result" class="step hidden">
+            <h2>🎉 Ваш исторический портрет готов!</h2>
+            <div class="result">
+                <canvas id="resultCanvas" style="max-width: 100%; border-radius: 10px;"></canvas>
+            </div>
+            <button id="downloadBtn" class="btn">💾 Сохранить</button>
+            <button id="shareBtn" class="btn">📤 Поделиться</button>
+            <button id="newBtn" class="btn">🔄 Создать новый</button>
+        </div>
+    </div>
+
+    <script>
+        let uploadedImage = null;
+        let selectedRole = null;
+
+        const roles = {
+            hussar: {
+                name: 'Крылатый гусар',
+                color: '#8B4513'
+            },
+            boyar: {
+                name: 'Литовский боярин',
+                color: '#654321'
+            },
+            prince: {
+                name: 'Князь',
+                color: '#4A0E4E'
+            },
+            merchant: {
+                name: 'Купец',
+                color: '#2F4F4F'
+            },
+            monk: {
+                name: 'Монах',
+                color: '#2C1810'
+            },
+            hunter: {
+                name: 'Охотник',
+                color: '#556B2F'
+            }
+        };
+
+        // Загрузка файла
+        document.getElementById('fileInput').addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    uploadedImage = e.target.result;
+                    const preview = document.getElementById('preview');
+                    preview.src = uploadedImage;
+                    preview.classList.remove('hidden');
+                    document.getElementById('upload-text').style.display = 'none';
+                    document.getElementById('nextToRoles').classList.remove('hidden');
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+
+        // Переход к выбору ролей
+        document.getElementById('nextToRoles').addEventListener('click', function() {
+            document.getElementById('step-upload').classList.add('hidden');
+            document.getElementById('step-roles').classList.remove('hidden');
+        });
+
+        // Выбор роли
+        document.querySelectorAll('.role-card').forEach(card => {
+            card.addEventListener('click', function() {
+                document.querySelectorAll('.role-card').forEach(c => c.classList.remove('selected'));
+                this.classList.add('selected');
+                selectedRole = this.dataset.role;
+                document.getElementById('generateBtn').disabled = false;
+            });
+        });
+
+        // Генерация портрета
+        document.getElementById('generateBtn').addEventListener('click', function() {
+            document.getElementById('step-roles').classList.add('hidden');
+            document.getElementById('step-generation').classList.remove('hidden');
+            generatePortrait();
+        });
+
+        async function generatePortrait() {
+            const statusEl = document.getElementById('status');
+            const progressEl = document.getElementById('progress');
+
+            const stages = [{
+                progress: 20,
+                text: 'Анализ лица...'
+            }, {
+                progress: 40,
+                text: 'Подбор исторической одежды...'
+            }, {
+                progress: 60,
+                text: 'Генерация портрета...'
+            }, {
+                progress: 80,
+                text: 'Применение эффектов...'
+            }, {
+                progress: 100,
+                text: 'Завершение...'
+            }];
+
+            for (const stage of stages) {
+                statusEl.textContent = stage.text;
+                progressEl.style.width = stage.progress + '%';
+                await new Promise(resolve => setTimeout(resolve, 1500));
+            }
+
+            createResult();
+        }
+
+        function createResult() {
+            const canvas = document.getElementById('resultCanvas');
+            const ctx = canvas.getContext('2d');
+            canvas.width = 400;
+            canvas.height = 600;
+
+            const role = roles[selectedRole];
+
+            // Фон
+            ctx.fillStyle = role.color;
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            // Рамка
+            ctx.strokeStyle = '#d4af37';
+            ctx.lineWidth = 8;
+            ctx.strokeRect(20, 20, canvas.width - 40, canvas.height - 40);
+
+            // Текст
+            ctx.fillStyle = '#d4af37';
+            ctx.font = 'bold 32px Arial';
+            ctx.textAlign = 'center';
+            ctx.fillText(role.name, canvas.width / 2, canvas.height / 2);
+
+            ctx.font = '24px Arial';
+            ctx.fillStyle = '#f4e4bc';
+            ctx.fillText('Демо версия', canvas.width / 2, canvas.height / 2 + 50);
+
+            // Корона
+            ctx.fillStyle = '#ffd700';
+            ctx.font = '80px Arial';
+            ctx.fillText('👑', canvas.width / 2, canvas.height / 2 - 100);
+
+            document.getElementById('step-generation').classList.add('hidden');
+            document.getElementById('step-result').classList.remove('hidden');
+        }
+
+        // Сохранение
+        document.getElementById('downloadBtn').addEventListener('click', function() {
+            const canvas = document.getElementById('resultCanvas');
+            const link = document.createElement('a');
+            link.download = 'historical-portrait.png';
+            link.href = canvas.toDataURL();
+            link.click();
+        });
+
+        // Поделиться
+        document.getElementById('shareBtn').addEventListener('click', function() {
+            const canvas = document.getElementById('resultCanvas');
+            canvas.toBlob(function(blob) {
+                if (navigator.share) {
+                    const file = new File([blob], 'portrait.png', {
+                        type: 'image/png'
+                    });
+                    navigator.share({
+                        title: 'Мой исторический портрет',
+                        files: [file]
+                    });
+                } else {
+                    // Fallback
+                    const link = document.createElement('a');
+                    link.href = URL.createObjectURL(blob);
+                    link.download = 'historical-portrait.png';
+                    link.click();
+                }
+            });
+        });
+
+        // Новый портрет
+        document.getElementById('newBtn').addEventListener('click', function() {
+            location.reload();
+        });
+
+        // Drag & Drop
+        const uploadArea = document.querySelector('.upload-area');
+        uploadArea.addEventListener('dragover', function(e) {
+            e.preventDefault();
+            this.classList.add('dragover');
+        });
+
+        uploadArea.addEventListener('dragleave', function(e) {
+            this.classList.remove('dragover');
+        });
+
+        uploadArea.addEventListener('drop', function(e) {
+            e.preventDefault();
+            this.classList.remove('dragover');
+            const files = e.dataTransfer.files;
+            if (files.length > 0) {
+                document.getElementById('fileInput').files = files;
+                document.getElementById('fileInput').dispatchEvent(new Event('change'));
+            }
+        });
+    </script>
+</body>
+
+</html>

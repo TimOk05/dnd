@@ -1,0 +1,541 @@
+<!DOCTYPE html>
+<html lang="ru">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Создавайте исторические портреты в стиле Речи Посполитой и Великого Княжества Литовского">
+    <title>⚜️ Исторический портрет</title>
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#B8860B">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="apple-mobile-web-app-title" content="ИсторПортрет">
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500;600;700&family=Cinzel+Decorative:wght@400;700&display=swap" rel="stylesheet">
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            background: radial-gradient(ellipse at top left, rgba(101, 67, 33, 0.08) 0%, transparent 50%), radial-gradient(ellipse at bottom right, rgba(139, 69, 19, 0.12) 0%, transparent 60%), linear-gradient(135deg, #050302 0%, #0a0805 25%, #1a0f0a 50%, #0a0805 75%, #050302 100%);
+            color: #F8F0E6;
+            font-family: 'Cinzel', serif;
+            min-height: 100vh;
+            padding: 15px;
+            overflow-x: hidden;
+            position: relative;
+        }
+        
+        .container {
+            max-width: 450px;
+            margin: 0 auto;
+            background: linear-gradient(145deg, rgba(15, 10, 8, 0.95) 0%, rgba(25, 18, 12, 0.95) 100%), radial-gradient(circle at center, rgba(139, 69, 19, 0.1) 0%, transparent 70%);
+            border-radius: 20px;
+            padding: 25px;
+            border: 4px solid #DAA520;
+            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.9), inset 0 2px 0 rgba(255, 215, 0, 0.4), 0 0 40px rgba(218, 165, 32, 0.5), inset 0 0 30px rgba(101, 67, 33, 0.2);
+            position: relative;
+            backdrop-filter: blur(10px);
+        }
+        
+        h1 {
+            font-family: 'Cinzel Decorative', serif;
+            font-size: 28px;
+            font-weight: 700;
+            color: #FFE55C;
+            text-shadow: 3px 3px 6px rgba(0, 0, 0, 1), 1px 1px 0 rgba(139, 69, 19, 0.8), -1px -1px 0 rgba(139, 69, 19, 0.8), 0 0 15px rgba(255, 215, 0, 0.6);
+            margin-bottom: 8px;
+            filter: drop-shadow(0 0 8px rgba(255, 229, 92, 0.4));
+            text-align: center;
+        }
+        
+        .upload-area {
+            border: 3px dashed #DAA520;
+            border-radius: 15px;
+            padding: 35px 20px;
+            text-align: center;
+            margin: 20px 0;
+            transition: all 0.4s ease;
+            cursor: pointer;
+            background: linear-gradient(135deg, rgba(10, 8, 5, 0.8) 0%, rgba(20, 15, 10, 0.8) 100%);
+            position: relative;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.6), inset 0 1px 0 rgba(255, 215, 0, 0.2);
+        }
+        
+        .btn {
+            width: 100%;
+            padding: 15px;
+            border: none;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin: 10px 0;
+            font-family: 'Cinzel', serif;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            position: relative;
+            overflow: hidden;
+            background: linear-gradient(145deg, #DAA520, #FFD700);
+            color: #0a0805;
+            box-shadow: 0 10px 20px rgba(184, 134, 11, 0.5), inset 0 2px 0 rgba(255, 255, 255, 0.4), 0 0 15px rgba(255, 215, 0, 0.3);
+            border: 3px solid #FFE55C;
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
+            font-weight: 700;
+        }
+        
+        .file-input {
+            display: none;
+        }
+        
+        .result-area {
+            text-align: center;
+            margin: 20px 0;
+            display: none;
+        }
+        
+        .result-canvas {
+            max-width: 100%;
+            border-radius: 10px;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.6), 0 0 20px rgba(255, 215, 0, 0.3);
+            border: 4px solid #B8860B;
+        }
+        
+        .status {
+            color: #F8F0E6;
+            margin: 15px 0;
+            font-style: italic;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 1), 1px 1px 0 rgba(101, 67, 33, 0.6);
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <h1>⚜️ Исторический портрет</h1>
+        <p style="text-align: center; margin-bottom: 20px; color: #F0E6DA;">Умный алгоритм извлечения человека</p>
+
+        <div class="upload-area" onclick="document.getElementById('fileInput').click()">
+            <span style="font-size: 40px; margin-bottom: 12px; display: block;">🖼️</span>
+            <p><strong>Выберите фото с человеком</strong></p>
+            <p style="opacity: 0.8; margin-top: 5px; font-style: italic;">Работает с любым фоном!</p>
+        </div>
+
+        <input type="file" id="fileInput" class="file-input" accept="image/*">
+        <button id="processBtn" class="btn" disabled>🎨 Создать портрет</button>
+
+        <div id="status" class="status"></div>
+
+        <div id="resultArea" class="result-area">
+            <canvas id="resultCanvas" class="result-canvas"></canvas>
+            <br><br>
+            <button onclick="location.reload()" class="btn">🔄 Новый портрет</button>
+        </div>
+    </div>
+
+    <script>
+        let uploadedImage = null;
+
+        // Обработка загрузки файла
+        document.getElementById('fileInput').addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                uploadedImage = new Image();
+                uploadedImage.onload = function() {
+                    document.querySelector('.upload-area').innerHTML = `
+                        <span style="font-size: 40px; margin-bottom: 12px; display: block;">✅</span>
+                        <p><strong>Фото загружено!</strong></p>
+                        <p style="opacity: 0.8;">${file.name}</p>
+                    `;
+                    document.getElementById('processBtn').disabled = false;
+                };
+                uploadedImage.src = e.target.result;
+            };
+            reader.readAsDataURL(file);
+        });
+
+        // Обработка создания портрета
+        document.getElementById('processBtn').addEventListener('click', async function() {
+            if (!uploadedImage) return;
+
+            const statusEl = document.getElementById('status');
+            const resultArea = document.getElementById('resultArea');
+            const canvas = document.getElementById('resultCanvas');
+            const ctx = canvas.getContext('2d');
+
+            // Настройки canvas
+            canvas.width = 400;
+            canvas.height = 600;
+
+            try {
+                statusEl.textContent = '🧠 Анализ изображения...';
+                await new Promise(resolve => setTimeout(resolve, 500));
+
+                statusEl.textContent = '🎯 Умное извлечение человека...';
+
+                // Создание интеллектуальной маски
+                const segmentationResult = await segmentPersonIntelligently(uploadedImage);
+
+                statusEl.textContent = '🎨 Создание исторического фона...';
+
+                // Создание фона
+                const backgroundCanvas = createHistoricalBackground();
+
+                statusEl.textContent = '✨ Финальная композиция...';
+
+                // Композиция
+                await composePortrait(ctx, canvas, uploadedImage, segmentationResult, backgroundCanvas);
+
+                statusEl.textContent = '🎉 Портрет готов!';
+                resultArea.style.display = 'block';
+
+            } catch (error) {
+                console.error('Ошибка:', error);
+                statusEl.textContent = '❌ Ошибка создания портрета';
+            }
+        });
+
+        // Интеллектуальная сегментация
+        async function segmentPersonIntelligently(imageElement) {
+            console.log('🧠 Начинаем интеллектуальную сегментацию...');
+
+            const tempCanvas = document.createElement('canvas');
+            const tempCtx = tempCanvas.getContext('2d');
+            tempCanvas.width = imageElement.width;
+            tempCanvas.height = imageElement.height;
+            tempCtx.drawImage(imageElement, 0, 0);
+
+            const imageData = tempCtx.getImageData(0, 0, tempCanvas.width, tempCanvas.height);
+            const data = imageData.data;
+
+            // Создание умной маски
+            const mask = createSmartMask(data, tempCanvas.width, tempCanvas.height);
+
+            return {
+                mask,
+                width: tempCanvas.width,
+                height: tempCanvas.height
+            };
+        }
+
+        // Создание умной маски
+        function createSmartMask(imageData, width, height) {
+            const mask = new Uint8ClampedArray(width * height);
+
+            // Анализ краев (вероятный фон)
+            const edgeColors = analyzeEdgeColors(imageData, width, height);
+
+            // Анализ каждого пикселя
+            for (let i = 0; i < imageData.length; i += 4) {
+                const pixelIndex = Math.floor(i / 4);
+                const r = imageData[i];
+                const g = imageData[i + 1];
+                const b = imageData[i + 2];
+                const alpha = imageData[i + 3];
+
+                if (alpha < 50) {
+                    mask[pixelIndex] = 0; // Прозрачный = фон
+                    continue;
+                }
+
+                // Проверки для определения человека vs фон
+                const isSkinTone = checkSkinTone(r, g, b);
+                const isEdgeColor = checkEdgeColor(r, g, b, edgeColors);
+                const centerDistance = getCenterDistance(pixelIndex, width, height);
+                const uniformity = checkUniformity(imageData, pixelIndex, width, height, r, g, b);
+
+                // Логика принятия решения
+                let humanProbability = 0;
+
+                if (isSkinTone) humanProbability += 0.4;
+                if (!isEdgeColor) humanProbability += 0.2;
+                if (centerDistance < 0.6) humanProbability += 0.3;
+                if (uniformity < 0.7) humanProbability += 0.1;
+
+                mask[pixelIndex] = humanProbability > 0.5 ? 255 : 0;
+            }
+
+            // Сглаживание маски
+            return smoothMask(mask, width, height);
+        }
+
+        // Анализ цветов на краях
+        function analyzeEdgeColors(imageData, width, height) {
+            const edgeColors = [];
+            const edgeWidth = Math.min(width, height) * 0.1;
+
+            for (let i = 0; i < imageData.length; i += 4) {
+                const pixelIndex = Math.floor(i / 4);
+                const x = pixelIndex % width;
+                const y = Math.floor(pixelIndex / width);
+
+                if (x < edgeWidth || x > width - edgeWidth ||
+                    y < edgeWidth || y > height - edgeWidth) {
+                    edgeColors.push({
+                        r: imageData[i],
+                        g: imageData[i + 1],
+                        b: imageData[i + 2]
+                    });
+                }
+            }
+
+            return edgeColors;
+        }
+
+        // Проверка на цвет кожи
+        function checkSkinTone(r, g, b) {
+            // Расширенные диапазоны цветов кожи
+            const skinRanges = [{
+                    r: [180, 255],
+                    g: [140, 220],
+                    b: [100, 180]
+                }, // Светлая
+                {
+                    r: [120, 200],
+                    g: [80, 150],
+                    b: [50, 120]
+                }, // Средняя
+                {
+                    r: [60, 140],
+                    g: [40, 100],
+                    b: [20, 80]
+                } // Темная
+            ];
+
+            return skinRanges.some(range =>
+                r >= range.r[0] && r <= range.r[1] &&
+                g >= range.g[0] && g <= range.g[1] &&
+                b >= range.b[0] && b <= range.b[1]
+            );
+        }
+
+        // Проверка на цвет края (фон)
+        function checkEdgeColor(r, g, b, edgeColors) {
+            return edgeColors.some(edge => {
+                const distance = Math.sqrt(
+                    Math.pow(r - edge.r, 2) +
+                    Math.pow(g - edge.g, 2) +
+                    Math.pow(b - edge.b, 2)
+                );
+                return distance < 40;
+            });
+        }
+
+        // Расстояние от центра
+        function getCenterDistance(pixelIndex, width, height) {
+            const x = pixelIndex % width;
+            const y = Math.floor(pixelIndex / width);
+            const centerX = width / 2;
+            const centerY = height / 2;
+
+            const distance = Math.sqrt(
+                Math.pow(x - centerX, 2) +
+                Math.pow(y - centerY, 2)
+            );
+
+            const maxDistance = Math.sqrt(centerX * centerX + centerY * centerY);
+            return distance / maxDistance;
+        }
+
+        // Проверка однородности
+        function checkUniformity(imageData, pixelIndex, width, height, r, g, b) {
+            const x = pixelIndex % width;
+            const y = Math.floor(pixelIndex / width);
+            const radius = 3;
+            let similarPixels = 0;
+            let totalPixels = 0;
+
+            for (let dy = -radius; dy <= radius; dy++) {
+                for (let dx = -radius; dx <= radius; dx++) {
+                    const nx = x + dx;
+                    const ny = y + dy;
+
+                    if (nx >= 0 && nx < width && ny >= 0 && ny < height) {
+                        const nIndex = (ny * width + nx) * 4;
+                        const nr = imageData[nIndex];
+                        const ng = imageData[nIndex + 1];
+                        const nb = imageData[nIndex + 2];
+
+                        const distance = Math.sqrt(
+                            Math.pow(r - nr, 2) +
+                            Math.pow(g - ng, 2) +
+                            Math.pow(b - nb, 2)
+                        );
+
+                        if (distance < 25) similarPixels++;
+                        totalPixels++;
+                    }
+                }
+            }
+
+            return similarPixels / totalPixels;
+        }
+
+        // Сглаживание маски
+        function smoothMask(mask, width, height) {
+            const smoothed = new Uint8ClampedArray(mask.length);
+            const radius = 2;
+
+            for (let y = 0; y < height; y++) {
+                for (let x = 0; x < width; x++) {
+                    let sum = 0;
+                    let count = 0;
+
+                    for (let dy = -radius; dy <= radius; dy++) {
+                        for (let dx = -radius; dx <= radius; dx++) {
+                            const nx = x + dx;
+                            const ny = y + dy;
+
+                            if (nx >= 0 && nx < width && ny >= 0 && ny < height) {
+                                sum += mask[ny * width + nx];
+                                count++;
+                            }
+                        }
+                    }
+
+                    smoothed[y * width + x] = sum / count;
+                }
+            }
+
+            return smoothed;
+        }
+
+        // Создание исторического фона
+        function createHistoricalBackground() {
+            const bgCanvas = document.createElement('canvas');
+            const bgCtx = bgCanvas.getContext('2d');
+            bgCanvas.width = 400;
+            bgCanvas.height = 600;
+
+            // Исторический градиент
+            const gradient = bgCtx.createLinearGradient(0, 0, bgCanvas.width, bgCanvas.height);
+            gradient.addColorStop(0, '#4a3d2f');
+            gradient.addColorStop(0.5, '#6b5b47');
+            gradient.addColorStop(1, '#8b7355');
+
+            bgCtx.fillStyle = gradient;
+            bgCtx.fillRect(0, 0, bgCanvas.width, bgCanvas.height);
+
+            // Текстура старины
+            bgCtx.globalAlpha = 0.15;
+            for (let i = 0; i < 300; i++) {
+                const brightness = Math.random() * 100;
+                bgCtx.fillStyle = `rgba(${brightness}, ${brightness * 0.8}, ${brightness * 0.6}, 0.1)`;
+                bgCtx.fillRect(Math.random() * bgCanvas.width, Math.random() * bgCanvas.height, 2, 2);
+            }
+            bgCtx.globalAlpha = 1;
+
+            return bgCanvas;
+        }
+
+        // Композиция портрета
+        async function composePortrait(ctx, canvas, userImage, segmentationResult, backgroundCanvas) {
+            // Рисуем фон
+            ctx.drawImage(backgroundCanvas, 0, 0);
+
+            // Создаем временный canvas для обработки
+            const tempCanvas = document.createElement('canvas');
+            const tempCtx = tempCanvas.getContext('2d');
+            tempCanvas.width = 300;
+            tempCanvas.height = 400;
+
+            // Масштабируем изображение пользователя
+            const scale = Math.min(tempCanvas.width / userImage.width, tempCanvas.height / userImage.height);
+            const scaledWidth = userImage.width * scale;
+            const scaledHeight = userImage.height * scale;
+            const offsetX = (tempCanvas.width - scaledWidth) / 2;
+            const offsetY = (tempCanvas.height - scaledHeight) / 2;
+
+            tempCtx.drawImage(userImage, offsetX, offsetY, scaledWidth, scaledHeight);
+
+            // Получаем данные изображения
+            const imageData = tempCtx.getImageData(0, 0, tempCanvas.width, tempCanvas.height);
+            const data = imageData.data;
+
+            // Масштабируем маску
+            const mask = scaleArray(segmentationResult.mask,
+                segmentationResult.width, segmentationResult.height,
+                tempCanvas.width, tempCanvas.height);
+
+            // Применяем маску и фильтры
+            for (let i = 0; i < data.length; i += 4) {
+                const pixelIndex = Math.floor(i / 4);
+                const maskValue = mask[pixelIndex] / 255;
+
+                if (maskValue > 0.1) { // Если это человек
+                    // Применяем сепию
+                    const r = data[i];
+                    const g = data[i + 1];
+                    const b = data[i + 2];
+
+                    data[i] = Math.min(255, (r * 0.393) + (g * 0.769) + (b * 0.189));
+                    data[i + 1] = Math.min(255, (r * 0.349) + (g * 0.686) + (b * 0.168));
+                    data[i + 2] = Math.min(255, (r * 0.272) + (g * 0.534) + (b * 0.131));
+                } else {
+                    // Делаем фон прозрачным
+                    data[i + 3] = 0;
+                }
+            }
+
+            tempCtx.putImageData(imageData, 0, 0);
+
+            // Рисуем результат на портретной области
+            const portraitX = 50;
+            const portraitY = 80;
+            const portraitWidth = 300;
+            const portraitHeight = 400;
+
+            ctx.drawImage(tempCanvas, portraitX, portraitY, portraitWidth, portraitHeight);
+
+            // Добавляем декоративную рамку
+            ctx.strokeStyle = '#FFD700';
+            ctx.lineWidth = 6;
+            ctx.strokeRect(portraitX - 3, portraitY - 3, portraitWidth + 6, portraitHeight + 6);
+
+            // Заголовок
+            ctx.fillStyle = '#FFD700';
+            ctx.font = 'bold 24px "Cinzel Decorative", serif';
+            ctx.textAlign = 'center';
+            ctx.fillText('Крестьянин', canvas.width / 2, 50);
+
+            // Подпись
+            ctx.font = '16px "Cinzel", serif';
+            ctx.fillStyle = '#F4E4BC';
+            ctx.fillText('XVI-XVII век', canvas.width / 2, 520);
+            ctx.fillText('Речь Посполитая', canvas.width / 2, 545);
+        }
+
+        // Масштабирование массива
+        function scaleArray(sourceArray, sourceWidth, sourceHeight, targetWidth, targetHeight) {
+            const targetArray = new Uint8ClampedArray(targetWidth * targetHeight);
+
+            for (let y = 0; y < targetHeight; y++) {
+                for (let x = 0; x < targetWidth; x++) {
+                    const sourceX = Math.floor(x * sourceWidth / targetWidth);
+                    const sourceY = Math.floor(y * sourceHeight / targetHeight);
+                    const sourceIndex = sourceY * sourceWidth + sourceX;
+                    const targetIndex = y * targetWidth + x;
+
+                    targetArray[targetIndex] = sourceArray[sourceIndex] || 0;
+                }
+            }
+
+            return targetArray;
+        }
+
+        console.log('⚜️ Исторический портрет v6.0 - Простой и надежный!');
+        console.log('🧠 Умный алгоритм сегментации без внешних библиотек');
+        console.log('🎯 Работает с любыми фонами');
+        console.log('⚡ Быстро и стабильно');
+    </script>
+</body>
+
+</html>

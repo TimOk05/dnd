@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="ru">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>Исторический портрет - Установка</title>
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#d4af37">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="apple-mobile-web-app-title" content="ИсторПортрет">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #1e293b, #374151);
+            color: white;
+            font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        
+        .install-card {
+            max-width: 400px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            padding: 40px;
+            text-align: center;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        .app-icon {
+            width: 100px;
+            height: 100px;
+            background: linear-gradient(135deg, #d4af37, #fbbf24);
+            border-radius: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 48px;
+            margin: 0 auto 20px;
+        }
+        
+        .install-btn {
+            background: linear-gradient(135deg, #d4af37, #cd7f32);
+            color: #1e293b;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 10px;
+            font-weight: bold;
+            cursor: pointer;
+            width: 100%;
+            margin: 10px 0;
+            font-size: 16px;
+            text-decoration: none;
+            display: inline-block;
+        }
+        
+        .install-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(212, 175, 55, 0.3);
+        }
+        
+        .device-section {
+            margin: 30px 0;
+            padding: 20px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 15px;
+            border-left: 4px solid #d4af37;
+        }
+        
+        .qr-code {
+            background: white;
+            padding: 20px;
+            border-radius: 15px;
+            margin: 20px 0;
+            display: inline-block;
+        }
+        
+        .url-box {
+            background: #374151;
+            padding: 15px;
+            border-radius: 10px;
+            font-family: monospace;
+            margin: 15px 0;
+            word-break: break-all;
+            font-size: 14px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="install-card">
+        <div class="app-icon">👑</div>
+        <h1>Исторический портрет</h1>
+        <p style="margin: 15px 0; opacity: 0.9;">Создавайте исторические портреты в стиле Речи Посполитой</p>
+
+        <div id="auto-install" style="display: none;">
+            <button class="install-btn" onclick="installApp()">📱 Установить приложение</button>
+        </div>
+
+        <a href="app.html" class="install-btn">🚀 Открыть приложение</a>
+
+        <div class="device-section">
+            <h3>📱 Android</h3>
+            <p>1. Откройте в Chrome</p>
+            <p>2. Меню (⋮) → "Добавить на главный экран"</p>
+            <p>3. Подтвердите установку</p>
+        </div>
+
+        <div class="device-section">
+            <h3>🍎 iPhone/iPad</h3>
+            <p>1. Откройте в Safari</p>
+            <p>2. Нажмите "Поделиться" 📤</p>
+            <p>3. "Добавить на экран Домой"</p>
+        </div>
+
+        <div class="device-section">
+            <h3>💻 Компьютер</h3>
+            <p>1. Откройте в Chrome/Edge</p>
+            <p>2. Адресная строка → "Установить"</p>
+            <p>3. Или Ctrl+Shift+A</p>
+        </div>
+
+        <div class="qr-code">
+            <img src="https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=https://yoursite.com/install.html" style="width: 200px; height: 200px;" alt="QR код">
+        </div>
+
+        <div class="url-box" id="current-url">
+            Загрузка ссылки...
+        </div>
+
+        <button class="install-btn" onclick="copyUrl()">📋 Скопировать ссылку</button>
+    </div>
+
+    <script>
+        // PWA установка
+        let deferredPrompt;
+
+        window.addEventListener('beforeinstallprompt', (e) => {
+            e.preventDefault();
+            deferredPrompt = e;
+            document.getElementById('auto-install').style.display = 'block';
+        });
+
+        function installApp() {
+            if (deferredPrompt) {
+                deferredPrompt.prompt();
+                deferredPrompt.userChoice.then((choiceResult) => {
+                    if (choiceResult.outcome === 'accepted') {
+                        console.log('Приложение установлено');
+                    }
+                    deferredPrompt = null;
+                });
+            }
+        }
+
+        function copyUrl() {
+            const url = window.location.href;
+            navigator.clipboard.writeText(url).then(() => {
+                alert('Ссылка скопирована!');
+            });
+        }
+
+        // Показать текущий URL
+        document.getElementById('current-url').textContent = window.location.href;
+    </script>
+</body>
+
+</html>

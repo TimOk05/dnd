@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Установка - Исторический портрет</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { 
+            background: linear-gradient(135deg, #1e293b, #374151);
+            color: white;
+            font-family: -apple-system, sans-serif;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        .install-card {
+            max-width: 450px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 25px;
+            padding: 40px;
+            text-align: center;
+            backdrop-filter: blur(20px);
+        }
+        .app-icon {
+            width: 100px;
+            height: 100px;
+            background: linear-gradient(135deg, #d4af37, #fbbf24);
+            border-radius: 25px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 50px;
+            margin: 0 auto 25px;
+        }
+        .btn {
+            background: linear-gradient(135deg, #d4af37, #cd7f32);
+            color: #1e293b;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 15px;
+            font-weight: bold;
+            cursor: pointer;
+            width: 100%;
+            margin: 15px 0;
+            font-size: 16px;
+            text-decoration: none;
+            display: inline-block;
+        }
+        .device-section {
+            margin: 25px 0;
+            padding: 20px;
+            background: rgba(255,255,255,0.05);
+            border-radius: 15px;
+            text-align: left;
+        }
+        .qr-code {
+            background: white;
+            padding: 20px;
+            border-radius: 15px;
+            margin: 25px 0;
+            display: inline-block;
+        }
+    </style>
+</head>
+<body>
+    <div class="install-card">
+        <div class="app-icon">👑</div>
+        <h1>Исторический портрет</h1>
+        <p style="margin: 20px 0;">Установите приложение для удобного доступа</p>
+        
+        <a href="index.html" class="btn">🚀 Открыть приложение</a>
+        
+        <div class="device-section">
+            <h3>📱 Android</h3>
+            <p>1. Откройте в Chrome</p>
+            <p>2. Меню (⋮) → "Добавить на главный экран"</p>
+        </div>
+        
+        <div class="device-section">
+            <h3>🍎 iPhone/iPad</h3>
+            <p>1. Откройте в Safari</p>
+            <p>2. "Поделиться" → "Добавить на экран Домой"</p>
+        </div>
+        
+        <div class="qr-code">
+            <img id="qr" style="width: 200px; height: 200px;" alt="QR код">
+        </div>
+    </div>
+    
+    <script>
+        const qr = document.getElementById('qr');
+        qr.src = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(window.location.origin)}`;
+    </script>
+</body>
+</html>

@@ -1,0 +1,36 @@
+{
+    "name": "historical-portrait-windows",
+    "version": "1.0.0",
+    "description": "Исторический портрет - Windows приложение",
+    "main": "main.js",
+    "scripts": {
+        "start": "electron .",
+        "build": "electron-builder",
+        "build-win": "electron-builder --win",
+        "dist": "npm run build-win"
+    },
+    "build": {
+        "appId": "com.historicalportrait.app",
+        "productName": "Исторический портрет",
+        "directories": {
+            "output": "dist"
+        },
+        "files": [
+            "**/*",
+            "!node_modules",
+            "!dist"
+        ],
+        "win": {
+            "target": "nsis",
+            "icon": "assets/icon.ico"
+        },
+        "nsis": {
+            "oneClick": false,
+            "allowToChangeInstallationDirectory": true
+        }
+    },
+    "devDependencies": {
+        "electron": "^25.0.0",
+        "electron-builder": "^24.0.0"
+    }
+}

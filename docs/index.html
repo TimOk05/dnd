@@ -1,0 +1,577 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Создавайте исторические портреты в стиле Речи Посполитой и Великого Княжества Литовского">
+    <title>👑 Исторический портрет</title>
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#d4af37">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="apple-mobile-web-app-title" content="ИсторПортрет">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { 
+            background: linear-gradient(135deg, #1e293b, #374151);
+            color: white;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            min-height: 100vh;
+            padding: 20px;
+            overflow-x: hidden;
+        }
+        .container {
+            max-width: 450px;
+            margin: 0 auto;
+            background: rgba(255,255,255,0.1);
+            border-radius: 25px;
+            padding: 30px;
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255,255,255,0.2);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .app-icon {
+            width: 80px;
+            height: 80px;
+            background: linear-gradient(135deg, #d4af37, #fbbf24);
+            border-radius: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 40px;
+            margin: 0 auto 15px;
+            box-shadow: 0 10px 30px rgba(212,175,55,0.3);
+        }
+        .upload-area {
+            border: 3px dashed #d4af37;
+            border-radius: 20px;
+            padding: 40px 20px;
+            text-align: center;
+            margin: 25px 0;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+        .upload-area:hover {
+            background: rgba(212,175,55,0.1);
+            transform: translateY(-2px);
+        }
+        .upload-area.dragover {
+            background: rgba(212,175,55,0.2);
+            border-color: #fbbf24;
+            transform: scale(1.02);
+        }
+        input[type="file"] {
+            display: none;
+        }
+        .preview {
+            max-width: 100%;
+            max-height: 300px;
+            border-radius: 15px;
+            margin: 20px 0;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+        }
+        .roles {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+            margin: 25px 0;
+        }
+        .role-card {
+            background: rgba(255,255,255,0.1);
+            border-radius: 15px;
+            padding: 20px 15px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: 2px solid transparent;
+            position: relative;
+        }
+        .role-card:hover {
+            background: rgba(212,175,55,0.2);
+            border-color: #d4af37;
+            transform: translateY(-3px);
+        }
+        .role-card.selected {
+            background: rgba(212,175,55,0.3);
+            border-color: #fbbf24;
+            box-shadow: 0 10px 25px rgba(212,175,55,0.4);
+        }
+        .role-card .emoji {
+            font-size: 32px;
+            margin-bottom: 8px;
+            display: block;
+        }
+        .role-card .name {
+            font-size: 14px;
+            font-weight: 600;
+            line-height: 1.3;
+        }
+        .btn {
+            background: linear-gradient(135deg, #d4af37, #cd7f32);
+            color: #1e293b;
+            border: none;
+            padding: 18px 30px;
+            border-radius: 15px;
+            font-weight: bold;
+            cursor: pointer;
+            width: 100%;
+            margin: 15px 0;
+            font-size: 16px;
+            transition: all 0.3s ease;
+        }
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(212,175,55,0.4);
+        }
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+        .secondary-btn {
+            background: rgba(255,255,255,0.1);
+            color: white;
+            border: 2px solid rgba(255,255,255,0.3);
+        }
+        .secondary-btn:hover {
+            background: rgba(255,255,255,0.2);
+        }
+        .progress-bar {
+            background: rgba(255,255,255,0.2);
+            border-radius: 15px;
+            height: 25px;
+            margin: 25px 0;
+            overflow: hidden;
+            position: relative;
+        }
+        .progress-fill {
+            background: linear-gradient(90deg, #d4af37, #fbbf24);
+            height: 100%;
+            transition: width 0.5s ease;
+            border-radius: 15px;
+            position: relative;
+        }
+        .progress-fill::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+            animation: shimmer 2s infinite;
+        }
+        @keyframes shimmer {
+            0% { transform: translateX(-100%); }
+            100% { transform: translateX(100%); }
+        }
+        .result {
+            text-align: center;
+            margin: 25px 0;
+        }
+        .result canvas {
+            max-width: 100%;
+            border-radius: 20px;
+            box-shadow: 0 15px 40px rgba(0,0,0,0.4);
+        }
+        .hidden { display: none; }
+        .step { 
+            margin: 20px 0;
+            animation: fadeInUp 0.6s ease;
+        }
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        .status-text {
+            text-align: center;
+            margin: 15px 0;
+            font-size: 16px;
+            font-weight: 600;
+            color: #fbbf24;
+        }
+        .feature-badge {
+            background: rgba(34,197,94,0.1);
+            border: 1px solid rgba(34,197,94,0.3);
+            border-radius: 20px;
+            padding: 8px 16px;
+            font-size: 12px;
+            color: #10b981;
+            display: inline-block;
+            margin: 5px;
+        }
+        .install-prompt {
+            background: rgba(59,130,246,0.1);
+            border: 2px solid rgba(59,130,246,0.3);
+            border-radius: 15px;
+            padding: 20px;
+            margin: 20px 0;
+            text-align: center;
+        }
+        .social-share {
+            display: flex;
+            gap: 10px;
+            margin: 20px 0;
+        }
+        .social-share button {
+            flex: 1;
+            padding: 12px;
+            border-radius: 10px;
+            border: none;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+        .share-download {
+            background: #10b981;
+            color: white;
+        }
+        .share-link {
+            background: #3b82f6;
+            color: white;
+        }
+        .share-whatsapp {
+            background: #25d366;
+            color: white;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="app-icon">👑</div>
+            <h1>Исторический портрет</h1>
+            <p>Создайте портрет в стиле Речи Посполитой</p>
+            <div style="margin-top: 15px;">
+                <span class="feature-badge">📸 Камера</span>
+                <span class="feature-badge">🎭 10 ролей</span>
+                <span class="feature-badge">💾 Сохранение</span>
+            </div>
+        </div>
+
+        <!-- Шаг 1: Загрузка фото -->
+        <div id="step-upload" class="step">
+            <h2 style="margin-bottom: 20px; text-align: center;">📸 Загрузите ваше фото</h2>
+            <div class="upload-area" onclick="document.getElementById('fileInput'^).click^(^)">
+                <div id="upload-text">
+                    <p style="font-size: 48px; margin-bottom: 15px;">📷</p>
+                    <p style="font-size: 16px; margin-bottom: 8px;">Нажмите для выбора фото</p>
+                    <p style="font-size: 14px; opacity: 0.8;">или перетащите файл сюда</p>
+                </div>
+                <img id="preview" class="preview hidden" />
+            </div>
+            <input type="file" id="fileInput" accept="image/*" capture="environment">
+            <button id="nextToRoles" class="btn hidden">Выбрать роль 🎭</button>
+        </div>
+
+        <!-- Шаг 2: Выбор роли -->
+        <div id="step-roles" class="step hidden">
+            <h2 style="margin-bottom: 20px; text-align: center;">🎭 Выберите историческую роль</h2>
+            <div class="roles">
+                <div class="role-card" data-role="hussar">
+                    <span class="emoji">⚔️</span>
+                    <div class="name">Крылатый гусар</div>
+                </div>
+                <div class="role-card" data-role="boyar">
+                    <span class="emoji">🏰</span>
+                    <div class="name">Литовский боярин</div>
+                </div>
+                <div class="role-card" data-role="prince">
+                    <span class="emoji">👑</span>
+                    <div class="name">Князь</div>
+                </div>
+                <div class="role-card" data-role="merchant">
+                    <span class="emoji">💰</span>
+                    <div class="name">Купец</div>
+                </div>
+                <div class="role-card" data-role="monk">
+                    <span class="emoji">⛪</span>
+                    <div class="name">Монах</div>
+                </div>
+                <div class="role-card" data-role="hunter">
+                    <span class="emoji">🏹</span>
+                    <div class="name">Охотник</div>
+                </div>
+                <div class="role-card" data-role="craftswoman">
+                    <span class="emoji">🧵</span>
+                    <div class="name">Ремесленница</div>
+                </div>
+                <div class="role-card" data-role="blacksmith">
+                    <span class="emoji">🔨</span>
+                    <div class="name">Кузнец</div>
+                </div>
+            </div>
+            <button id="generateBtn" class="btn" disabled>Создать портрет 🎨</button>
+            <button class="secondary-btn" onclick="goToUpload^(^)">⬅️ Назад</button>
+        </div>
+
+        <!-- Шаг 3: Генерация -->
+        <div id="step-generation" class="step hidden">
+            <h2 style="text-align: center; margin-bottom: 25px;">🎨 Создание портрета...</h2>
+            <div class="progress-bar">
+                <div id="progress" class="progress-fill" style="width: 0%;"></div>
+            </div>
+            <p id="status" class="status-text">Инициализация...</p>
+        </div>
+
+        <!-- Шаг 4: Результат -->
+        <div id="step-result" class="step hidden">
+            <h2 style="text-align: center; margin-bottom: 25px;">🎉 Ваш портрет готов!</h2>
+            <div class="result">
+                <canvas id="resultCanvas"></canvas>
+            </div>
+            <div class="social-share">
+                <button class="share-download" onclick="downloadResult^(^)">💾 Сохранить</button>
+                <button class="share-link" onclick="shareResult^(^)">📤 Поделиться</button>
+            </div>
+            <button class="btn" onclick="createNew^(^)">🔄 Создать новый</button>
+            <button class="secondary-btn" onclick="tryAnother^(^)">🎲 Другой вариант</button>
+        </div>
+
+        <!-- PWA Install Prompt -->
+        <div id="install-prompt" class="install-prompt hidden">
+            <h3 style="margin-bottom: 15px;">📱 Установить приложение</h3>
+            <p style="margin-bottom: 20px; opacity: 0.9;">Добавьте на главный экран для быстрого доступа</p>
+            <button class="btn" onclick="installApp^(^)">⬇️ Установить сейчас</button>
+        </div>
+    </div>
+
+    <script>
+        let uploadedImage = null;
+        let selectedRole = null;
+        let deferredPrompt;
+
+        const roles = {
+            hussar: { name: 'Крылатый гусар', color: '#8B4513' },
+            boyar: { name: 'Литовский боярин', color: '#654321' },
+            prince: { name: 'Князь', color: '#4A0E4E' },
+            merchant: { name: 'Купец', color: '#2F4F4F' },
+            monk: { name: 'Монах', color: '#2C1810' },
+            hunter: { name: 'Охотник', color: '#556B2F' },
+            craftswoman: { name: 'Ремесленница', color: '#8B008B' },
+            blacksmith: { name: 'Кузнец', color: '#A0522D' }
+        };
+
+        // PWA Installation
+        window.addEventListener('beforeinstallprompt', (e) => {
+            e.preventDefault();
+            deferredPrompt = e;
+            document.getElementById('install-prompt').classList.remove('hidden');
+        });
+
+        function installApp() {
+            if (deferredPrompt) {
+                deferredPrompt.prompt();
+                deferredPrompt.userChoice.then((choiceResult) => {
+                    if (choiceResult.outcome === 'accepted') {
+                        document.getElementById('install-prompt').classList.add('hidden');
+                    }
+                    deferredPrompt = null;
+                });
+            }
+        }
+
+        // File upload
+        document.getElementById('fileInput').addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    uploadedImage = e.target.result;
+                    const preview = document.getElementById('preview');
+                    preview.src = uploadedImage;
+                    preview.classList.remove('hidden');
+                    document.getElementById('upload-text').style.display = 'none';
+                    document.getElementById('nextToRoles').classList.remove('hidden');
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+
+        // Navigation
+        document.getElementById('nextToRoles').addEventListener('click', function() {
+            document.getElementById('step-upload').classList.add('hidden');
+            document.getElementById('step-roles').classList.remove('hidden');
+        });
+
+        function goToUpload() {
+            document.getElementById('step-roles').classList.add('hidden');
+            document.getElementById('step-upload').classList.remove('hidden');
+        }
+
+        // Role selection
+        document.querySelectorAll('.role-card').forEach(card => {
+            card.addEventListener('click', function() {
+                document.querySelectorAll('.role-card').forEach(c => c.classList.remove('selected'));
+                this.classList.add('selected');
+                selectedRole = this.dataset.role;
+                document.getElementById('generateBtn').disabled = false;
+            });
+        });
+
+        // Generate portrait
+        document.getElementById('generateBtn').addEventListener('click', function() {
+            document.getElementById('step-roles').classList.add('hidden');
+            document.getElementById('step-generation').classList.remove('hidden');
+            generatePortrait();
+        });
+
+        async function generatePortrait() {
+            const statusEl = document.getElementById('status');
+            const progressEl = document.getElementById('progress');
+ECHO is off.
+            const stages = [
+                { progress: 15, text: 'Анализ лица...' },
+                { progress: 35, text: 'Подбор исторической одежды...' },
+                { progress: 55, text: 'Генерация портрета...' },
+                { progress: 75, text: 'Применение эффектов...' },
+                { progress: 95, text: 'Финальная обработка...' },
+                { progress: 100, text: 'Готово!' }
+            ];
+
+            for (const stage of stages) {
+                statusEl.textContent = stage.text;
+                progressEl.style.width = stage.progress + '%';
+                await new Promise(resolve => setTimeout(resolve, 1200 + Math.random() * 800));
+            }
+
+            createResult();
+        }
+
+        function createResult() {
+            const canvas = document.getElementById('resultCanvas');
+            const ctx = canvas.getContext('2d');
+            canvas.width = 400;
+            canvas.height = 600;
+
+            const role = roles[selectedRole];
+ECHO is off.
+            // Background
+            const gradient = ctx.createLinearGradient(0, 0, 0, canvas.height);
+            gradient.addColorStop(0, role.color);
+            gradient.addColorStop(1, '#2C1810');
+            ctx.fillStyle = gradient;
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            // Decorative frame
+            ctx.strokeStyle = '#d4af37';
+            ctx.lineWidth = 12;
+            ctx.strokeRect(20, 20, canvas.width - 40, canvas.height - 40);
+
+            // Inner frame
+            ctx.strokeStyle = '#fbbf24';
+            ctx.lineWidth = 4;
+            ctx.strokeRect(35, 35, canvas.width - 70, canvas.height - 70);
+
+            // Title
+            ctx.fillStyle = '#d4af37';
+            ctx.font = 'bold 32px serif';
+            ctx.textAlign = 'center';
+            ctx.fillText(role.name, canvas.width/2, canvas.height/2 - 50);
+
+            // Subtitle
+            ctx.font = '18px serif';
+            ctx.fillStyle = '#f4e4bc';
+            ctx.fillText('XVI-XVII век', canvas.width/2, canvas.height/2 - 15);
+            ctx.fillText('Речь Посполитая', canvas.width/2, canvas.height/2 + 10);
+
+            // Crown
+            ctx.fillStyle = '#ffd700';
+            ctx.font = '80px serif';
+            ctx.fillText('👑', canvas.width/2, canvas.height/2 - 120);
+
+            // Demo watermark
+            ctx.font = '16px sans-serif';
+            ctx.fillStyle = 'rgba(255,255,255,0.6)';
+            ctx.fillText('Демо версия', canvas.width/2, canvas.height - 60);
+
+            document.getElementById('step-generation').classList.add('hidden');
+            document.getElementById('step-result').classList.remove('hidden');
+        }
+
+        // Result actions
+        function downloadResult() {
+            const canvas = document.getElementById('resultCanvas');
+            const link = document.createElement('a');
+            link.download = `historical-portrait-${roles[selectedRole].name.replace(/\s+/g, '-').toLowerCase()}.png`;
+            link.href = canvas.toDataURL();
+            link.click();
+        }
+
+        function shareResult() {
+            const canvas = document.getElementById('resultCanvas');
+            canvas.toBlob(function(blob) {
+                if (navigator.share 
+                    const file = new File([blob], 'portrait.png', { type: 'image/png' });
+                    navigator.share({
+                        title: 'Мой исторический портрет',
+                        text: `Я создал портрет в роли "${roles[selectedRole].name}"!`,
+                        files: [file]
+                    });
+                } else {
+                    // Fallback: copy to clipboard
+                    canvas.toBlob(async function(blob) {
+                        try {
+                            await navigator.clipboard.write([
+                                new ClipboardItem({ 'image/png': blob })
+                            ]);
+                            alert('Изображение скопировано в буфер обмена!');
+                        } catch (err) {
+                            downloadResult(); // Fallback to download
+                        }
+                    });
+                }
+            });
+        }
+
+        function createNew() {
+            location.reload();
+        }
+
+        function tryAnother() {
+            if (selectedRole) {
+                document.getElementById('step-result').classList.add('hidden');
+                document.getElementById('step-generation').classList.remove('hidden');
+                generatePortrait();
+            }
+        }
+
+        // Drag and drop
+        const uploadArea = document.querySelector('.upload-area');
+        uploadArea.addEventListener('dragover', function(e) {
+            e.preventDefault();
+            this.classList.add('dragover');
+        });
+
+        uploadArea.addEventListener('dragleave', function(e) {
+            this.classList.remove('dragover');
+        });
+
+        uploadArea.addEventListener('drop', function(e) {
+            e.preventDefault();
+            this.classList.remove('dragover');
+            const files = e.dataTransfer.files;
+            if (files.length > 0) {
+                document.getElementById('fileInput').files = files;
+                document.getElementById('fileInput').dispatchEvent(new Event('change'));
+            }
+        });
+
+        // Check if already installed
+        if (window.matchMedia('(display-mode: standalone)').matches) {
+            console.log('Приложение уже установлено как PWA');
+        }
+    </script>
+</body>
+</html>
