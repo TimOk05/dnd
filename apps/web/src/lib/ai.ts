@@ -73,6 +73,71 @@ export class DeepSeekClient {
     }
   }
 
+  async chat(message: string, context: string = ''): Promise<AISuggestion> {
+    try {
+      const systemPrompt = `Ты опытный мастер подземелий D&D, помощник для ведущего игры. Твоя задача - помогать мастеру с советами, идеями и решениями игровых ситуаций. Отвечай кратко, но информативно, на русском языке.
+
+Контекст сессии: ${context || 'Не указан'}
+
+Ты можешь помочь с:
+- Советами по ведению игры
+- Идеями для сюжета
+- Балансировкой боевых встреч
+- Созданием NPC
+- Решением сложных игровых ситуаций
+- Правилами D&D
+- И многим другим, связанным с D&D`
+
+      const response = await fetch(DEEPSEEK_API_URL, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${this.config.apiKey}`
+        },
+        body: JSON.stringify({
+          model: this.config.model,
+          messages: [
+            {
+              role: 'system',
+              content: systemPrompt
+            },
+            {
+              role: 'user',
+              content: message
+            }
+          ],
+          max_tokens: this.config.maxTokens,
+          temperature: this.config.temperature,
+          stream: false
+        })
+      })
+
+      if (!response.ok) {
+        throw new Error(`DeepSeek API error: ${response.status} ${response.statusText}`)
+      }
+
+      const data = await response.json()
+      const content = data.choices[0]?.message?.content
+
+      if (!content) {
+        throw new Error('Empty response from DeepSeek API')
+      }
+
+      return {
+        type: 'chat',
+        content,
+        metadata: {
+          model: this.config.model,
+          tokens: data.usage?.total_tokens || 0,
+          timestamp: new Date().toISOString()
+        }
+      }
+    } catch (error) {
+      console.error('Error in chat:', error)
+      throw error
+    }
+  }
+
   private buildPrompt(context: AIContext, template: PromptTemplate): AIPrompt {
     let userPrompt = template.userPrompt
 

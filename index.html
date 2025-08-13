@@ -111,6 +111,9 @@
                 <button onclick="showTab('ai')" class="tab-game px-6 py-3 rounded-md text-lg modern">
                     🔮 AI Подсказки
                 </button>
+                <button onclick="showTab('chat')" class="tab-game px-6 py-3 rounded-md text-lg modern">
+                    💬 Чат с AI
+                </button>
             </div>
         </div>
 
@@ -387,6 +390,51 @@
             </div>
         </div>
 
+        <!-- Chat Tab -->
+        <div id="chat" class="tab-content hidden">
+            <div class="card-game p-8 mb-8">
+                <h2 class="medieval text-3xl font-bold mb-8 text-yellow-400">💬 Чат с DeepSeek</h2>
+                <p class="text-base text-gray-300 mb-6 modern">
+                    Общайтесь с AI-помощником мастера. Задавайте вопросы о D&D, просите советы по ведению игры, идеи для сюжета или помощь с правилами.
+                </p>
+
+                <!-- Chat Interface -->
+                <div class="bg-gray-800 border border-gray-600 rounded-lg h-96 mb-6">
+                    <div id="chatContent" class="h-full p-4 overflow-y-auto space-y-4">
+                        <!-- Приветственное сообщение -->
+                        <div class="mb-4 text-left">
+                            <div class="inline-block bg-gray-700 text-gray-100 p-3 rounded-lg max-w-xs lg:max-w-md">
+                                <div class="text-sm">
+                                    Привет! Я DeepSeek, ваш AI-помощник для D&D. Могу помочь с советами по ведению игры, идеями для сюжета, балансировкой встреч и многим другим. Просто напишите ваш вопрос!
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Chat Input -->
+                <div class="flex gap-4">
+                    <input type="text" id="chatMessage" placeholder="Введите ваш вопрос или сообщение..." class="flex-1 p-3 border border-gray-600 rounded-lg bg-gray-800 text-gray-100 modern focus:ring-2 focus:ring-yellow-500 focus:border-transparent" onkeypress="handleChatKeyPress(event)">
+                    <button id="sendChatBtn" onclick="sendChatMessage()" class="btn-primary-game px-6 py-3 rounded modern">
+                        📤 Отправить
+                    </button>
+                </div>
+
+                <!-- Chat Tips -->
+                <div class="mt-6 p-4 bg-gray-800/50 border border-gray-600 rounded-lg">
+                    <h4 class="text-lg font-semibold mb-3 text-yellow-400 modern">💡 Примеры вопросов:</h4>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-3 text-sm text-gray-300">
+                        <div>• "Как создать интересного NPC?"</div>
+                        <div>• "Помоги сбалансировать боевую встречу"</div>
+                        <div>• "Идеи для поворота сюжета"</div>
+                        <div>• "Объясни правило заклинания"</div>
+                        <div>• "Как описать локацию?"</div>
+                        <div>• "Советы для новых мастеров"</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
         <!-- Results Modal -->
         <div id="resultModal" class="fixed inset-0 bg-black bg-opacity-75 hidden flex items-center justify-center z-50">
             <div class="card-game p-8 max-w-lg mx-4">
@@ -401,6 +449,12 @@
     </div>
 
     <script>
+        // Конфигурация API
+        const API_BASE_URL = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' ?
+            '' // Локальная разработка
+            :
+            'https://your-netlify-app.netlify.app'; // Замените на ваш Netlify URL
+
         // Demo data
         const demoData = {
             drinks: [{
@@ -660,15 +714,21 @@
             const startTime = Date.now();
 
             try {
-                const response = await fetch('/api/orchestrate', {
+                const response = await fetch(`${API_BASE_URL}/api/orchestrate`, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json'
                     },
                     body: JSON.stringify({
-                        type: currentAIType,
-                        context: context,
-                        sessionStage: 'general'
+                        templateType: currentAIType,
+                        context: {
+                            sessionStage: 'general',
+                            masterNotes: context,
+                            moduleSummary: '',
+                            recentEvents: [],
+                            relevantChunks: [],
+                            tableData: []
+                        }
                     })
                 });
 
@@ -689,6 +749,116 @@
 
             generateBtn.disabled = false;
             generateBtn.innerHTML = '🔮 Сгенерировать с помощью AI';
+        }
+
+        // Chat with DeepSeek
+        async function sendChatMessage() {
+            const messageInput = document.getElementById('chatMessage');
+            const message = messageInput.value.trim();
+
+            if (!message) return;
+
+            const chatContent = document.getElementById('chatContent');
+            const sendBtn = document.getElementById('sendChatBtn');
+            const context = document.getElementById('sessionContext').value;
+
+            // Добавляем сообщение пользователя
+            const userMessageDiv = document.createElement('div');
+            userMessageDiv.className = 'mb-4 text-right';
+            userMessageDiv.innerHTML = `
+                <div class="inline-block bg-blue-600 text-white p-3 rounded-lg max-w-xs lg:max-w-md">
+                    <div class="text-sm">${message}</div>
+                </div>
+            `;
+            chatContent.appendChild(userMessageDiv);
+
+            // Очищаем поле ввода
+            messageInput.value = '';
+
+            // Показываем индикатор загрузки
+            const loadingDiv = document.createElement('div');
+            loadingDiv.className = 'mb-4 text-left';
+            loadingDiv.innerHTML = `
+                <div class="inline-block bg-gray-700 text-gray-300 p-3 rounded-lg">
+                    <div class="flex items-center">
+                        <div class="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                        <span>DeepSeek думает...</span>
+                    </div>
+                </div>
+            `;
+            chatContent.appendChild(loadingDiv);
+
+            // Отключаем кнопку
+            sendBtn.disabled = true;
+
+            try {
+                const response = await fetch(`${API_BASE_URL}/api/orchestrate`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        message: message,
+                        context: context,
+                        isChat: true
+                    })
+                });
+
+                // Удаляем индикатор загрузки
+                chatContent.removeChild(loadingDiv);
+
+                if (response.ok) {
+                    const data = await response.json();
+
+                    // Добавляем ответ AI
+                    const aiMessageDiv = document.createElement('div');
+                    aiMessageDiv.className = 'mb-4 text-left';
+                    aiMessageDiv.innerHTML = `
+                        <div class="inline-block bg-gray-700 text-gray-100 p-3 rounded-lg max-w-xs lg:max-w-md">
+                            <div class="text-sm">${data.suggestion.replace(/\n/g, '<br>')}</div>
+                        </div>
+                    `;
+                    chatContent.appendChild(aiMessageDiv);
+                } else {
+                    // Показываем ошибку
+                    const errorDiv = document.createElement('div');
+                    errorDiv.className = 'mb-4 text-left';
+                    errorDiv.innerHTML = `
+                        <div class="inline-block bg-red-600 text-white p-3 rounded-lg">
+                            <div class="text-sm">Ошибка: Не удалось получить ответ от AI</div>
+                        </div>
+                    `;
+                    chatContent.appendChild(errorDiv);
+                }
+
+            } catch (error) {
+                // Удаляем индикатор загрузки
+                chatContent.removeChild(loadingDiv);
+
+                // Показываем ошибку
+                const errorDiv = document.createElement('div');
+                errorDiv.className = 'mb-4 text-left';
+                errorDiv.innerHTML = `
+                    <div class="inline-block bg-red-600 text-white p-3 rounded-lg">
+                        <div class="text-sm">Ошибка: Не удалось подключиться к серверу</div>
+                    </div>
+                `;
+                chatContent.appendChild(errorDiv);
+            }
+
+            // Включаем кнопку обратно
+            sendBtn.disabled = false;
+
+            // Прокручиваем к последнему сообщению
+            chatContent.scrollTop = chatContent.scrollHeight;
+        }
+
+        // Обработчик Enter в чате
+        function handleChatKeyPress(event) {
+            if (event.key === 'Enter' && !event.shiftKey) {
+                event.preventDefault();
+                sendChatMessage();
+            }
         }
 
         // Fallback demo suggestion generation

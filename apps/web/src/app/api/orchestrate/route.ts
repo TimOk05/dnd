@@ -5,35 +5,14 @@ import { AIContext, PromptTemplate } from '@dm-copilot/shared'
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json()
-    const { context, templateType, customTemplate } = body
+    const { context, templateType, type, customTemplate, message, isChat = false } = body
 
-    if (!context || !templateType) {
+    // Поддержка старого формата (type) и нового (templateType)
+    const finalTemplateType = templateType || type
+
+    if (!context && !message) {
       return NextResponse.json(
-        { error: 'Отсутствуют обязательные параметры: context, templateType' },
-        { status: 400 }
-      )
-    }
-
-    // Валидация контекста
-    const aiContext: AIContext = {
-      sessionStage: context.sessionStage || '',
-      masterNotes: context.masterNotes || '',
-      moduleSummary: context.moduleSummary || '',
-      recentEvents: context.recentEvents || [],
-      relevantChunks: context.relevantChunks || [],
-      tableData: context.tableData || []
-    }
-
-    // Получение шаблона промпта
-    let promptTemplate: PromptTemplate
-
-    if (customTemplate) {
-      promptTemplate = customTemplate
-    } else if (PROMPT_TEMPLATES[templateType]) {
-      promptTemplate = PROMPT_TEMPLATES[templateType]
-    } else {
-      return NextResponse.json(
-        { error: `Неизвестный тип шаблона: ${templateType}` },
+        { error: 'Отсутствуют обязательные параметры: context или message' },
         { status: 400 }
       )
     }
@@ -41,21 +20,66 @@ export async function POST(request: NextRequest) {
     // Создание клиента DeepSeek
     const deepSeekClient = createDeepSeekClient()
 
-    // Генерация подсказки
-    const suggestion = await deepSeekClient.generateSuggestion(aiContext, promptTemplate)
+    if (isChat) {
+      // Режим чата
+      const chatResponse = await deepSeekClient.chat(message, context || '')
+      
+      return NextResponse.json({
+        success: true,
+        suggestion: chatResponse.content,
+        tokens: chatResponse.metadata.tokens,
+        context: { message, isChat: true }
+      })
+    } else {
+      // Режим генерации подсказок
+      if (!finalTemplateType) {
+        return NextResponse.json(
+          { error: 'Отсутствует тип шаблона: templateType или type' },
+          { status: 400 }
+        )
+      }
 
-    // Логирование запроса (для аналитики)
-    console.log(`AI Request: ${templateType}`, {
-      sessionStage: aiContext.sessionStage,
-      tokens: suggestion.metadata.tokens,
-      timestamp: suggestion.metadata.timestamp
-    })
+      // Валидация контекста
+      const aiContext: AIContext = {
+        sessionStage: context.sessionStage || '',
+        masterNotes: context.masterNotes || '',
+        moduleSummary: context.moduleSummary || '',
+        recentEvents: context.recentEvents || [],
+        relevantChunks: context.relevantChunks || [],
+        tableData: context.tableData || []
+      }
 
-    return NextResponse.json({
-      success: true,
-      suggestion,
-      context: aiContext
-    })
+      // Получение шаблона промпта
+      let promptTemplate: PromptTemplate
+
+      if (customTemplate) {
+        promptTemplate = customTemplate
+      } else if (PROMPT_TEMPLATES[finalTemplateType]) {
+        promptTemplate = PROMPT_TEMPLATES[finalTemplateType]
+      } else {
+        return NextResponse.json(
+          { error: `Неизвестный тип шаблона: ${finalTemplateType}` },
+          { status: 400 }
+        )
+      }
+
+      // Генерация подсказки
+      const suggestion = await deepSeekClient.generateSuggestion(aiContext, promptTemplate)
+
+      // Логирование запроса (для аналитики)
+      console.log(`AI Request: ${finalTemplateType}`, {
+        sessionStage: aiContext.sessionStage,
+        tokens: suggestion.metadata.tokens,
+        timestamp: suggestion.metadata.timestamp
+      })
+
+      return NextResponse.json({
+        success: true,
+        suggestion: suggestion.content,
+        tokens: suggestion.metadata.tokens,
+        context: aiContext
+      })
+    }
 
   } catch (error) {
     console.error('Ошибка оркестрации промпта:', error)
