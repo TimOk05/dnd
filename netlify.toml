@@ -1,27 +1,13 @@
 [build]
-  command = ""
   publish = "."
   functions = "netlify/functions"
-  base = "."
 
-[build.environment]
-  NODE_VERSION = "18"
-
-# Редиректы для API
 [[redirects]]
   from = "/api/*"
   to = "/.netlify/functions/api-orchestrate-simple"
   status = 200
 
-# Редирект для SPA
 [[redirects]]
   from = "/*"
   to = "/index.html"
   status = 200
-
-# Игнорируем ненужные файлы
-[[headers]]
-  for = "/*"
-  [headers.values]
-    X-Frame-Options = "DENY"
-    X-XSS-Protection = "1; mode=block"

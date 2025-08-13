@@ -1,13 +1,10 @@
 {
-  "name": "dm-copilot-static",
-  "version": "1.0.0",
-  "description": "DM Copilot Static Site",
-  "main": "index.html",
-  "scripts": {
-    "build": "echo 'Static site - no build needed'",
-    "start": "echo 'Static site - open index.html'"
-  },
-  "keywords": ["dnd", "dungeons-dragons", "dm-copilot"],
-  "author": "DM Copilot",
-  "license": "MIT"
+    "name": "dm-copilot-static",
+    "version": "1.0.0",
+    "description": "DM Copilot Static Site",
+    "main": "index.html",
+    "scripts": {},
+    "keywords": ["dnd", "dungeons-dragons", "dm-copilot"],
+    "author": "DM Copilot",
+    "license": "MIT"
 }
