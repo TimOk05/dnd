@@ -66,12 +66,12 @@ if (isset($_POST['fast_action'])) {
         curl_setopt($ch, CURLOPT_POST, true);
         curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($data));
         $response = curl_exec($ch);
+        $curlError = curl_error($ch);
         curl_close($ch);
-        file_put_contents(__DIR__ . '/npc_debug.txt', $response); // debug
         $result = json_decode($response, true);
         $aiMessage = $result['choices'][0]['message']['content'] ?? '';
         if (!$aiMessage) {
-            echo '<div class="result-segment"><b>Ошибка:</b> Нет ответа от AI.<br><pre>' . htmlspecialchars($response) . '</pre></div>';
+            echo '<div class="result-segment"><b>DEBUG:</b><br><pre>' . htmlspecialchars("CURL ERROR: $curlError\nRESPONSE: $response") . '</pre></div>';
             exit;
         }
         $aiMessage = preg_replace('/[*_`>#\-]+/', '', $aiMessage);
