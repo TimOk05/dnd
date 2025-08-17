@@ -1,10 +1,24 @@
 {
-    "name": "dm-copilot-static",
-    "version": "1.0.0",
-    "description": "DM Copilot Static Site",
-    "main": "index.html",
-    "scripts": {},
-    "keywords": ["dnd", "dungeons-dragons", "dm-copilot"],
-    "author": "DM Copilot",
-    "license": "MIT"
+    "name": "dm-copilot",
+    "version": "0.1.0",
+    "description": "AI-powered DnD session assistant for dungeon masters",
+    "private": true,
+    "scripts": {
+        "dev": "pnpm --filter dm-copilot-web dev",
+        "build": "pnpm --filter dm-copilot-web build",
+        "start": "pnpm --filter dm-copilot-web start",
+        "lint": "pnpm --filter dm-copilot-web lint",
+        "db:generate": "pnpm --filter dm-copilot-db generate",
+        "db:push": "pnpm --filter dm-copilot-db push",
+        "db:migrate": "pnpm --filter dm-copilot-db migrate",
+        "db:seed": "pnpm --filter dm-copilot-db seed"
+    },
+    "devDependencies": {
+        "@types/node": "^20.0.0",
+        "typescript": "^5.0.0"
+    },
+    "packageManager": "pnpm@8.0.0",
+    "engines": {
+        "node": ">=18.0.0"
+    }
 }

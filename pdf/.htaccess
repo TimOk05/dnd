@@ -1,0 +1,11 @@
+# Запрещаем прямой доступ к PDF файлам
+<Files "*.pdf">
+    Order Allow,Deny
+    Deny from all
+</Files>
+
+# Запрещаем просмотр содержимого папки
+Options -Indexes
+
+# Перенаправляем все запросы на главную страницу
+ErrorDocument 403 /dnd/
