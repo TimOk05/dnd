@@ -22,7 +22,7 @@ if (isset($_POST['fast_action'])) {
     $action = $_POST['fast_action'];
     $apiKey = 'sk-1e898ddba737411e948af435d767e893';
     $apiUrl = 'https://api.deepseek.com/v1/chat/completions';
-    $systemInstruction = 'Всегда пиши ответы без оформления, без markdown, без кавычек и звёздочек. Разбивай текст на короткие строки для удобства чтения во время игры.';
+    $systemInstruction = 'Всегда пиши ответы без оформления, без markdown, без кавычек и звёздочек. Разделяй результат NPC на смысловые блоки с заголовками: Описание, Внешность, Черты характера, Особенности поведения, Короткая характеристика. В блоке Короткая характеристика выведи отдельными строками: Оружие, Урон, Способность, Хиты. Каждый блок начинай с заголовка.';
 
     // --- Кости ---
     if ($action === 'dice_result') {
@@ -49,7 +49,7 @@ if (isset($_POST['fast_action'])) {
         $class = $_POST['class'] ?? '';
         $prof = $_POST['prof'] ?? '';
         $level = $_POST['level'] ?? '1';
-        $prompt = "Создай NPC для DnD. Раса: $race. Класс: $class. Профессия: $prof. Уровень: $level. Добавь имя, особенности поведения, внешность, черты характера. Обязательно выведи отдельными строками: Оружие: ..., Урон: ..., Способность: ..., Хиты: ... (на основе уровня, класса и расы). $systemInstruction";
+        $prompt = "Создай NPC для DnD. Раса: $race. Класс: $class. Профессия: $prof. Уровень: $level. Добавь имя. $systemInstruction";
         $data = [
             'model' => 'deepseek-chat',
             'messages' => [
@@ -165,7 +165,9 @@ foreach ($_SESSION['chat'] as $msg) {
 // --- Генерация блока заметок ---
 $notesBlock = '';
 foreach ($_SESSION['notes'] as $i => $note) {
-    $notesBlock .= '<div class="note-item">' . nl2br(htmlspecialchars($note)) . '<button class="note-remove" onclick="removeNote(' . $i . ')">×</button></div>';
+    // Показываем только первую строку (до <br> или \n)
+    $firstLine = preg_split('/<br>|\n/', $note)[0];
+    $notesBlock .= '<div class="note-item" onclick="expandNote(' . $i . ')">' . htmlspecialchars($firstLine) . '<button class="note-remove" onclick="event.stopPropagation();removeNote(' . $i . ')">×</button></div>';
 }
 
 // --- Загрузка шаблона и подстановка контента ---
@@ -179,7 +181,8 @@ echo $template;
 // --- Dice Modal Steps ---
 function openDiceStep1() {
     showModal('<b class="mini-menu-title">Выберите тип кости:</b><div class="mini-menu-btns">' +
-        ['d3','d4','d6','d8','d10','d12','d20','d100'].map(d => `<button onclick=\'openDiceStep2("${d}")\' class=\'fast-btn\'>${d}</button>`).join(' ') + '</div>');
+        ['d3','d4','d6','d8','d10','d12','d20','d100'].map(d => `<button onclick=\'openDiceStep2("${d}")\' class=\'fast-btn\'>${d}</button>`).join(' ') + '</div>'
+    );
     document.getElementById('modal-save').style.display = 'none';
 }
 function openDiceStep2(dice) {
@@ -236,34 +239,45 @@ function getNpcResult(prof) {
     })
     .then(r => r.text())
     .then(txt => {
-        document.getElementById('modal-content').innerHTML = formatResultSegments(txt, true);
+        document.getElementById('modal-content').innerHTML = formatNpcBlocks(txt);
         document.getElementById('modal-save').style.display = '';
         document.getElementById('modal-save').onclick = function() { saveNote(txt); closeModal(); };
     });
 }
-// --- Форматирование результата по сегментам ---
+// --- Форматирование результата NPC по смысловым блокам ---
+function formatNpcBlocks(txt) {
+    // Блоки: Описание, Внешность, Черты характера, Особенности поведения, Короткая характеристика
+    const blockTitles = [
+        'Описание', 'Внешность', 'Черты характера', 'Особенности поведения', 'Короткая характеристика'
+    ];
+    let blocks = [];
+    let current = null;
+    let lines = txt.split(/<br>|\n/).map(l => l.trim());
+    for (let line of lines) {
+        if (!line) continue;
+        let found = blockTitles.find(t => line.toLowerCase().startsWith(t.toLowerCase() + ':'));
+        if (found) {
+            if (current) blocks.push(current);
+            current = {title: found, content: line.slice(found.length+1).trim()};
+        } else if (current) {
+            current.content += (current.content ? '<br>' : '') + line;
+        }
+    }
+    if (current) blocks.push(current);
+    let out = '';
+    for (let block of blocks) {
+        if (block.title === 'Короткая характеристика') {
+            out += `<div class="npc-summary"><b>${block.title}:</b><br>${block.content}</div>`;
+        } else {
+            out += `<div class="result-segment"><b>${block.title}:</b> ${block.content}</div>`;
+        }
+    }
+    return out;
+}
+// --- Форматирование результата бросков ---
 function formatResultSegments(txt, isNpc) {
     if (isNpc) {
-        // NPC: собрать основную инфу в один блок, характеристику — в отдельный
-        let lines = txt.split(/<br>|\n/).map(l => l.trim()).filter(Boolean);
-        let summaryLines = [];
-        let infoLines = [];
-        for (let line of lines) {
-            let lower = line.toLowerCase();
-            if (lower.startsWith('оружие:') || lower.startsWith('урон:') || lower.startsWith('способность:') || lower.startsWith('хиты:')) {
-                summaryLines.push(line);
-            } else {
-                infoLines.push(line);
-            }
-        }
-        let out = '';
-        if (infoLines.length) {
-            out += `<div class="result-segment">${infoLines.join('<br>')}</div>`;
-        }
-        if (summaryLines.length) {
-            out += `<div class="npc-summary">${summaryLines.join('<br>')}</div>`;
-        }
-        return out;
+        return formatNpcBlocks(txt);
     } else {
         // Для бросков: бросок+результаты, сумма, комментарий (если есть)
         const lines = txt.split(/<br>|\n/).map(l => l.trim()).filter(Boolean);
@@ -304,4 +318,14 @@ function removeNote(idx) {
         body: 'remove_note=' + encodeURIComponent(idx)
     }).then(() => location.reload());
 }
+function expandNote(idx) {
+    // Получить полное содержимое заметки с сервера через JS (или из DOM)
+    // Для простоты: все заметки доступны в window.allNotes
+    if (window.allNotes && window.allNotes[idx]) {
+        showModal(window.allNotes[idx]);
+        document.getElementById('modal-save').style.display = 'none';
+    }
+}
+// Передаём все заметки в JS
+window.allNotes = <?php echo json_encode($_SESSION['notes']); ?>;
 </script>
