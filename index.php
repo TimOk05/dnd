@@ -198,7 +198,7 @@ function getDiceResult(dice) {
     })
     .then(r => r.text())
     .then(txt => {
-        document.getElementById('modal-content').innerHTML = formatResultSegments(txt);
+        document.getElementById('modal-content').innerHTML = formatResultSegments(txt, false);
         document.getElementById('modal-save').style.display = '';
         document.getElementById('modal-save').onclick = function() { saveNote(txt); closeModal(); };
     });
@@ -237,26 +237,56 @@ function getNpcResult(prof) {
     })
     .then(r => r.text())
     .then(txt => {
-        document.getElementById('modal-content').innerHTML = formatResultSegments(txt);
+        document.getElementById('modal-content').innerHTML = formatResultSegments(txt, true);
         document.getElementById('modal-save').style.display = '';
         document.getElementById('modal-save').onclick = function() { saveNote(txt); closeModal(); };
     });
 }
 // --- Форматирование результата по сегментам ---
-function formatResultSegments(txt) {
+function formatResultSegments(txt, isNpc) {
+    // Ключи для NPC и бросков
     const keys = [
         'Имя', 'Раса', 'Класс', 'Уровень', 'Профессия', 'Оружие', 'Урон', 'Хиты', 'Способность',
         'Результаты', 'Сумма', 'Комментарий'
     ];
-    const lines = txt.split(/<br>|\n/).map(l => l.trim()).filter(Boolean);
-    let out = '', alt = false;
-    for (let line of lines) {
-        let isKey = keys.some(k => line.toLowerCase().startsWith(k.toLowerCase() + ':'));
-        let cls = alt ? 'result-segment-alt' : 'result-segment';
-        out += `<div class="${cls}">${line}</div>`;
-        alt = !alt;
+    // Для NPC: собрать короткую характеристику
+    let summary = '';
+    if (isNpc) {
+        let lines = txt.split(/<br>|\n/).map(l => l.trim()).filter(Boolean);
+        let summaryLines = [];
+        let otherLines = [];
+        for (let line of lines) {
+            let lower = line.toLowerCase();
+            if (lower.startsWith('оружие:') || lower.startsWith('урон:') || lower.startsWith('способность:') || lower.startsWith('хиты:')) {
+                summaryLines.push(line);
+            } else {
+                otherLines.push(line);
+            }
+        }
+        let out = '';
+        let alt = false;
+        for (let line of otherLines) {
+            if (!line) continue;
+            let cls = alt ? 'result-segment-alt' : 'result-segment';
+            out += `<div class="${cls}">${line}</div>`;
+            alt = !alt;
+        }
+        if (summaryLines.length) {
+            out += `<div class="npc-summary">${summaryLines.map(l => l).join('<br>')}</div>`;
+        }
+        return out;
+    } else {
+        // Для бросков: просто сегменты
+        const lines = txt.split(/<br>|\n/).map(l => l.trim()).filter(Boolean);
+        let out = '', alt = false;
+        for (let line of lines) {
+            if (!line) continue;
+            let cls = alt ? 'result-segment-alt' : 'result-segment';
+            out += `<div class="${cls}">${line}</div>`;
+            alt = !alt;
+        }
+        return out;
     }
-    return out;
 }
 // --- Modal & Notes ---
 function showModal(content) {

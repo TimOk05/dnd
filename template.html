@@ -123,7 +123,8 @@
             margin-top: 10px;
         }
         
-        input[type=text] {
+        input[type=text],
+        input[type=number] {
             flex: 1;
             padding: 12px 16px;
             border-radius: 8px;
@@ -131,6 +132,16 @@
             font-size: 1.13em;
             background: #fffbe6;
             font-family: inherit;
+            color: #3d2a0a;
+            outline: none;
+            box-shadow: 0 1px 4px #0001;
+            transition: border 0.2s;
+        }
+        
+        input[type=text]:focus,
+        input[type=number]:focus {
+            border: 2px solid #7c4a02;
+            background: #f3e1b6;
         }
         
         button[type=submit] {
@@ -217,6 +228,9 @@
             text-align: center;
             position: relative;
             font-size: 1.22em;
+            height: 420px;
+            display: flex;
+            flex-direction: column;
         }
         
         .modal .modal-close {
@@ -246,6 +260,12 @@
             background: #7c4a02;
             color: #ffe0a3;
         }
+        
+        .modal #modal-content {
+            flex: 1 1 auto;
+            overflow-y: auto;
+            margin-bottom: 8px;
+        }
         /* --- Стили для сегментов результата --- */
         
         .result-segment {
@@ -264,6 +284,18 @@
             padding: 12px 16px;
             text-align: left;
             font-size: 1.08em;
+        }
+        
+        .npc-summary {
+            background: #fffbe6;
+            border: 2px solid #a67c52;
+            border-radius: 12px;
+            margin: 18px 0 0 0;
+            padding: 14px 18px;
+            font-weight: bold;
+            color: #3d2a0a;
+            font-size: 1.13em;
+            box-shadow: 0 2px 8px #0001;
         }
         
         @media (max-width: 900px) {
@@ -311,15 +343,7 @@
         <div class="modal" id="modal">
             <button class="modal-close" id="modal-close">×</button>
             <div id="modal-content">
-                <!-- Пример сегментов -->
-                <!--
-                <div class="result-segment">Имя: Боромир</div>
-                <div class="result-segment-alt">Класс: Воин</div>
-                <div class="result-segment">Уровень: 5</div>
-                <div class="result-segment-alt">Оружие: Меч</div>
-                <div class="result-segment">Хиты: 38</div>
-                <div class="result-segment-alt">Способность: Яростный выпад</div>
-                -->
+                <!-- Содержимое результата с сегментами и блоком npc-summary -->
             </div>
             <button class="modal-save" id="modal-save">Сохранить в заметки</button>
         </div>
