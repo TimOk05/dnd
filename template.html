@@ -57,14 +57,16 @@
             text-shadow: 0 2px 0 #fff8, 0 0 8px #a67c52aa;
         }
         
-        .quick-bar {
+        .quick-bar,
+        .fast-bar {
             text-align: center;
             margin-bottom: 18px;
         }
         
-        .quick-btn {
+        .quick-btn,
+        .fast-btn {
             display: inline-block;
-            margin: 0 8px;
+            margin: 0 8px 8px 0;
             padding: 8px 18px;
             background: #a67c52;
             color: #fffbe6;
@@ -78,7 +80,8 @@
             text-decoration: none;
         }
         
-        .quick-btn:hover {
+        .quick-btn:hover,
+        .fast-btn:hover {
             background: #7c4a02;
             color: #ffe0a3;
         }
@@ -156,6 +159,93 @@
             margin-top: 2px;
         }
         
+        .notes-block {
+            background: #fffbe6cc;
+            border: 1.5px solid #a67c52;
+            border-radius: 12px;
+            margin: 18px 0 0 0;
+            padding: 12px 14px;
+            min-height: 40px;
+        }
+        
+        .note-item {
+            background: #f3e1b6;
+            border: 1px solid #a67c52;
+            border-radius: 8px;
+            margin-bottom: 8px;
+            padding: 8px 12px 8px 8px;
+            position: relative;
+        }
+        
+        .note-remove {
+            position: absolute;
+            right: 8px;
+            top: 8px;
+            color: #b71c1c;
+            background: none;
+            border: none;
+            font-size: 1.1em;
+            cursor: pointer;
+        }
+        /* Modal styles */
+        
+        .modal-bg {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100vw;
+            height: 100vh;
+            background: #0008;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .modal-bg.active {
+            display: flex;
+        }
+        
+        .modal {
+            background: #f8ecd0;
+            border: 4px solid #a67c52;
+            border-radius: 18px;
+            box-shadow: 0 4px 24px #0006;
+            padding: 28px 24px 18px 24px;
+            max-width: 420px;
+            min-width: 260px;
+            text-align: center;
+            position: relative;
+        }
+        
+        .modal .modal-close {
+            position: absolute;
+            right: 12px;
+            top: 10px;
+            background: none;
+            border: none;
+            font-size: 1.3em;
+            color: #b71c1c;
+            cursor: pointer;
+        }
+        
+        .modal .modal-save {
+            margin-top: 18px;
+            padding: 8px 18px;
+            background: #a67c52;
+            color: #fffbe6;
+            border: 2px solid #7c4a02;
+            border-radius: 10px;
+            font-size: 1em;
+            font-family: inherit;
+            cursor: pointer;
+        }
+        
+        .modal .modal-save:hover {
+            background: #7c4a02;
+            color: #ffe0a3;
+        }
+        
         @media (max-width: 700px) {
             .parchment {
                 padding: 18px 4vw;
@@ -170,20 +260,36 @@
 <body>
     <div class="parchment">
         <h1>DnD AI Чат</h1>
+        <div class="fast-bar">
+            <!-- Быстрые генерации (заполнить через PHP) -->
+            {{fast_buttons}}
+        </div>
         <div class="quick-bar">
-            <!-- Быстрые кнопки (заполнить через PHP) -->
             {{quick_buttons}}
             <a class="reset-link" href="?reset=1">Сбросить чат</a>
         </div>
         <div class="chat-box">
-            <!-- Сообщения чата (заполнить через PHP) -->
             {{chat_messages}}
         </div>
         <form method="post">
             <input type="text" name="message" placeholder="Введите сообщение..." autocomplete="off" required>
             <button type="submit">Отправить</button>
         </form>
+        <div class="notes-block" id="notes-block">
+            <b>Заметки:</b> {{notes_block}}
+        </div>
     </div>
+    <!-- Modal -->
+    <div class="modal-bg" id="modal-bg">
+        <div class="modal" id="modal">
+            <button class="modal-close" id="modal-close">×</button>
+            <div id="modal-content"></div>
+            <button class="modal-save" id="modal-save">Сохранить в заметки</button>
+        </div>
+    </div>
+    <script>
+        // JS для модального окна и заметок будет добавлен через PHP
+    </script>
 </body>
 
 </html>
