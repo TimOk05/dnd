@@ -165,9 +165,10 @@ foreach ($_SESSION['chat'] as $msg) {
 // --- Генерация блока заметок ---
 $notesBlock = '';
 foreach ($_SESSION['notes'] as $i => $note) {
-    // Показываем только первую строку (до <br> или \n)
-    $firstLine = preg_split('/<br>|\n/', $note)[0];
-    $notesBlock .= '<div class="note-item" onclick="expandNote(' . $i . ')">' . htmlspecialchars($firstLine) . '<button class="note-remove" onclick="event.stopPropagation();removeNote(' . $i . ')">×</button></div>';
+    // Извлекаем первую строку из HTML (strip_tags, explode по <br> или \n)
+    $plain = strip_tags(str_replace(['<br>', "\n"], "\n", $note));
+    $firstLine = explode("\n", $plain)[0];
+    $notesBlock .= '<div class="note-item" onclick="expandNote(' . $i . ')">' . htmlspecialchars($firstLine, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8') . '<button class="note-remove" onclick="event.stopPropagation();removeNote(' . $i . ')">×</button></div>';
 }
 
 // --- Загрузка шаблона и подстановка контента ---
@@ -305,10 +306,12 @@ function closeModal() {
 document.getElementById('modal-close').onclick = closeModal;
 document.getElementById('modal-bg').onclick = function(e) { if (e.target === this) closeModal(); };
 function saveNote(content) {
+    // Сохраняем HTML содержимого модального окна
+    var content = document.getElementById('modal-content').innerHTML;
     fetch('', {
         method: 'POST',
         headers: {'Content-Type': 'application/x-www-form-urlencoded'},
-        body: 'add_note=' + encodeURIComponent(1) + '&note_content=' + encodeURIComponent(content)
+        body: 'add_note=1&note_content=' + encodeURIComponent(content)
     }).then(() => location.reload());
 }
 function removeNote(idx) {
@@ -329,5 +332,5 @@ function expandNote(idx) {
     }
 }
 // Передаём все заметки в JS
-window.allNotes = <?php echo json_encode($_SESSION['notes']); ?>;
+window.allNotes = <?php echo json_encode($_SESSION['notes'], JSON_UNESCAPED_UNICODE); ?>;
 </script>
