@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="ru">
+
+<head>
+    <meta charset="UTF-8">
+    <title>DnD AI Чат</title>
+    <link href="https://fonts.googleapis.com/css2?family=UnifrakturCook:wght@700&family=IM+Fell+English+SC&display=swap" rel="stylesheet">
+    <style>
+        body {
+            background: url('https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=1500&q=80') no-repeat center center fixed;
+            background-size: cover;
+            min-height: 100vh;
+            margin: 0;
+            font-family: 'IM Fell English SC', serif;
+            color: #2d1b00;
+        }
+        
+        .parchment {
+            background: #f8ecd0 url('https://www.transparenttextures.com/patterns/old-mathematics.png');
+            border: 8px solid #a67c52;
+            border-radius: 24px;
+            box-shadow: 0 8px 32px #0006, 0 0 0 12px #d2b48c44;
+            max-width: 700px;
+            margin: 48px auto;
+            padding: 36px 32px 24px 32px;
+            position: relative;
+        }
+        
+        .parchment:before,
+        .parchment:after {
+            content: '';
+            position: absolute;
+            width: 64px;
+            height: 64px;
+            background: url('https://cdn-icons-png.flaticon.com/512/616/616494.png') no-repeat center/contain;
+            opacity: 0.12;
+        }
+        
+        .parchment:before {
+            left: -40px;
+            top: -40px;
+        }
+        
+        .parchment:after {
+            right: -40px;
+            bottom: -40px;
+            transform: scaleX(-1);
+        }
+        
+        h1 {
+            font-family: 'UnifrakturCook', cursive;
+            font-size: 2.8em;
+            text-align: center;
+            margin-bottom: 0.2em;
+            color: #7c4a02;
+            letter-spacing: 2px;
+            text-shadow: 0 2px 0 #fff8, 0 0 8px #a67c52aa;
+        }
+        
+        .quick-bar {
+            text-align: center;
+            margin-bottom: 18px;
+        }
+        
+        .quick-btn {
+            display: inline-block;
+            margin: 0 8px;
+            padding: 8px 18px;
+            background: #a67c52;
+            color: #fffbe6;
+            border: 2px solid #7c4a02;
+            border-radius: 12px;
+            font-size: 1.1em;
+            font-family: inherit;
+            cursor: pointer;
+            box-shadow: 0 2px 8px #0002;
+            transition: background 0.2s, color 0.2s;
+            text-decoration: none;
+        }
+        
+        .quick-btn:hover {
+            background: #7c4a02;
+            color: #ffe0a3;
+        }
+        
+        .chat-box {
+            min-height: 220px;
+            margin-bottom: 18px;
+            padding: 18px 12px;
+            background: #fffbe6cc;
+            border-radius: 12px;
+            border: 1.5px solid #a67c52;
+            box-shadow: 0 1px 4px #0001;
+            max-height: 320px;
+            overflow-y: auto;
+        }
+        
+        .msg {
+            margin-bottom: 14px;
+            line-height: 1.5;
+        }
+        
+        .user {
+            text-align: right;
+            color: #4e260e;
+        }
+        
+        .assistant {
+            text-align: left;
+            color: #1b4e2d;
+        }
+        
+        .msg b {
+            font-family: 'UnifrakturCook', cursive;
+            font-size: 1.1em;
+        }
+        
+        form {
+            display: flex;
+            gap: 10px;
+            margin-top: 10px;
+        }
+        
+        input[type=text] {
+            flex: 1;
+            padding: 10px 14px;
+            border-radius: 8px;
+            border: 2px solid #a67c52;
+            font-size: 1.1em;
+            background: #fffbe6;
+            font-family: inherit;
+        }
+        
+        button[type=submit] {
+            padding: 10px 22px;
+            border-radius: 8px;
+            border: 2px solid #7c4a02;
+            background: #a67c52;
+            color: #fffbe6;
+            font-size: 1.1em;
+            font-family: inherit;
+            cursor: pointer;
+            transition: background 0.2s, color 0.2s;
+        }
+        
+        button[type=submit]:hover {
+            background: #7c4a02;
+            color: #ffe0a3;
+        }
+        
+        .reset-link {
+            float: right;
+            color: #b71c1c;
+            text-decoration: underline;
+            font-size: 0.98em;
+            margin-top: 2px;
+        }
+        
+        @media (max-width: 700px) {
+            .parchment {
+                padding: 18px 4vw;
+            }
+            h1 {
+                font-size: 2em;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="parchment">
+        <h1>DnD AI Чат</h1>
+        <div class="quick-bar">
+            <!-- Быстрые кнопки (заполнить через PHP) -->
+            {{quick_buttons}}
+            <a class="reset-link" href="?reset=1">Сбросить чат</a>
+        </div>
+        <div class="chat-box">
+            <!-- Сообщения чата (заполнить через PHP) -->
+            {{chat_messages}}
+        </div>
+        <form method="post">
+            <input type="text" name="message" placeholder="Введите сообщение..." autocomplete="off" required>
+            <button type="submit">Отправить</button>
+        </form>
+    </div>
+</body>
+
+</html>

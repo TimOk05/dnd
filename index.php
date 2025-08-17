@@ -59,46 +59,28 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['message'])) {
         $_SESSION['chat'][] = ['role' => 'assistant', 'content' => $aiMessage];
     }
 }
-?>
-<!DOCTYPE html>
-<html lang="ru">
-<head>
-    <meta charset="UTF-8">
-    <title>DnD AI Чат</title>
-    <style>
-        body { font-family: sans-serif; background: #f8f8fa; }
-        .chat { max-width: 600px; margin: 40px auto; background: #fff; border-radius: 8px; box-shadow: 0 2px 8px #0001; padding: 24px; }
-        .msg { margin-bottom: 12px; }
-        .user { text-align: right; color: #1a237e; }
-        .assistant { text-align: left; color: #388e3c; }
-        .quick { margin: 0 4px; }
-        form { display: flex; gap: 8px; margin-top: 16px; }
-        input[type=text] { flex: 1; padding: 8px; border-radius: 4px; border: 1px solid #ccc; }
-        button { padding: 8px 16px; border-radius: 4px; border: none; background: #1976d2; color: #fff; cursor: pointer; }
-        button:disabled { background: #aaa; }
-    </style>
-</head>
-<body>
-<div class="chat">
-    <h2>DnD AI Чат</h2>
-    <div>
-        <a class="quick" href="?quick=d20">🎲 Бросить d20</a>
-        <a class="quick" href="?quick=npc">🗣️ NPC</a>
-        <a class="quick" href="?quick=event">🚗 Событие</a>
-        <a class="quick" href="?reset=1" style="float:right;color:#d32f2f;">Сбросить чат</a>
-    </div>
-    <hr>
-    <div>
-        <?php foreach ($_SESSION['chat'] as $msg): ?>
-            <div class="msg <?= $msg['role'] ?>">
-                <b><?= $msg['role'] === 'user' ? 'Вы' : 'AI' ?>:</b> <?= nl2br(htmlspecialchars($msg['content'])) ?>
-            </div>
-        <?php endforeach; ?>
-    </div>
-    <form method="post">
-        <input type="text" name="message" placeholder="Введите сообщение..." autocomplete="off" required>
-        <button type="submit">Отправить</button>
-    </form>
-</div>
-</body>
-</html>
+
+// Генерация быстрых кнопок
+$quickBtns = '';
+foreach ($quickCommands as $key => $prompt) {
+    $labels = [
+        'd20' => '🎲 Бросить d20',
+        'npc' => '🗣️ NPC',
+        'event' => '🚗 Событие'
+    ];
+    $quickBtns .= '<a class="quick-btn" href="?quick=' . $key . '">' . $labels[$key] . '</a>';
+}
+
+// Генерация сообщений чата
+$chatMsgs = '';
+foreach ($_SESSION['chat'] as $msg) {
+    $who = $msg['role'] === 'user' ? 'Вы' : 'AI';
+    $class = $msg['role'];
+    $chatMsgs .= '<div class="msg ' . $class . '"><b>' . $who . ':</b> ' . nl2br(htmlspecialchars($msg['content'])) . '</div>';
+}
+
+// Загрузка шаблона и подстановка контента
+$template = file_get_contents(__DIR__ . '/template.html');
+$template = str_replace('{{quick_buttons}}', $quickBtns, $template);
+$template = str_replace('{{chat_messages}}', $chatMsgs, $template);
+echo $template;
