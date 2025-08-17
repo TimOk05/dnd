@@ -301,39 +301,29 @@ function openNpcStepLevel(cls) {
 }
 function openNpcStep3WithLevel() {
     npcLevel = document.getElementById('npc-level').value;
-    showModal('<b class="mini-menu-title">Выберите профессию NPC:</b><div class="mini-menu-btns">' + npcProfs.map(p => `<button onclick=\'fetchNpcFromAI("${npcRace}","${npcClass}","${p}","${npcLevel}")\' class=\'fast-btn\'>${p}</button>`).join(' ') + '</div>');
+    showModal('<b class="mini-menu-title">Выберите профессию NPC:</b><div class="mini-menu-btns">' + npcProfs.map(p => `<button onclick=\'getNpcResult("${p}")\' class=\'fast-btn\'>${p}</button>`).join(' ') + '</div>');
     document.getElementById('modal-save').style.display = 'none';
 }
-const DEEPSEEK_API_KEY = "sk-1e898ddba737411e948af435d767e893";
-const DEEPSEEK_API_URL = "https://api.deepseek.com/v1/chat/completions";
-function fetchNpcFromAI(race, npcClass, prof, level) {
+function getNpcResult(prof) {
+    npcProf = prof;
     showModal('Генерация NPC...');
-    const systemInstruction = 'Всегда пиши ответы без оформления, без markdown, без кавычек и звёздочек. Разделяй результат NPC на смысловые блоки с заголовками: Описание, Внешность, Черты характера, Особенности поведения, Короткая характеристика. В блоке Короткая характеристика выведи отдельными строками: Оружие, Урон, Способность, Хиты. Каждый блок начинай с заголовка.';
-    const prompt = `Создай NPC для DnD. Раса: ${race}. Класс: ${npcClass}. Профессия: ${prof}. Уровень: ${level}. Добавь имя. ${systemInstruction}`;
-    fetch(DEEPSEEK_API_URL, {
-        method: "POST",
-        headers: {
-            "Content-Type": "application/json",
-            "Authorization": `Bearer ${DEEPSEEK_API_KEY}`
-        },
-        body: JSON.stringify({
-            model: "deepseek-chat",
-            messages: [
-                { role: "system", content: systemInstruction },
-                { role: "user", content: prompt }
-            ]
-        })
+    const form = new FormData();
+    form.append('fast_action', 'npc_result');
+    form.append('race', npcRace);
+    form.append('class', npcClass);
+    form.append('prof', npcProf);
+    form.append('level', npcLevel);
+    fetch('', {
+        method: 'POST',
+        body: form
     })
-    .then(r => r.json())
-    .then(data => {
-        console.log('AI raw response:', data); // debug
-        const aiMessage = data.choices?.[0]?.message?.content || '[Ошибка AI]';
-        document.getElementById('modal-content').innerHTML = formatNpcBlocks(aiMessage);
+    .then(r => r.text())
+    .then(txt => {
+        document.getElementById('modal-content').innerHTML = formatNpcBlocks(txt);
         document.getElementById('modal-save').style.display = '';
         document.getElementById('modal-save').onclick = function() { saveNote(document.getElementById('modal-content').innerHTML); closeModal(); };
     })
-    .catch((e) => {
-        console.log('AI fetch error:', e);
+    .catch(() => {
         document.getElementById('modal-content').innerHTML = '<div class="result-segment">[Ошибка соединения с AI]</div>';
         document.getElementById('modal-save').style.display = 'none';
     });
