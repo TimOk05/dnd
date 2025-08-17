@@ -4,20 +4,20 @@
     "description": "AI-powered DnD session assistant for dungeon masters",
     "private": true,
     "scripts": {
-        "dev": "pnpm --filter dm-copilot-web dev",
-        "build": "pnpm --filter dm-copilot-web build",
-        "start": "pnpm --filter dm-copilot-web start",
-        "lint": "pnpm --filter dm-copilot-web lint",
-        "db:generate": "pnpm --filter dm-copilot-db generate",
-        "db:push": "pnpm --filter dm-copilot-db push",
-        "db:migrate": "pnpm --filter dm-copilot-db migrate",
-        "db:seed": "pnpm --filter dm-copilot-db seed"
+        "dev": "npm --filter dm-copilot-web dev",
+        "build": "npm --filter dm-copilot-web build",
+        "start": "npm --filter dm-copilot-web start",
+        "lint": "npm --filter dm-copilot-web lint",
+        "db:generate": "npm --filter dm-copilot-db generate",
+        "db:push": "npm --filter dm-copilot-db push",
+        "db:migrate": "npm --filter dm-copilot-db migrate",
+        "db:seed": "npm --filter dm-copilot-db seed"
     },
     "devDependencies": {
         "@types/node": "^20.0.0",
         "typescript": "^5.0.0"
     },
-    "packageManager": "pnpm@8.0.0",
+    "packageManager": "npm@8.0.0",
     "engines": {
         "node": ">=18.0.0"
     }
