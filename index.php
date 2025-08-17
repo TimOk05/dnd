@@ -48,7 +48,8 @@ if (isset($_POST['fast_action'])) {
         $race = $_POST['race'] ?? '';
         $class = $_POST['class'] ?? '';
         $prof = $_POST['prof'] ?? '';
-        $prompt = "Создай NPC для DnD. Раса: $race. Класс: $class. Профессия: $prof. Добавь имя, особенности поведения, внешность, черты характера. $systemInstruction";
+        $level = $_POST['level'] ?? '1';
+        $prompt = "Создай NPC для DnD. Раса: $race. Класс: $class. Профессия: $prof. Уровень: $level. Добавь имя, особенности поведения, внешность, черты характера. Обязательно выведи отдельными строками: Оружие: ..., Урон: ..., Способность: ..., Хиты: ... (на основе уровня, класса и расы). $systemInstruction";
         $data = [
             'model' => 'deepseek-chat',
             'messages' => [
@@ -197,7 +198,7 @@ function getDiceResult(dice) {
     })
     .then(r => r.text())
     .then(txt => {
-        document.getElementById('modal-content').innerHTML = txt;
+        document.getElementById('modal-content').innerHTML = formatResultSegments(txt);
         document.getElementById('modal-save').style.display = '';
         document.getElementById('modal-save').onclick = function() { saveNote(txt); closeModal(); };
     });
@@ -206,18 +207,23 @@ function getDiceResult(dice) {
 const npcRaces = ['Человек','Эльф','Гном','Полуорк','Полурослик','Тифлинг','Драконорожденный','Полуэльф','Дворф','Гоблин','Орк','Кобольд','Ящеролюд','Гоблин','Гном','Хоббит'];
 const npcClasses = ['Без класса','Воин','Паладин','Колдун','Маг','Разбойник','Следопыт','Жрец','Бард','Варвар','Плут','Монах','Чародей','Друид'];
 const npcProfs = ['Прохожий','Стражник','Тавернщик','Торговец','Кузнец','Наёмник','Жрец','Преступник','Ремесленник','Охотник','Повар','Писарь','Мастер гильдии','Путешественник','Мудрец'];
-let npcRace = '', npcClass = '', npcProf = '';
+let npcRace = '', npcClass = '', npcProf = '', npcLevel = 1;
 function openNpcStep1() {
     showModal('<b>Выберите расу NPC:</b><br>' + npcRaces.map(r => `<button onclick=\'openNpcStep2("${r}")\' class=\'fast-btn\'>${r}</button>`).join(' '));
     document.getElementById('modal-save').style.display = 'none';
 }
 function openNpcStep2(race) {
     npcRace = race;
-    showModal('<b>Выберите класс NPC:</b><br>' + npcClasses.map(c => `<button onclick=\'openNpcStep3("${c}")\' class=\'fast-btn\'>${c}</button>`).join(' '));
+    showModal('<b>Выберите класс NPC:</b><br>' + npcClasses.map(c => `<button onclick=\'openNpcStepLevel("${c}")\' class=\'fast-btn\'>${c}</button>`).join(' '));
     document.getElementById('modal-save').style.display = 'none';
 }
-function openNpcStep3(cls) {
+function openNpcStepLevel(cls) {
     npcClass = cls;
+    showModal('<b>Укажите уровень NPC (1-20):</b><br><input type=number id=npc-level value=1 min=1 max=20 style=\'width:60px\'><br><button class=\'fast-btn\' onclick=\'openNpcStep3WithLevel()\'>Далее</button>');
+    document.getElementById('modal-save').style.display = 'none';
+}
+function openNpcStep3WithLevel() {
+    npcLevel = document.getElementById('npc-level').value;
     showModal('<b>Выберите профессию NPC:</b><br>' + npcProfs.map(p => `<button onclick=\'getNpcResult("${p}")\' class=\'fast-btn\'>${p}</button>`).join(' '));
     document.getElementById('modal-save').style.display = 'none';
 }
@@ -227,14 +233,30 @@ function getNpcResult(prof) {
     fetch('', {
         method: 'POST',
         headers: {'Content-Type': 'application/x-www-form-urlencoded'},
-        body: 'fast_action=npc_result&race=' + encodeURIComponent(npcRace) + '&class=' + encodeURIComponent(npcClass) + '&prof=' + encodeURIComponent(npcProf)
+        body: 'fast_action=npc_result&race=' + encodeURIComponent(npcRace) + '&class=' + encodeURIComponent(npcClass) + '&prof=' + encodeURIComponent(npcProf) + '&level=' + encodeURIComponent(npcLevel)
     })
     .then(r => r.text())
     .then(txt => {
-        document.getElementById('modal-content').innerHTML = txt;
+        document.getElementById('modal-content').innerHTML = formatResultSegments(txt);
         document.getElementById('modal-save').style.display = '';
         document.getElementById('modal-save').onclick = function() { saveNote(txt); closeModal(); };
     });
+}
+// --- Форматирование результата по сегментам ---
+function formatResultSegments(txt) {
+    const keys = [
+        'Имя', 'Раса', 'Класс', 'Уровень', 'Профессия', 'Оружие', 'Урон', 'Хиты', 'Способность',
+        'Результаты', 'Сумма', 'Комментарий'
+    ];
+    const lines = txt.split(/<br>|\n/).map(l => l.trim()).filter(Boolean);
+    let out = '', alt = false;
+    for (let line of lines) {
+        let isKey = keys.some(k => line.toLowerCase().startsWith(k.toLowerCase() + ':'));
+        let cls = alt ? 'result-segment-alt' : 'result-segment';
+        out += `<div class="${cls}">${line}</div>`;
+        alt = !alt;
+    }
+    return out;
 }
 // --- Modal & Notes ---
 function showModal(content) {

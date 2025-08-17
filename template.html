@@ -4,15 +4,16 @@
 <head>
     <meta charset="UTF-8">
     <title>DnD AI Чат</title>
-    <link href="https://fonts.googleapis.com/css2?family=UnifrakturCook:wght@700&family=IM+Fell+English+SC&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&family=UnifrakturCook:wght@700&family=IM+Fell+English+SC&display=swap" rel="stylesheet">
     <style>
         body {
             background: url('https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=1500&q=80') no-repeat center center fixed;
             background-size: cover;
             min-height: 100vh;
             margin: 0;
-            font-family: 'IM Fell English SC', serif;
+            font-family: 'Roboto', 'IM Fell English SC', serif;
             color: #2d1b00;
+            font-size: 1.18em;
         }
         
         .parchment {
@@ -20,9 +21,9 @@
             border: 8px solid #a67c52;
             border-radius: 24px;
             box-shadow: 0 8px 32px #0006, 0 0 0 12px #d2b48c44;
-            max-width: 700px;
+            max-width: 820px;
             margin: 48px auto;
-            padding: 36px 32px 24px 32px;
+            padding: 44px 38px 28px 38px;
             position: relative;
         }
         
@@ -65,12 +66,12 @@
         .fast-btn {
             display: inline-block;
             margin: 0 8px 8px 0;
-            padding: 10px 22px;
+            padding: 12px 28px;
             background: #a67c52;
             color: #fffbe6;
             border: 2px solid #7c4a02;
             border-radius: 12px;
-            font-size: 1.2em;
+            font-size: 1.25em;
             font-family: inherit;
             cursor: pointer;
             box-shadow: 0 2px 8px #0002;
@@ -91,13 +92,14 @@
             border-radius: 12px;
             border: 1.5px solid #a67c52;
             box-shadow: 0 1px 4px #0001;
-            max-height: 320px;
+            max-height: 340px;
             overflow-y: auto;
+            font-size: 1.13em;
         }
         
         .msg {
             margin-bottom: 14px;
-            line-height: 1.5;
+            line-height: 1.6;
         }
         
         .user {
@@ -123,21 +125,21 @@
         
         input[type=text] {
             flex: 1;
-            padding: 10px 14px;
+            padding: 12px 16px;
             border-radius: 8px;
             border: 2px solid #a67c52;
-            font-size: 1.1em;
+            font-size: 1.13em;
             background: #fffbe6;
             font-family: inherit;
         }
         
         button[type=submit] {
-            padding: 10px 22px;
+            padding: 12px 28px;
             border-radius: 8px;
             border: 2px solid #7c4a02;
             background: #a67c52;
             color: #fffbe6;
-            font-size: 1.1em;
+            font-size: 1.13em;
             font-family: inherit;
             cursor: pointer;
             transition: background 0.2s, color 0.2s;
@@ -152,7 +154,7 @@
             float: right;
             color: #b71c1c;
             text-decoration: underline;
-            font-size: 0.98em;
+            font-size: 1.05em;
             margin-top: 2px;
         }
         
@@ -161,16 +163,17 @@
             border: 1.5px solid #a67c52;
             border-radius: 12px;
             margin: 18px 0 0 0;
-            padding: 12px 14px;
+            padding: 14px 16px;
             min-height: 40px;
+            font-size: 1.13em;
         }
         
         .note-item {
             background: #f3e1b6;
             border: 1px solid #a67c52;
             border-radius: 8px;
-            margin-bottom: 8px;
-            padding: 8px 12px 8px 8px;
+            margin-bottom: 10px;
+            padding: 10px 14px 10px 10px;
             position: relative;
         }
         
@@ -181,7 +184,7 @@
             color: #b71c1c;
             background: none;
             border: none;
-            font-size: 1.1em;
+            font-size: 1.2em;
             cursor: pointer;
         }
         /* Modal styles */
@@ -208,32 +211,33 @@
             border: 4px solid #a67c52;
             border-radius: 18px;
             box-shadow: 0 4px 24px #0006;
-            padding: 28px 24px 18px 24px;
-            max-width: 420px;
-            min-width: 260px;
+            padding: 38px 32px 28px 32px;
+            max-width: 600px;
+            min-width: 320px;
             text-align: center;
             position: relative;
+            font-size: 1.22em;
         }
         
         .modal .modal-close {
             position: absolute;
-            right: 12px;
-            top: 10px;
+            right: 16px;
+            top: 12px;
             background: none;
             border: none;
-            font-size: 1.3em;
+            font-size: 1.5em;
             color: #b71c1c;
             cursor: pointer;
         }
         
         .modal .modal-save {
-            margin-top: 18px;
-            padding: 8px 18px;
+            margin-top: 22px;
+            padding: 10px 24px;
             background: #a67c52;
             color: #fffbe6;
             border: 2px solid #7c4a02;
             border-radius: 10px;
-            font-size: 1em;
+            font-size: 1.1em;
             font-family: inherit;
             cursor: pointer;
         }
@@ -242,10 +246,40 @@
             background: #7c4a02;
             color: #ffe0a3;
         }
+        /* --- Стили для сегментов результата --- */
+        
+        .result-segment {
+            background: #f3e1b6;
+            border-radius: 10px;
+            margin: 10px 0 0 0;
+            padding: 12px 16px;
+            text-align: left;
+            font-size: 1.08em;
+        }
+        
+        .result-segment-alt {
+            background: #e7d3a8;
+            border-radius: 10px;
+            margin: 10px 0 0 0;
+            padding: 12px 16px;
+            text-align: left;
+            font-size: 1.08em;
+        }
+        
+        @media (max-width: 900px) {
+            .parchment {
+                padding: 18px 2vw;
+                max-width: 99vw;
+            }
+            .modal {
+                max-width: 95vw;
+                min-width: 0;
+            }
+        }
         
         @media (max-width: 700px) {
             .parchment {
-                padding: 18px 4vw;
+                padding: 10px 1vw;
             }
             h1 {
                 font-size: 2em;
@@ -276,7 +310,17 @@
     <div class="modal-bg" id="modal-bg">
         <div class="modal" id="modal">
             <button class="modal-close" id="modal-close">×</button>
-            <div id="modal-content"></div>
+            <div id="modal-content">
+                <!-- Пример сегментов -->
+                <!--
+                <div class="result-segment">Имя: Боромир</div>
+                <div class="result-segment-alt">Класс: Воин</div>
+                <div class="result-segment">Уровень: 5</div>
+                <div class="result-segment-alt">Оружие: Меч</div>
+                <div class="result-segment">Хиты: 38</div>
+                <div class="result-segment-alt">Способность: Яростный выпад</div>
+                -->
+            </div>
             <button class="modal-save" id="modal-save">Сохранить в заметки</button>
         </div>
     </div>
