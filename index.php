@@ -251,28 +251,36 @@ function fetchNpcFromAI(race, npcClass, prof, level) {
     showModal('Генерация NPC...');
     const systemInstruction = 'Всегда пиши ответы без оформления, без markdown, без кавычек и звёздочек. Разделяй результат NPC на смысловые блоки с заголовками: Описание, Внешность, Черты характера, Особенности поведения, Короткая характеристика. В блоке Короткая характеристика выведи отдельными строками: Оружие, Урон, Способность, Хиты. Каждый блок начинай с заголовка.';
     const prompt = `Создай NPC для DnD. Раса: ${race}. Класс: ${npcClass}. Профессия: ${prof}. Уровень: ${level}. Добавь имя. ${systemInstruction}`;
+    const fetchBody = {
+        model: "deepseek-chat",
+        messages: [
+            { role: "system", content: systemInstruction },
+            { role: "user", content: prompt }
+        ]
+    };
+    const fetchHeaders = {
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${DEEPSEEK_API_KEY}`
+    };
+    console.log('DEBUG: fetchNpcFromAI', {url: DEEPSEEK_API_URL, headers: fetchHeaders, body: fetchBody});
     fetch(DEEPSEEK_API_URL, {
         method: "POST",
-        headers: {
-            "Content-Type": "application/json",
-            "Authorization": `Bearer ${DEEPSEEK_API_KEY}`
-        },
-        body: JSON.stringify({
-            model: "deepseek-chat",
-            messages: [
-                { role: "system", content: systemInstruction },
-                { role: "user", content: prompt }
-            ]
-        })
+        headers: fetchHeaders,
+        body: JSON.stringify(fetchBody)
     })
-    .then(r => r.json())
+    .then(r => {
+        console.log('DEBUG: fetch response status', r.status);
+        return r.json();
+    })
     .then(data => {
+        console.log('DEBUG: AI raw response:', data);
         const aiMessage = data.choices?.[0]?.message?.content || '[Ошибка AI]';
         document.getElementById('modal-content').innerHTML = formatNpcBlocks(aiMessage);
         document.getElementById('modal-save').style.display = '';
         document.getElementById('modal-save').onclick = function() { saveNote(document.getElementById('modal-content').innerHTML); closeModal(); };
     })
-    .catch(() => {
+    .catch((e) => {
+        console.log('DEBUG: AI fetch error:', e);
         document.getElementById('modal-content').innerHTML = '<div class="result-segment">[Ошибка соединения с AI]</div>';
         document.getElementById('modal-save').style.display = 'none';
     });
