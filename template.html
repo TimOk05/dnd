@@ -57,22 +57,20 @@
             text-shadow: 0 2px 0 #fff8, 0 0 8px #a67c52aa;
         }
         
-        .quick-bar,
         .fast-bar {
             text-align: center;
             margin-bottom: 18px;
         }
         
-        .quick-btn,
         .fast-btn {
             display: inline-block;
             margin: 0 8px 8px 0;
-            padding: 8px 18px;
+            padding: 10px 22px;
             background: #a67c52;
             color: #fffbe6;
             border: 2px solid #7c4a02;
             border-radius: 12px;
-            font-size: 1.1em;
+            font-size: 1.2em;
             font-family: inherit;
             cursor: pointer;
             box-shadow: 0 2px 8px #0002;
@@ -80,7 +78,6 @@
             text-decoration: none;
         }
         
-        .quick-btn:hover,
         .fast-btn:hover {
             background: #7c4a02;
             color: #ffe0a3;
@@ -261,12 +258,7 @@
     <div class="parchment">
         <h1>DnD AI Чат</h1>
         <div class="fast-bar">
-            <!-- Быстрые генерации (заполнить через PHP) -->
             {{fast_buttons}}
-        </div>
-        <div class="quick-bar">
-            {{quick_buttons}}
-            <a class="reset-link" href="?reset=1">Сбросить чат</a>
         </div>
         <div class="chat-box">
             {{chat_messages}}
@@ -274,6 +266,7 @@
         <form method="post">
             <input type="text" name="message" placeholder="Введите сообщение..." autocomplete="off" required>
             <button type="submit">Отправить</button>
+            <a class="reset-link" href="?reset=1">Сбросить чат</a>
         </form>
         <div class="notes-block" id="notes-block">
             <b>Заметки:</b> {{notes_block}}

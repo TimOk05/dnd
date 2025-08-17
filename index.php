@@ -23,18 +23,11 @@ if (isset($_POST['fast_action'])) {
     $apiKey = 'sk-1e898ddba737411e948af435d767e893';
     $apiUrl = 'https://api.deepseek.com/v1/chat/completions';
     $systemInstruction = 'Всегда пиши ответы без оформления, без markdown, без кавычек и звёздочек. Разбивай текст на короткие строки для удобства чтения во время игры.';
-    $prompts = [
-        'npc' => 'Сгенерируй случайного NPC для DnD с именем, внешностью и короткой историей. ' . $systemInstruction,
-        'name' => 'Придумай уникальное фэнтези-имя для персонажа. ' . $systemInstruction,
-        'race' => 'Назови случайную расу для персонажа DnD. ' . $systemInstruction,
-        'class' => 'Назови случайный класс для персонажа DnD. ' . $systemInstruction,
-        'tavern' => 'Придумай название для таверны в стиле DnD. ' . $systemInstruction,
-        'event' => 'Придумай интересное событие для приключенцев в дороге. ' . $systemInstruction
-    ];
-    if ($action === 'dice') {
+
+    // --- Кости ---
+    if ($action === 'dice_result') {
         $dice = $_POST['dice'] ?? '1d20';
         $label = $_POST['label'] ?? '';
-        // Кидаем кости на PHP
         if (preg_match('/^(\d{1,2})d(\d{1,3})$/', $dice, $m)) {
             $count = (int)$m[1]; $sides = (int)$m[2];
             $results = [];
@@ -49,12 +42,18 @@ if (isset($_POST['fast_action'])) {
             exit;
         }
     }
-    if (isset($prompts[$action])) {
+
+    // --- NPC ---
+    if ($action === 'npc_result') {
+        $race = $_POST['race'] ?? '';
+        $class = $_POST['class'] ?? '';
+        $prof = $_POST['prof'] ?? '';
+        $prompt = "Создай NPC для DnD. Раса: $race. Класс: $class. Профессия: $prof. Добавь имя, особенности поведения, внешность, черты характера. $systemInstruction";
         $data = [
             'model' => 'deepseek-chat',
             'messages' => [
                 ['role' => 'system', 'content' => $systemInstruction],
-                ['role' => 'user', 'content' => $prompts[$action]]
+                ['role' => 'user', 'content' => $prompt]
             ]
         ];
         $ch = curl_init($apiUrl);
@@ -99,14 +98,6 @@ if (isset($_GET['reset'])) {
     $_SESSION['chat'] = [];
     header("Location: index.php");
     exit;
-}
-$quickCommands = [
-    'd20' => 'Брось d20 и выведи результат как мастер DnD. Ответ должен быть без оформления, без markdown, без кавычек и звёздочек. Разбей текст на короткие строки для удобства чтения во время игры.',
-    'npc' => 'Сгенерируй случайного NPC для DnD с именем, внешностью и короткой историей. Ответ должен быть без оформления, без markdown, без кавычек и звёздочек. Разбей текст на короткие строки для удобства чтения во время игры.',
-    'event' => 'Придумай интересное событие, которое может произойти с приключенцами в дороге. Ответ должен быть без оформления, без markdown, без кавычек и звёздочек. Разбей текст на короткие строки для удобства чтения во время игры.'
-];
-if (isset($_GET['quick']) && isset($quickCommands[$_GET['quick']])) {
-    $_POST['message'] = $quickCommands[$_GET['quick']];
 }
 $systemInstruction = 'Всегда пиши ответы без оформления, без markdown, без кавычек и звёздочек. Разбивай текст на короткие строки для удобства чтения во время игры.';
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['message']) && !isset($_POST['add_note']) && !isset($_POST['remove_note'])) {
@@ -156,26 +147,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['message']) && !isset(
     }
 }
 
-// --- Генерация быстрых кнопок (только для чата) ---
-$quickBtns = '';
-foreach ($quickCommands as $key => $prompt) {
-    $labels = [
-        'd20' => '🎲 Бросить d20',
-        'npc' => '🗣️ NPC',
-        'event' => '🚗 Событие'
-    ];
-    $quickBtns .= '<a class="quick-btn" href="?quick=' . $key . '">' . $labels[$key] . '</a>';
-}
-
-// --- Генерация быстрых генераций вне чата ---
+// --- Генерация быстрых кнопок ---
 $fastBtns = '';
-$fastBtns .= '<button class="fast-btn" onclick="openFastModal(\'npc\')">🗣️ NPC</button>';
-$fastBtns .= '<button class="fast-btn" onclick="openFastModal(\'name\')">📝 Имя</button>';
-$fastBtns .= '<button class="fast-btn" onclick="openFastModal(\'race\')">👤 Раса</button>';
-$fastBtns .= '<button class="fast-btn" onclick="openFastModal(\'class\')">⚔️ Класс</button>';
-$fastBtns .= '<button class="fast-btn" onclick="openFastModal(\'tavern\')">🏪 Таверна</button>';
-$fastBtns .= '<button class="fast-btn" onclick="openFastModal(\'event\')">🚗 Событие</button>';
-$fastBtns .= '<button class="fast-btn" onclick="openDiceModal()">🎲 Кости</button>';
+$fastBtns .= '<button class="fast-btn" onclick="openDiceStep1()">🎲 Бросок костей</button>';
+$fastBtns .= '<button class="fast-btn" onclick="openNpcStep1()">🗣️ NPC</button>';
 
 // --- Генерация сообщений чата (пропускаем system) ---
 $chatMsgs = '';
@@ -195,38 +170,30 @@ foreach ($_SESSION['notes'] as $i => $note) {
 // --- Загрузка шаблона и подстановка контента ---
 $template = file_get_contents(__DIR__ . '/template.html');
 $template = str_replace('{{fast_buttons}}', $fastBtns, $template);
-$template = str_replace('{{quick_buttons}}', $quickBtns, $template);
 $template = str_replace('{{chat_messages}}', $chatMsgs, $template);
 $template = str_replace('{{notes_block}}', $notesBlock, $template);
 echo $template;
 ?>
 <script>
-function openFastModal(action) {
-    showModal('Генерация...');
-    fetch('', {
-        method: 'POST',
-        headers: {'Content-Type': 'application/x-www-form-urlencoded'},
-        body: 'fast_action=' + encodeURIComponent(action)
-    })
-    .then(r => r.text())
-    .then(txt => {
-        document.getElementById('modal-content').innerHTML = txt;
-        document.getElementById('modal-save').onclick = function() { saveNote(txt); closeModal(); };
-    });
-}
-function openDiceModal() {
-    showModal('<form id="dice-form" onsubmit="return rollDice()">Бросить <input type="number" id="dice-count" value="1" min="1" max="20" style="width:40px;">d<input type="number" id="dice-sides" value="20" min="2" max="100" style="width:50px;"> <br><input type="text" id="dice-label" placeholder="Комментарий (необязательно)" style="margin-top:8px;width:90%"><br><button type="submit" class="modal-save" style="margin-top:10px;">Бросить</button></form>');
+// --- Dice Modal Steps ---
+function openDiceStep1() {
+    showModal('<b>Выберите тип кости:</b><br>' +
+        ['d3','d4','d6','d8','d10','d12','d20','d100'].map(d => `<button onclick=\'openDiceStep2("${d}")\' class=\'fast-btn\'>${d}</button>`).join(' ')
+    );
     document.getElementById('modal-save').style.display = 'none';
 }
-function rollDice() {
+function openDiceStep2(dice) {
+    showModal(`<b>Сколько бросков ${dice}?</b><br><input type=number id=dice-count value=1 min=1 max=20 style=\'width:60px\'><br><input type=text id=dice-label placeholder=\'Комментарий (необязательно)\' style=\'margin-top:8px;width:90%\'><br><button class=\'fast-btn\' onclick=\'getDiceResult("${dice}")\'>Бросить</button>`);
+    document.getElementById('modal-save').style.display = 'none';
+}
+function getDiceResult(dice) {
     let count = document.getElementById('dice-count').value;
-    let sides = document.getElementById('dice-sides').value;
     let label = document.getElementById('dice-label').value;
-    let dice = count + 'd' + sides;
+    let diceStr = count + dice;
     fetch('', {
         method: 'POST',
         headers: {'Content-Type': 'application/x-www-form-urlencoded'},
-        body: 'fast_action=dice&dice=' + encodeURIComponent(dice) + '&label=' + encodeURIComponent(label)
+        body: 'fast_action=dice_result&dice=' + encodeURIComponent(diceStr) + '&label=' + encodeURIComponent(label)
     })
     .then(r => r.text())
     .then(txt => {
@@ -234,8 +201,42 @@ function rollDice() {
         document.getElementById('modal-save').style.display = '';
         document.getElementById('modal-save').onclick = function() { saveNote(txt); closeModal(); };
     });
-    return false;
 }
+// --- NPC Modal Steps ---
+const npcRaces = ['Человек','Эльф','Гном','Полуорк','Полурослик','Тифлинг','Драконорожденный','Полуэльф','Дворф','Гоблин','Орк','Кобольд','Ящеролюд','Гоблин','Гном','Хоббит'];
+const npcClasses = ['Без класса','Воин','Паладин','Колдун','Маг','Разбойник','Следопыт','Жрец','Бард','Варвар','Плут','Монах','Чародей','Друид'];
+const npcProfs = ['Прохожий','Стражник','Тавернщик','Торговец','Кузнец','Наёмник','Жрец','Преступник','Ремесленник','Охотник','Повар','Писарь','Мастер гильдии','Путешественник','Мудрец'];
+let npcRace = '', npcClass = '', npcProf = '';
+function openNpcStep1() {
+    showModal('<b>Выберите расу NPC:</b><br>' + npcRaces.map(r => `<button onclick=\'openNpcStep2("${r}")\' class=\'fast-btn\'>${r}</button>`).join(' '));
+    document.getElementById('modal-save').style.display = 'none';
+}
+function openNpcStep2(race) {
+    npcRace = race;
+    showModal('<b>Выберите класс NPC:</b><br>' + npcClasses.map(c => `<button onclick=\'openNpcStep3("${c}")\' class=\'fast-btn\'>${c}</button>`).join(' '));
+    document.getElementById('modal-save').style.display = 'none';
+}
+function openNpcStep3(cls) {
+    npcClass = cls;
+    showModal('<b>Выберите профессию NPC:</b><br>' + npcProfs.map(p => `<button onclick=\'getNpcResult("${p}")\' class=\'fast-btn\'>${p}</button>`).join(' '));
+    document.getElementById('modal-save').style.display = 'none';
+}
+function getNpcResult(prof) {
+    npcProf = prof;
+    showModal('Генерация NPC...');
+    fetch('', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/x-www-form-urlencoded'},
+        body: 'fast_action=npc_result&race=' + encodeURIComponent(npcRace) + '&class=' + encodeURIComponent(npcClass) + '&prof=' + encodeURIComponent(npcProf)
+    })
+    .then(r => r.text())
+    .then(txt => {
+        document.getElementById('modal-content').innerHTML = txt;
+        document.getElementById('modal-save').style.display = '';
+        document.getElementById('modal-save').onclick = function() { saveNote(txt); closeModal(); };
+    });
+}
+// --- Modal & Notes ---
 function showModal(content) {
     document.getElementById('modal-content').innerHTML = content;
     document.getElementById('modal-bg').classList.add('active');
