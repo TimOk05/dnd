@@ -204,17 +204,17 @@ foreach ($_SESSION['chat'] as $msg) {
 // --- Генерация блока заметок ---
 $notesBlock = '';
 foreach ($_SESSION['notes'] as $i => $note) {
-    // Ищем строку Имя: ...
+    // Ищем строку с именем по разным вариантам
     $plain = strip_tags(str_replace(['<br>', "\n"], "\n", $note));
-    $lines = explode("\n", $plain);
+    $lines = array_filter(array_map('trim', explode("\n", $plain)));
     $nameLine = '';
     foreach ($lines as $line) {
-        if (preg_match('/^(Имя|Name):/iu', trim($line))) {
-            $nameLine = trim($line);
+        if (preg_match('/^(Имя|Name|Имя NPC|Имя персонажа)\s*:/iu', $line)) {
+            $nameLine = $line;
             break;
         }
     }
-    $preview = $nameLine ?: (count($lines) ? trim($lines[0]) : '');
+    $preview = $nameLine ?: (count($lines) ? $lines[0] : '(нет данных)');
     $notesBlock .= '<div class="note-item" onclick="expandNote(' . $i . ')">' . htmlspecialchars($preview, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8') . '<button class="note-remove" onclick="event.stopPropagation();removeNote(' . $i . ')">×</button></div>';
 }
 
@@ -399,4 +399,14 @@ function expandNote(idx) {
 }
 // Передаём все заметки в JS
 window.allNotes = <?php echo json_encode($_SESSION['notes'], JSON_UNESCAPED_UNICODE); ?>;
+// Debug: выводим первую строку каждой заметки в консоль
+if (window.allNotes) {
+    window.allNotes.forEach((n, i) => {
+        let plain = n.replace(/<[^>]+>/g, '\n');
+        let lines = plain.split(/\n/).map(l => l.trim()).filter(Boolean);
+        let nameLine = lines.find(l => /^(Имя|Name|Имя NPC|Имя персонажа)\s*:/i.test(l));
+        let preview = nameLine || (lines.length ? lines[0] : '(нет данных)');
+        console.log('Заметка', i, 'превью:', preview);
+    });
+}
 </script>
