@@ -20,11 +20,7 @@ if (isset($_POST['remove_note'])) {
 // --- Быстрые генерации через AJAX ---
 if (isset($_POST['fast_action'])) {
     $action = $_POST['fast_action'];
-    // Временно для отладки:
-    if ($action === 'npc_result') {
-        echo '<div class="result-segment"><b>Описание:</b> Тестовый результат NPC</div><div class="npc-summary"><b>Короткая характеристика:</b><br>Оружие: меч<br>Урон: 1d8+2<br>Способность: Яростный выпад<br>Хиты: 18</div>';
-        exit;
-    }
+    // Тестовый блок для бросков можно оставить, но для NPC убираем:
     if ($action === 'dice_result') {
         echo '<div class="result-segment">Бросок: 2d6<br>Результаты: 3, 5</div><div class="result-segment-alt">Сумма: 8</div>';
         exit;
