@@ -178,13 +178,12 @@ echo $template;
 <script>
 // --- Dice Modal Steps ---
 function openDiceStep1() {
-    showModal('<b>Выберите тип кости:</b><br>' +
-        ['d3','d4','d6','d8','d10','d12','d20','d100'].map(d => `<button onclick=\'openDiceStep2("${d}")\' class=\'fast-btn\'>${d}</button>`).join(' ')
-    );
+    showModal('<b class="mini-menu-title">Выберите тип кости:</b><div class="mini-menu-btns">' +
+        ['d3','d4','d6','d8','d10','d12','d20','d100'].map(d => `<button onclick=\'openDiceStep2("${d}")\' class=\'fast-btn\'>${d}</button>`).join(' ') + '</div>');
     document.getElementById('modal-save').style.display = 'none';
 }
 function openDiceStep2(dice) {
-    showModal(`<b>Сколько бросков ${dice}?</b><br><input type=number id=dice-count value=1 min=1 max=20 style=\'width:60px\'><br><input type=text id=dice-label placeholder=\'Комментарий (необязательно)\' style=\'margin-top:8px;width:90%\'><br><button class=\'fast-btn\' onclick=\'getDiceResult("${dice}")\'>Бросить</button>`);
+    showModal(`<b class="mini-menu-title">Сколько бросков ${dice}?</b><div class="npc-level-wrap"><input type=number id=dice-count value=1 min=1 max=20 style=\'width:60px\'></div><div class="npc-level-wrap"><input type=text id=dice-label placeholder=\'Комментарий (необязательно)\' style=\'margin-top:8px;width:90%\'></div><button class=\'fast-btn\' onclick=\'getDiceResult("${dice}")\'>Бросить</button>`);
     document.getElementById('modal-save').style.display = 'none';
 }
 function getDiceResult(dice) {
@@ -209,22 +208,22 @@ const npcClasses = ['Без класса','Воин','Паладин','Колд�
 const npcProfs = ['Прохожий','Стражник','Тавернщик','Торговец','Кузнец','Наёмник','Жрец','Преступник','Ремесленник','Охотник','Повар','Писарь','Мастер гильдии','Путешественник','Мудрец'];
 let npcRace = '', npcClass = '', npcProf = '', npcLevel = 1;
 function openNpcStep1() {
-    showModal('<b>Выберите расу NPC:</b><br>' + npcRaces.map(r => `<button onclick=\'openNpcStep2("${r}")\' class=\'fast-btn\'>${r}</button>`).join(' '));
+    showModal('<b class="mini-menu-title">Выберите расу NPC:</b><div class="mini-menu-btns">' + npcRaces.map(r => `<button onclick=\'openNpcStep2("${r}")\' class=\'fast-btn\'>${r}</button>`).join(' ') + '</div>');
     document.getElementById('modal-save').style.display = 'none';
 }
 function openNpcStep2(race) {
     npcRace = race;
-    showModal('<b>Выберите класс NPC:</b><br>' + npcClasses.map(c => `<button onclick=\'openNpcStepLevel("${c}")\' class=\'fast-btn\'>${c}</button>`).join(' '));
+    showModal('<b class="mini-menu-title">Выберите класс NPC:</b><div class="mini-menu-btns">' + npcClasses.map(c => `<button onclick=\'openNpcStepLevel("${c}")\' class=\'fast-btn\'>${c}</button>`).join(' ') + '</div>');
     document.getElementById('modal-save').style.display = 'none';
 }
 function openNpcStepLevel(cls) {
     npcClass = cls;
-    showModal('<b>Укажите уровень NPC (1-20):</b><br><input type=number id=npc-level value=1 min=1 max=20 style=\'width:60px\'><br><button class=\'fast-btn\' onclick=\'openNpcStep3WithLevel()\'>Далее</button>');
+    showModal('<b class="mini-menu-title">Укажите уровень NPC (1-20):</b><div class="npc-level-wrap"><input type=number id=npc-level value=1 min=1 max=20 style=\'width:60px\'></div><button class=\'fast-btn\' onclick=\'openNpcStep3WithLevel()\'>Далее</button>');
     document.getElementById('modal-save').style.display = 'none';
 }
 function openNpcStep3WithLevel() {
     npcLevel = document.getElementById('npc-level').value;
-    showModal('<b>Выберите профессию NPC:</b><br>' + npcProfs.map(p => `<button onclick=\'getNpcResult("${p}")\' class=\'fast-btn\'>${p}</button>`).join(' '));
+    showModal('<b class="mini-menu-title">Выберите профессию NPC:</b><div class="mini-menu-btns">' + npcProfs.map(p => `<button onclick=\'getNpcResult("${p}")\' class=\'fast-btn\'>${p}</button>`).join(' ') + '</div>');
     document.getElementById('modal-save').style.display = 'none';
 }
 function getNpcResult(prof) {
@@ -244,46 +243,39 @@ function getNpcResult(prof) {
 }
 // --- Форматирование результата по сегментам ---
 function formatResultSegments(txt, isNpc) {
-    // Ключи для NPC и бросков
-    const keys = [
-        'Имя', 'Раса', 'Класс', 'Уровень', 'Профессия', 'Оружие', 'Урон', 'Хиты', 'Способность',
-        'Результаты', 'Сумма', 'Комментарий'
-    ];
-    // Для NPC: собрать короткую характеристику
-    let summary = '';
     if (isNpc) {
+        // NPC: собрать основную инфу в один блок, характеристику — в отдельный
         let lines = txt.split(/<br>|\n/).map(l => l.trim()).filter(Boolean);
         let summaryLines = [];
-        let otherLines = [];
+        let infoLines = [];
         for (let line of lines) {
             let lower = line.toLowerCase();
             if (lower.startsWith('оружие:') || lower.startsWith('урон:') || lower.startsWith('способность:') || lower.startsWith('хиты:')) {
                 summaryLines.push(line);
             } else {
-                otherLines.push(line);
+                infoLines.push(line);
             }
         }
         let out = '';
-        let alt = false;
-        for (let line of otherLines) {
-            if (!line) continue;
-            let cls = alt ? 'result-segment-alt' : 'result-segment';
-            out += `<div class="${cls}">${line}</div>`;
-            alt = !alt;
+        if (infoLines.length) {
+            out += `<div class="result-segment">${infoLines.join('<br>')}</div>`;
         }
         if (summaryLines.length) {
-            out += `<div class="npc-summary">${summaryLines.map(l => l).join('<br>')}</div>`;
+            out += `<div class="npc-summary">${summaryLines.join('<br>')}</div>`;
         }
         return out;
     } else {
-        // Для бросков: просто сегменты
+        // Для бросков: бросок+результаты, сумма, комментарий (если есть)
         const lines = txt.split(/<br>|\n/).map(l => l.trim()).filter(Boolean);
-        let out = '', alt = false;
-        for (let line of lines) {
-            if (!line) continue;
-            let cls = alt ? 'result-segment-alt' : 'result-segment';
-            out += `<div class="${cls}">${line}</div>`;
-            alt = !alt;
+        let out = '';
+        if (lines.length) {
+            out += `<div class="result-segment">${lines[0]}</div>`;
+        }
+        if (lines.length > 1) {
+            out += `<div class="result-segment-alt">${lines[1]}</div>`;
+        }
+        if (lines.length > 2) {
+            out += `<div class="result-segment">${lines.slice(2).join('<br>')}</div>`;
         }
         return out;
     }
