@@ -299,10 +299,12 @@ function formatNpcBlocks(txt) {
     let blocks = [];
     let current = null;
     let lines = txt.split(/<br>|\n/).map(l => l.trim());
+    let foundBlock = false;
     for (let line of lines) {
         if (!line) continue;
         let found = blockTitles.find(t => line.toLowerCase().startsWith(t.toLowerCase() + ':'));
         if (found) {
+            foundBlock = true;
             if (current) blocks.push(current);
             current = {title: found, content: line.slice(found.length+1).trim()};
         } else if (current) {
@@ -311,11 +313,18 @@ function formatNpcBlocks(txt) {
     }
     if (current) blocks.push(current);
     let out = '';
-    for (let block of blocks) {
-        if (block.title === 'Короткая характеристика') {
-            out += `<div class="npc-summary"><b>${block.title}:</b><br>${block.content}</div>`;
-        } else {
-            out += `<div class="result-segment"><b>${block.title}:</b> ${block.content}</div>`;
+    if (foundBlock && blocks.length) {
+        for (let block of blocks) {
+            if (block.title === 'Короткая характеристика') {
+                out += `<div class="npc-summary"><b>${block.title}:</b><br>${block.content}</div>`;
+            } else {
+                out += `<div class="result-segment"><b>${block.title}:</b> ${block.content}</div>`;
+            }
+        }
+    } else {
+        // Если нет блоков с заголовками — просто разбить по абзацам
+        for (let line of lines) {
+            if (line) out += `<div class="result-segment">${line}</div>`;
         }
     }
     return out;
