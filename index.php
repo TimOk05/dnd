@@ -291,12 +291,14 @@ function fetchNpcFromAI(race, npcClass, prof, level) {
     })
     .then(r => r.json())
     .then(data => {
+        console.log('AI raw response:', data); // debug
         const aiMessage = data.choices?.[0]?.message?.content || '[Ошибка AI]';
         document.getElementById('modal-content').innerHTML = formatNpcBlocks(aiMessage);
         document.getElementById('modal-save').style.display = '';
         document.getElementById('modal-save').onclick = function() { saveNote(document.getElementById('modal-content').innerHTML); closeModal(); };
     })
-    .catch(() => {
+    .catch((e) => {
+        console.log('AI fetch error:', e);
         document.getElementById('modal-content').innerHTML = '<div class="result-segment">[Ошибка соединения с AI]</div>';
         document.getElementById('modal-save').style.display = 'none';
     });
