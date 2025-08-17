@@ -204,10 +204,18 @@ foreach ($_SESSION['chat'] as $msg) {
 // --- Генерация блока заметок ---
 $notesBlock = '';
 foreach ($_SESSION['notes'] as $i => $note) {
-    // Извлекаем первую строку из HTML (strip_tags, explode по <br> или \n)
+    // Ищем строку Имя: ...
     $plain = strip_tags(str_replace(['<br>', "\n"], "\n", $note));
-    $firstLine = explode("\n", $plain)[0];
-    $notesBlock .= '<div class="note-item" onclick="expandNote(' . $i . ')">' . htmlspecialchars($firstLine, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8') . '<button class="note-remove" onclick="event.stopPropagation();removeNote(' . $i . ')">×</button></div>';
+    $lines = explode("\n", $plain);
+    $nameLine = '';
+    foreach ($lines as $line) {
+        if (preg_match('/^(Имя|Name):/iu', trim($line))) {
+            $nameLine = trim($line);
+            break;
+        }
+    }
+    $preview = $nameLine ?: (count($lines) ? trim($lines[0]) : '');
+    $notesBlock .= '<div class="note-item" onclick="expandNote(' . $i . ')">' . htmlspecialchars($preview, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8') . '<button class="note-remove" onclick="event.stopPropagation();removeNote(' . $i . ')">×</button></div>';
 }
 
 // --- Загрузка шаблона и подстановка контента ---
