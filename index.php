@@ -71,10 +71,6 @@ if (isset($_POST['remove_note'])) {
 // --- Быстрые генерации через AJAX ---
 if (isset($_POST['fast_action'])) {
     $action = $_POST['fast_action'];
-    $apiKey = 'sk-1e898ddba737411e948af435d767e893';
-    $apiUrl = 'https://api.deepseek.com/v1/chat/completions';
-    $systemInstruction = 'Всегда пиши ответы без оформления, без markdown, без кавычек и звёздочек. Разделяй результат NPC на смысловые блоки с заголовками: Описание, Внешность, Черты характера, Особенности поведения, Короткая характеристика. В блоке Короткая характеристика выведи отдельными строками: Оружие, Урон, Способность, Хиты. Каждый блок начинай с заголовка.';
-
     // --- Кости ---
     if ($action === 'dice_result') {
         $dice = $_POST['dice'] ?? '1d20';
@@ -92,56 +88,6 @@ if (isset($_POST['fast_action'])) {
             echo 'Неверный формат кубов!';
             exit;
         }
-    }
-
-    // --- NPC ---
-    if ($action === 'npc_result') {
-        $race = $_POST['race'] ?? '';
-        $class = $_POST['class'] ?? '';
-        $prof = $_POST['prof'] ?? '';
-        $level = $_POST['level'] ?? '1';
-        $prompt = "Создай NPC для DnD. Раса: $race. Класс: $class. Профессия: $prof. Уровень: $level. Добавь имя. $systemInstruction";
-        $data = [
-            'model' => 'deepseek-chat',
-            'messages' => [
-                ['role' => 'system', 'content' => $systemInstruction],
-                ['role' => 'user', 'content' => $prompt]
-            ]
-        ];
-        $ch = curl_init($apiUrl);
-        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-        curl_setopt($ch, CURLOPT_HTTPHEADER, [
-            'Content-Type: application/json',
-            'Authorization: Bearer ' . $apiKey
-        ]);
-        curl_setopt($ch, CURLOPT_POST, true);
-        curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($data));
-        $response = curl_exec($ch);
-        $curlError = curl_error($ch);
-        curl_close($ch);
-        $result = json_decode($response, true);
-        $aiMessage = $result['choices'][0]['message']['content'] ?? '';
-        if (!$aiMessage) {
-            echo '<div class="result-segment"><b>DEBUG:</b><br><pre>' . htmlspecialchars("CURL ERROR: $curlError\nRESPONSE: $response") . '</pre></div>';
-            exit;
-        }
-        $aiMessage = preg_replace('/[*_`>#\-]+/', '', $aiMessage);
-        $aiMessage = str_replace(['"', "'", '“', '”', '«', '»'], '', $aiMessage);
-        $aiMessage = preg_replace('/\n{2,}/', "\n", $aiMessage);
-        $aiMessage = preg_replace('/\s{3,}/', "\n", $aiMessage);
-        $lines = explode("\n", $aiMessage);
-        $formatted = [];
-        foreach ($lines as $line) {
-            $line = trim($line);
-            if (mb_strlen($line) > 90) {
-                $formatted = array_merge($formatted, str_split($line, 80));
-            } else {
-                $formatted[] = $line;
-            }
-        }
-        $aiMessage = implode("<br>", $formatted);
-        echo $aiMessage;
-        exit;
     }
     echo 'Неизвестное действие';
     exit;
@@ -299,27 +245,30 @@ function openNpcStepLevel(cls) {
     showModal('<b class="mini-menu-title">Укажите уровень NPC (1-20):</b><div class="npc-level-wrap"><input type=number id=npc-level value=1 min=1 max=20 style=\'width:60px\'></div><button class=\'fast-btn\' onclick=\'openNpcStep3WithLevel()\'>Далее</button>');
     document.getElementById('modal-save').style.display = 'none';
 }
-function openNpcStep3WithLevel() {
-    npcLevel = document.getElementById('npc-level').value;
-    showModal('<b class="mini-menu-title">Выберите профессию NPC:</b><div class="mini-menu-btns">' + npcProfs.map(p => `<button onclick=\'getNpcResult("${p}")\' class=\'fast-btn\'>${p}</button>`).join(' ') + '</div>');
-    document.getElementById('modal-save').style.display = 'none';
-}
-function getNpcResult(prof) {
-    npcProf = prof;
+const DEEPSEEK_API_KEY = "sk-1e898ddba737411e948af435d767e893";
+const DEEPSEEK_API_URL = "https://api.deepseek.com/v1/chat/completions";
+function fetchNpcFromAI(race, npcClass, prof, level) {
     showModal('Генерация NPC...');
-    const form = new FormData();
-    form.append('fast_action', 'npc_result');
-    form.append('race', npcRace);
-    form.append('class', npcClass);
-    form.append('prof', npcProf);
-    form.append('level', npcLevel);
-    fetch('', {
-        method: 'POST',
-        body: form
+    const systemInstruction = 'Всегда пиши ответы без оформления, без markdown, без кавычек и звёздочек. Разделяй результат NPC на смысловые блоки с заголовками: Описание, Внешность, Черты характера, Особенности поведения, Короткая характеристика. В блоке Короткая характеристика выведи отдельными строками: Оружие, Урон, Способность, Хиты. Каждый блок начинай с заголовка.';
+    const prompt = `Создай NPC для DnD. Раса: ${race}. Класс: ${npcClass}. Профессия: ${prof}. Уровень: ${level}. Добавь имя. ${systemInstruction}`;
+    fetch(DEEPSEEK_API_URL, {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${DEEPSEEK_API_KEY}`
+        },
+        body: JSON.stringify({
+            model: "deepseek-chat",
+            messages: [
+                { role: "system", content: systemInstruction },
+                { role: "user", content: prompt }
+            ]
+        })
     })
-    .then(r => r.text())
-    .then(txt => {
-        document.getElementById('modal-content').innerHTML = formatNpcBlocks(txt);
+    .then(r => r.json())
+    .then(data => {
+        const aiMessage = data.choices?.[0]?.message?.content || '[Ошибка AI]';
+        document.getElementById('modal-content').innerHTML = formatNpcBlocks(aiMessage);
         document.getElementById('modal-save').style.display = '';
         document.getElementById('modal-save').onclick = function() { saveNote(document.getElementById('modal-content').innerHTML); closeModal(); };
     })
@@ -327,6 +276,11 @@ function getNpcResult(prof) {
         document.getElementById('modal-content').innerHTML = '<div class="result-segment">[Ошибка соединения с AI]</div>';
         document.getElementById('modal-save').style.display = 'none';
     });
+}
+function openNpcStep3WithLevel() {
+    npcLevel = document.getElementById('npc-level').value;
+    showModal('<b class="mini-menu-title">Выберите профессию NPC:</b><div class="mini-menu-btns">' + npcProfs.map(p => `<button onclick=\'fetchNpcFromAI("${npcRace}","${npcClass}","${p}","${npcLevel}")\' class=\'fast-btn\'>${p}</button>`).join(' ') + '</div>');
+    document.getElementById('modal-save').style.display = 'none';
 }
 // --- Форматирование результата NPC по смысловым блокам ---
 function formatNpcBlocks(txt) {
