@@ -1,4 +1,13 @@
 <?php
+if (isset($_GET['curltest'])) {
+    $ch = curl_init('https://api.deepseek.com/v1/chat/completions');
+    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+    $result = curl_exec($ch);
+    $err = curl_error($ch);
+    curl_close($ch);
+    echo "CURL RESULT: " . htmlspecialchars($result) . "<br>ERROR: " . htmlspecialchars($err);
+    exit;
+}
 session_start();
 
 // --- Заметки ---
@@ -105,6 +114,7 @@ if (isset($_GET['reset'])) {
     header("Location: index.php");
     exit;
 }
+
 $systemInstruction = 'Всегда пиши ответы без оформления, без markdown, без кавычек и звёздочек. Разбивай текст на короткие строки для удобства чтения во время игры.';
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['message']) && !isset($_POST['add_note']) && !isset($_POST['remove_note'])) {
     $userMessage = trim($_POST['message']);
