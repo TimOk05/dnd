@@ -319,11 +319,13 @@ function removeNote(idx) {
     }).then(() => location.reload());
 }
 function expandNote(idx) {
-    // Получить полное содержимое заметки с сервера через JS (или из DOM)
-    // Для простоты: все заметки доступны в window.allNotes
     if (window.allNotes && window.allNotes[idx]) {
-        showModal(window.allNotes[idx]);
-        document.getElementById('modal-save').style.display = 'none';
+        var content = window.allNotes[idx];
+        if (content && content.trim()) {
+            document.getElementById('modal-content').innerHTML = content;
+            document.getElementById('modal-bg').classList.add('active');
+            document.getElementById('modal-save').style.display = 'none';
+        }
     }
 }
 // Передаём все заметки в JS
