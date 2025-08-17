@@ -8,6 +8,30 @@ if (isset($_GET['curltest'])) {
     echo "CURL RESULT: " . htmlspecialchars($result) . "<br>ERROR: " . htmlspecialchars($err);
     exit;
 }
+if (isset($_GET['curltest2'])) {
+    $apiKey = 'sk-1e898ddba737411e948af435d767e893';
+    $data = [
+        'model' => 'deepseek-chat',
+        'messages' => [
+            ['role' => 'system', 'content' => 'Проверь соединение.'],
+            ['role' => 'user', 'content' => 'Скажи: соединение работает.']
+        ]
+    ];
+    $ch = curl_init('https://api.deepseek.com/v1/chat/completions');
+    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+    curl_setopt($ch, CURLOPT_POST, true);
+    curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($data));
+    curl_setopt($ch, CURLOPT_HTTPHEADER, [
+        'Content-Type: application/json',
+        'Authorization: Bearer ' . $apiKey,
+        'User-Agent: DnD-PHP-Test'
+    ]);
+    $result = curl_exec($ch);
+    $err = curl_error($ch);
+    curl_close($ch);
+    echo "CURL RESULT: " . htmlspecialchars($result) . "<br>ERROR: " . htmlspecialchars($err);
+    exit;
+}
 session_start();
 
 // --- Заметки ---
@@ -242,22 +266,39 @@ function openNpcStepLevel(cls) {
 }
 function openNpcStep3WithLevel() {
     npcLevel = document.getElementById('npc-level').value;
-    showModal('<b class="mini-menu-title">Выберите профессию NPC:</b><div class="mini-menu-btns">' + npcProfs.map(p => `<button onclick=\'getNpcResult("${p}")\' class=\'fast-btn\'>${p}</button>`).join(' ') + '</div>');
+    showModal('<b class="mini-menu-title">Выберите профессию NPC:</b><div class="mini-menu-btns">' + npcProfs.map(p => `<button onclick=\'fetchNpcFromAI("${npcRace}","${npcClass}","${p}","${npcLevel}")\' class=\'fast-btn\'>${p}</button>`).join(' ') + '</div>');
     document.getElementById('modal-save').style.display = 'none';
 }
-function getNpcResult(prof) {
-    npcProf = prof;
+const DEEPSEEK_API_KEY = "sk-1e898ddba737411e948af435d767e893";
+const DEEPSEEK_API_URL = "https://api.deepseek.com/v1/chat/completions";
+function fetchNpcFromAI(race, npcClass, prof, level) {
     showModal('Генерация NPC...');
-    fetch('', {
-        method: 'POST',
-        headers: {'Content-Type': 'application/x-www-form-urlencoded'},
-        body: 'fast_action=npc_result&race=' + encodeURIComponent(npcRace) + '&class=' + encodeURIComponent(npcClass) + '&prof=' + encodeURIComponent(npcProf) + '&level=' + encodeURIComponent(npcLevel)
+    const systemInstruction = 'Всегда пиши ответы без оформления, без markdown, без кавычек и звёздочек. Разделяй результат NPC на смысловые блоки с заголовками: Описание, Внешность, Черты характера, Особенности поведения, Короткая характеристика. В блоке Короткая характеристика выведи отдельными строками: Оружие, Урон, Способность, Хиты. Каждый блок начинай с заголовка.';
+    const prompt = `Создай NPC для DnD. Раса: ${race}. Класс: ${npcClass}. Профессия: ${prof}. Уровень: ${level}. Добавь имя. ${systemInstruction}`;
+    fetch(DEEPSEEK_API_URL, {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${DEEPSEEK_API_KEY}`
+        },
+        body: JSON.stringify({
+            model: "deepseek-chat",
+            messages: [
+                { role: "system", content: systemInstruction },
+                { role: "user", content: prompt }
+            ]
+        })
     })
-    .then(r => r.text())
-    .then(txt => {
-        document.getElementById('modal-content').innerHTML = formatNpcBlocks(txt);
+    .then(r => r.json())
+    .then(data => {
+        const aiMessage = data.choices?.[0]?.message?.content || '[Ошибка AI]';
+        document.getElementById('modal-content').innerHTML = formatNpcBlocks(aiMessage);
         document.getElementById('modal-save').style.display = '';
-        document.getElementById('modal-save').onclick = function() { saveNote(txt); closeModal(); };
+        document.getElementById('modal-save').onclick = function() { saveNote(document.getElementById('modal-content').innerHTML); closeModal(); };
+    })
+    .catch(() => {
+        document.getElementById('modal-content').innerHTML = '<div class="result-segment">[Ошибка соединения с AI]</div>';
+        document.getElementById('modal-save').style.display = 'none';
     });
 }
 // --- Форматирование результата NPC по смысловым блокам ---
