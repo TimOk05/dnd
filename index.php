@@ -253,34 +253,54 @@ fetch('pdf/d100_unique_traders.json')
   .then(data => { window.uniqueTraders = data; });
 function fetchNpcFromAI(race, npcClass, prof, level) {
     showModal('Генерация NPC...');
-    let traderExamples = '';
-    if (window.uniqueTraders && window.uniqueTraders.length > 0) {
-        let shuffled = window.uniqueTraders.slice().sort(() => Math.random() - 0.5);
-        let examples = shuffled.slice(0, 3).map(e => e.description).join('\n---\n');
-        traderExamples = `Вот примеры необычных NPC-торговцев и персонажей для вдохновения (не копируй их, а придумай нового на их основе):\n${examples}`;
-    }
-    const systemInstruction = 'Всегда пиши ответы без оформления, без markdown, без кавычек и звёздочек. Разделяй результат NPC на смысловые блоки с заголовками: Описание, Внешность, Черты характера, Особенности поведения, Короткая характеристика. В блоке Короткая характеристика выведи отдельными строками: Оружие, Урон, Способность, Хиты. Каждый блок начинай с заголовка.';
-    const prompt = `Создай NPC для DnD. Раса: ${race}. Класс: ${npcClass}. Профессия: ${prof}. Уровень: ${level}. Добавь имя. ${traderExamples}`;
-    fetch('ai.php', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-        body: 'prompt=' + encodeURIComponent(prompt) + '&system=' + encodeURIComponent(systemInstruction) + '&type=npc'
-    })
-    .then(r => r.json())
-    .then(data => {
-        if (data && data.result) {
-            document.getElementById('modal-content').innerHTML = formatNpcBlocks(data.result);
-            document.getElementById('modal-save').style.display = '';
-            document.getElementById('modal-save').onclick = function() { saveNote(document.getElementById('modal-content').innerHTML); closeModal(); };
-        } else {
-            document.getElementById('modal-content').innerHTML = '<div class="result-segment">[Ошибка AI: ' + (data.error || 'нет ответа') + ']</div>';
-            document.getElementById('modal-save').style.display = 'none';
+    // Загружаем контекст из d100_unique_traders.json
+    fetch('pdf/d100_unique_traders.json')
+      .then(r => r.json())
+      .then(json => {
+        let examples = [];
+        // Собираем массив всех NPC-примеров (если есть)
+        if (json.data && json.data.npcs && Array.isArray(json.data.npcs) && json.data.npcs.length > 0) {
+          // Берём случайные 2-3 NPC
+          let shuffled = json.data.npcs.slice().sort(() => Math.random() - 0.5);
+          examples = shuffled.slice(0, 3).map(e => {
+            let parts = [];
+            if (e.name) parts.push('Имя: ' + e.name);
+            if (e.epithet) parts.push('Прозвище: ' + e.epithet);
+            if (e.occupation_free) parts.push('Профессия: ' + e.occupation_free);
+            if (e.appearance) parts.push('Внешность: ' + e.appearance);
+            if (e.personality) parts.push('Черты: ' + e.personality);
+            if (e.motivation) parts.push('Мотивация: ' + e.motivation);
+            if (e.biography) parts.push('Биография: ' + e.biography);
+            return parts.join(' | ');
+          });
         }
-    })
-    .catch((e) => {
-        document.getElementById('modal-content').innerHTML = '<div class="result-segment">[Ошибка соединения с сервером]</div>';
-        document.getElementById('modal-save').style.display = 'none';
-    });
+        let contextBlock = '';
+        if (examples.length) {
+          contextBlock = '\nВот примеры для вдохновения:\n---\n' + examples.join('\n---\n') + '\n---\nНе копируй, а придумай нового NPC на их основе.';
+        }
+        const systemInstruction = 'Всегда пиши ответы без оформления, без markdown, без кавычек и звёздочек. Разделяй результат NPC на смысловые блоки с заголовками: Описание, Внешность, Черты характера, Особенности поведения, Короткая характеристика. В блоке Короткая характеристика выведи отдельными строками: Оружие, Урон, Способность, Хиты. Каждый блок начинай с заголовка.';
+        const prompt = `Создай NPC для DnD. Раса: ${race}. Класс: ${npcClass}. Профессия: ${prof}. Уровень: ${level}. Добавь имя.${contextBlock}`;
+        fetch('ai.php', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+            body: 'prompt=' + encodeURIComponent(prompt) + '&system=' + encodeURIComponent(systemInstruction) + '&type=npc'
+        })
+        .then(r => r.json())
+        .then(data => {
+            if (data && data.result) {
+                document.getElementById('modal-content').innerHTML = formatNpcBlocks(data.result);
+                document.getElementById('modal-save').style.display = '';
+                document.getElementById('modal-save').onclick = function() { saveNote(document.getElementById('modal-content').innerHTML); closeModal(); };
+            } else {
+                document.getElementById('modal-content').innerHTML = '<div class="result-segment">[Ошибка AI: ' + (data.error || 'нет ответа') + ']</div>';
+                document.getElementById('modal-save').style.display = 'none';
+            }
+        })
+        .catch((e) => {
+            document.getElementById('modal-content').innerHTML = '<div class="result-segment">[Ошибка соединения с сервером]</div>';
+            document.getElementById('modal-save').style.display = 'none';
+        });
+      });
 }
 function openNpcStep3WithLevel() {
     npcLevel = document.getElementById('npc-level').value;
