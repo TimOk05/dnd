@@ -310,12 +310,31 @@ function formatNpcBlocks(txt) {
         }
     }
     if (current) blocks.push(current);
+    // Объединяем все "Черты характера" в один блок, все "Короткая характеристика" в один блок
+    let mergedBlocks = [];
+    let traitsBlock = null;
+    let summaryBlock = null;
+    for (let block of blocks) {
+        if (block.title === 'Черты характера') {
+            if (!traitsBlock) traitsBlock = {title: block.title, content: ''};
+            traitsBlock.content += (traitsBlock.content ? '<br>' : '') + block.content;
+        } else if (block.title === 'Короткая характеристика') {
+            if (!summaryBlock) summaryBlock = {title: block.title, content: ''};
+            summaryBlock.content += (summaryBlock.content ? '<br>' : '') + block.content;
+        } else {
+            mergedBlocks.push(block);
+        }
+    }
+    if (traitsBlock) mergedBlocks.push(traitsBlock);
+    if (summaryBlock) mergedBlocks.push(summaryBlock);
     let out = '';
-    if (foundBlock && blocks.length) {
+    if (foundBlock && mergedBlocks.length) {
         let alt = false;
-        for (let block of blocks) {
+        for (let block of mergedBlocks) {
             if (block.title === 'Короткая характеристика') {
                 out += `<div class="npc-summary"><b>${block.title}:</b><br>${block.content}</div>`;
+            } else if (block.title === 'Черты характера') {
+                out += `<div class="result-segment-alt"><b>${block.title}:</b> ${block.content}</div>`;
             } else {
                 out += `<div class="${alt ? 'result-segment-alt' : 'result-segment'}"><b>${block.title}:</b> ${block.content}</div>`;
                 alt = !alt;
