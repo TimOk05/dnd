@@ -289,6 +289,8 @@ function openNpcStep3WithLevel() {
 }
 // --- Форматирование результата NPC по смысловым блокам ---
 function formatNpcBlocks(txt) {
+    // Очистка от markdown-символов и решёток
+    txt = txt.replace(/[\#\*`>]+/g, '');
     // Блоки: Описание, Внешность, Черты характера, Особенности поведения, Короткая характеристика
     const blockTitles = [
         'Описание', 'Внешность', 'Черты характера', 'Особенности поведения', 'Короткая характеристика'
@@ -311,17 +313,23 @@ function formatNpcBlocks(txt) {
     if (current) blocks.push(current);
     let out = '';
     if (foundBlock && blocks.length) {
+        let alt = false;
         for (let block of blocks) {
             if (block.title === 'Короткая характеристика') {
                 out += `<div class="npc-summary"><b>${block.title}:</b><br>${block.content}</div>`;
             } else {
-                out += `<div class="result-segment"><b>${block.title}:</b> ${block.content}</div>`;
+                out += `<div class="${alt ? 'result-segment-alt' : 'result-segment'}"><b>${block.title}:</b> ${block.content}</div>`;
+                alt = !alt;
             }
         }
     } else {
         // Если нет блоков с заголовками — просто разбить по абзацам
+        let alt = false;
         for (let line of lines) {
-            if (line) out += `<div class="result-segment">${line}</div>`;
+            if (line) {
+                out += `<div class="${alt ? 'result-segment-alt' : 'result-segment'}">${line}</div>`;
+                alt = !alt;
+            }
         }
     }
     return out;
