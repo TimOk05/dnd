@@ -328,12 +328,14 @@ function formatNpcBlocks(txt) {
     if (foundBlock && mergedBlocks.length) {
         let alt = false;
         for (let block of mergedBlocks) {
-            if (block.title === 'Черты характера') {
+            if (block.title === 'Черты характера' || block.title === 'Короткая характеристика') {
+                let isTraits = block.title === 'Черты характера';
+                let blockClass = isTraits ? 'traits-block' : 'npc-summary-special';
+                // Формируем чистый список: убираем дефисы/тире, пустые строки
+                let items = block.content.split(/\n/).map(s => s.replace(/^[-–—\s]+/, '').trim()).filter(Boolean);
+                let listHtml = items.map(s => `<div class='trait-line'>${s}</div>`).join('');
                 out += `<div class="result-segment-alt"><b>${block.title}</b></div>`;
-                out += `<div class="traits-block">${block.content}</div>`;
-            } else if (block.title === 'Короткая характеристика') {
-                out += `<div class="result-segment-alt"><b>${block.title}</b></div>`;
-                out += `<div class="npc-summary-special">${block.content}</div>`;
+                out += `<div class="${blockClass}">${listHtml}</div>`;
             } else {
                 out += `<div class="${alt ? 'result-segment-alt' : 'result-segment'}"><b>${block.title}:</b> ${block.content}</div>`;
                 alt = !alt;
