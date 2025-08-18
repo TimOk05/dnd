@@ -17,7 +17,16 @@ const QUICK_COMMANDS = [
   },
   {
     label: "🗣️ Создать NPC",
-    prompt: "Сгенерируй случайного NPC для DnD с именем, внешностью и короткой историей."
+    prompt: `Сгенерируй случайного NPC для DnD и выведи результат в формате JSON со следующими полями:
+{
+  "name": "Имя персонажа",
+  "race": "Раса",
+  "class": "Класс",
+  "traits": "Черты характера (коротко)",
+  "appearance": "Описание внешности",
+  "summary": "Короткая характеристика (1-2 предложения, выделить отдельно)"
+}
+Пиши только JSON, без пояснений.`
   },
   {
     label: "🚗 Событие в дороге",
@@ -98,13 +107,46 @@ export default function AssistantPage() {
           {messages.length === 0 && (
             <div className="text-gray-400 text-center mt-16">Начните диалог с AI или используйте быстрые команды</div>
           )}
-          {messages.map((msg, i) => (
-            <div key={i} className={`mb-3 flex ${msg.role === "user" ? "justify-end" : "justify-start"}`}>
-              <div className={`rounded-lg px-4 py-2 max-w-[80%] ${msg.role === "user" ? "bg-blue-100 text-right" : "bg-green-100 text-left"}`}>
-                {msg.content}
+          {messages.map((msg, i) => {
+            // Попытка распарсить JSON-ответ для NPC
+            let npc = null
+            if (msg.role === "assistant") {
+              try {
+                const match = msg.content.match(/\{[\s\S]*\}/)
+                if (match) {
+                  npc = JSON.parse(match[0])
+                }
+              } catch (e) {}
+            }
+            if (npc) {
+              return (
+                <div key={i} className="mb-3 flex justify-start">
+                  <div className="rounded-lg px-4 py-2 max-w-[80%] bg-green-100 text-left w-full">
+                    <div className="mb-2 text-lg font-bold">
+                      {npc.name} <span className="text-base font-normal">({npc.race}, {npc.class})</span>
+                    </div>
+                    <div className="mb-2">
+                      <span className="font-semibold">Черты характера: </span>{npc.traits}
+                    </div>
+                    <div className="mb-2">
+                      <span className="font-semibold">Внешность: </span>{npc.appearance}
+                    </div>
+                    <div className="mt-3 p-2 rounded bg-yellow-200 font-semibold text-center">
+                      {npc.summary}
+                    </div>
+                  </div>
+                </div>
+              )
+            }
+            // Обычный вывод для остальных сообщений
+            return (
+              <div key={i} className={`mb-3 flex ${msg.role === "user" ? "justify-end" : "justify-start"}`}>
+                <div className={`rounded-lg px-4 py-2 max-w-[80%] ${msg.role === "user" ? "bg-blue-100 text-right" : "bg-green-100 text-left"}`}>
+                  {msg.content}
+                </div>
               </div>
-            </div>
-          ))}
+            )
+          })}
         </div>
         <form
           className="flex gap-2"
