@@ -108,7 +108,7 @@ export default function AssistantPage() {
             <div className="text-gray-400 text-center mt-16">Начните диалог с AI или используйте быстрые команды</div>
           )}
           {messages.map((msg, i) => {
-            // Попытка распарсить JSON-ответ для NPC или текст с метками
+            // Улучшенный парсер для секций NPC
             let npc = null
             if (msg.role === "assistant") {
               try {
@@ -117,21 +117,32 @@ export default function AssistantPage() {
                 if (match) {
                   npc = JSON.parse(match[0])
                 } else {
-                  // 2. Попытка найти текстовые метки
-                  const name = msg.content.match(/Имя[:\-\s]+([^\n]+)/i)?.[1]?.trim()
-                  const race = msg.content.match(/Раса[:\-\s]+([^\n]+)/i)?.[1]?.trim()
-                  const cls = msg.content.match(/Класс[:\-\s]+([^\n]+)/i)?.[1]?.trim()
-                  const traits = msg.content.match(/Черты характера[:\-\s]+([\s\S]*?)(?:\n\s*Описание|\n\s*Внешность|\n\s*Особенности|\n\s*Короткая|$)/i)?.[1]?.trim()
-                  const appearance = msg.content.match(/(Описание внешности|Внешность|Особенности поведения)[:\-\s]+([\s\S]*?)(?:\n\s*Короткая|\n\s*Особенности|$)/i)?.[2]?.trim()
-                  const summary = msg.content.match(/Короткая характеристика[:\-\s]+([\s\S]*)/i)?.[1]?.trim()
-                  if (name || race || cls || traits || appearance || summary) {
+                  // 2. Парсинг по секциям
+                  const getSection = (label) => {
+                    const regex = new RegExp(label + "[\n\r\s:–-]*([\s\S]*?)(?=\n[A-ZА-ЯЁ][^\n]*:|\n[A-ZА-ЯЁ][^\n]*\n|$)", "i")
+                    return msg.content.match(regex)?.[1]?.trim() || null
+                  }
+                  const name = msg.content.match(/^[^\n]+/i)?.[0]?.trim()
+                  const description = getSection("Описание")
+                  const appearance = getSection("Внешность")
+                  const traits = getSection("Черты характера")
+                  const behavior = getSection("Особенности поведения")
+                  const summaryRaw = getSection("Короткая характеристика")
+                  // Парсим короткую характеристику на подпункты
+                  let summary = summaryRaw
+                  let summaryList = null
+                  if (summaryRaw && /[А-ЯA-Zа-яa-z]+:/u.test(summaryRaw)) {
+                    summaryList = summaryRaw.split(/\n|\r/).map(l => l.trim()).filter(Boolean)
+                  }
+                  if (name || description || appearance || traits || behavior || summary) {
                     npc = {
                       name: name || "NPC",
-                      race: race || "-",
-                      class: cls || "-",
-                      traits: traits || "-",
-                      appearance: appearance || "-",
-                      summary: summary || "-"
+                      description,
+                      appearance,
+                      traits,
+                      behavior,
+                      summary: summaryList ? null : summary,
+                      summaryList
                     }
                   }
                 }
@@ -139,25 +150,52 @@ export default function AssistantPage() {
             }
             if (npc) {
               // Черты характера — списком, если есть переносы
-              const traitsList = npc.traits.split(/\n|\r/).map(t => t.trim()).filter(Boolean)
+              const traitsList = npc.traits ? npc.traits.split(/\n|\r|•|-/).map(t => t.trim()).filter(Boolean) : []
               return (
                 <div key={i} className="mb-3 flex justify-start">
                   <div className="rounded-lg px-4 py-2 max-w-[80%] bg-green-100 text-left w-full">
                     <div className="mb-2 text-lg font-bold">
-                      {npc.name} <span className="text-base font-normal">({npc.race}, {npc.class})</span>
+                      {npc.name}
                     </div>
-                    <div className="mb-2">
-                      <span className="font-semibold">Черты характера:</span>
-                      <ul className="list-disc ml-5">
-                        {traitsList.map((t, idx) => <li key={idx}>{t}</li>)}
-                      </ul>
-                    </div>
-                    <div className="mb-2">
-                      <span className="font-semibold">Внешность:</span> {npc.appearance}
-                    </div>
-                    <div className="mt-3 p-2 rounded bg-yellow-200 font-semibold text-center">
-                      {npc.summary}
-                    </div>
+                    {npc.description && (
+                      <div className="mb-2">
+                        <span className="font-semibold">Описание:</span> {npc.description}
+                      </div>
+                    )}
+                    {npc.appearance && (
+                      <div className="mb-2">
+                        <span className="font-semibold">Внешность:</span> {npc.appearance}
+                      </div>
+                    )}
+                    {traitsList.length > 0 && (
+                      <div className="mb-2">
+                        <span className="font-semibold">Черты характера:</span>
+                        <ul className="list-disc ml-5">
+                          {traitsList.map((t, idx) => <li key={idx}>{t}</li>)}
+                        </ul>
+                      </div>
+                    )}
+                    {npc.behavior && (
+                      <div className="mb-2">
+                        <span className="font-semibold">Особенности поведения:</span>
+                        <ul className="list-disc ml-5">
+                          {npc.behavior.split(/\n|\r|•|-/).map((b, idx) => b.trim() && <li key={idx}>{b.trim()}</li>)}
+                        </ul>
+                      </div>
+                    )}
+                    {npc.summaryList && (
+                      <div className="mt-3 p-2 rounded bg-yellow-200 font-semibold">
+                        <span className="font-semibold">Короткая характеристика:</span>
+                        <ul className="list-disc ml-5">
+                          {npc.summaryList.map((s, idx) => <li key={idx}>{s}</li>)}
+                        </ul>
+                      </div>
+                    )}
+                    {npc.summary && !npc.summaryList && (
+                      <div className="mt-3 p-2 rounded bg-yellow-200 font-semibold text-center">
+                        {npc.summary}
+                      </div>
+                    )}
                   </div>
                 </div>
               )
