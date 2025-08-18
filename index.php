@@ -245,8 +245,6 @@ function openNpcStepLevel(cls) {
     showModal('<b class="mini-menu-title">Укажите уровень NPC (1-20):</b><div class="npc-level-wrap"><input type=number id=npc-level value=1 min=1 max=20 style=\'width:60px\'></div><button class=\'fast-btn\' onclick=\'openNpcStep3WithLevel()\'>Далее</button>');
     document.getElementById('modal-save').style.display = 'none';
 }
-const DEEPSEEK_API_KEY = "sk-1e898ddba737411e948af435d767e893";
-const DEEPSEEK_API_URL = "https://api.deepseek.com/v1/chat/completions";
 // --- Загрузка базы уникальных торговцев ---
 window.uniqueTraders = [];
 fetch('pdf/d100_unique_traders.json')
@@ -254,7 +252,6 @@ fetch('pdf/d100_unique_traders.json')
   .then(data => { window.uniqueTraders = data; });
 function fetchNpcFromAI(race, npcClass, prof, level) {
     showModal('Генерация NPC...');
-    // --- Формируем примеры из базы для любого NPC ---
     let traderExamples = '';
     if (window.uniqueTraders && window.uniqueTraders.length > 0) {
         let shuffled = window.uniqueTraders.slice().sort(() => Math.random() - 0.5);
@@ -263,37 +260,25 @@ function fetchNpcFromAI(race, npcClass, prof, level) {
     }
     const systemInstruction = 'Всегда пиши ответы без оформления, без markdown, без кавычек и звёздочек. Разделяй результат NPC на смысловые блоки с заголовками: Описание, Внешность, Черты характера, Особенности поведения, Короткая характеристика. В блоке Короткая характеристика выведи отдельными строками: Оружие, Урон, Способность, Хиты. Каждый блок начинай с заголовка.';
     const prompt = `Создай NPC для DnD. Раса: ${race}. Класс: ${npcClass}. Профессия: ${prof}. Уровень: ${level}. Добавь имя. ${traderExamples}`;
-    const fetchBody = {
-        model: "deepseek-chat",
-        messages: [
-            { role: "system", content: systemInstruction },
-            { role: "user", content: prompt }
-        ]
-    };
-    const fetchHeaders = {
-        "Content-Type": "application/json",
-        "Authorization": `Bearer ${DEEPSEEK_API_KEY}`
-    };
-    console.log('DEBUG: fetchNpcFromAI', {url: DEEPSEEK_API_URL, headers: fetchHeaders, body: fetchBody});
-    fetch(DEEPSEEK_API_URL, {
-        method: "POST",
-        headers: fetchHeaders,
-        body: JSON.stringify(fetchBody)
+    // --- Новый способ: отправляем запрос на серверный обработчик ---
+    fetch('ai.php', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: 'prompt=' + encodeURIComponent(prompt) + '&system=' + encodeURIComponent(systemInstruction)
     })
-    .then(r => {
-        console.log('DEBUG: fetch response status', r.status);
-        return r.json();
-    })
+    .then(r => r.json())
     .then(data => {
-        console.log('DEBUG: AI raw response:', data);
-        const aiMessage = data.choices?.[0]?.message?.content || '[Ошибка AI]';
-        document.getElementById('modal-content').innerHTML = formatNpcBlocks(aiMessage);
-        document.getElementById('modal-save').style.display = '';
-        document.getElementById('modal-save').onclick = function() { saveNote(document.getElementById('modal-content').innerHTML); closeModal(); };
+        if (data && data.result) {
+            document.getElementById('modal-content').innerHTML = formatNpcBlocks(data.result);
+            document.getElementById('modal-save').style.display = '';
+            document.getElementById('modal-save').onclick = function() { saveNote(document.getElementById('modal-content').innerHTML); closeModal(); };
+        } else {
+            document.getElementById('modal-content').innerHTML = '<div class="result-segment">[Ошибка AI: ' + (data.error || 'нет ответа') + ']</div>';
+            document.getElementById('modal-save').style.display = 'none';
+        }
     })
     .catch((e) => {
-        console.log('DEBUG: AI fetch error:', e);
-        document.getElementById('modal-content').innerHTML = '<div class="result-segment">[Ошибка соединения с AI]</div>';
+        document.getElementById('modal-content').innerHTML = '<div class="result-segment">[Ошибка соединения с сервером]</div>';
         document.getElementById('modal-save').style.display = 'none';
     });
 }
