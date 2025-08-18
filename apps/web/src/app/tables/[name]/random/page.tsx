@@ -217,39 +217,57 @@ export default function RandomTablePage() {
           </CardHeader>
           <CardContent>
             <div className="space-y-6">
-              {items.map((item, index) => (
-                <div key={index} className="border rounded-lg p-4">
-                  <div className="flex justify-between items-start mb-3">
-                    <h3 className="font-medium text-lg">
-                      Элемент #{index + 1}
-                    </h3>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => copyToClipboard(
-                        Object.entries(item)
-                          .map(([key, value]) => `${key}: ${value}`)
-                          .join('\n')
-                      )}
-                    >
-                      <Copy className="w-4 h-4" />
-                    </Button>
+              {tableName === 'npcs' ? (
+                items.map((item, index) => (
+                  <div key={index} className="border rounded-lg p-4 bg-green-50">
+                    <div className="mb-2 text-xl font-bold text-green-900">{item.name}</div>
+                    <div className="mb-2 text-base text-gray-700"><span className="font-semibold">Роль:</span> {item.role}</div>
+                    <div className="mb-2">
+                      <span className="font-semibold">Черта:</span>
+                      <ul className="list-disc ml-5">
+                        {item.trait.split(/\n|\r|•|-/).map((t, idx) => t.trim() && <li key={idx}>{t.trim()}</li>)}
+                      </ul>
+                    </div>
+                    <div className="mb-2 text-base text-gray-700"><span className="font-semibold">Голос:</span> {item.voice}</div>
+                    <div className="mt-3 p-2 rounded bg-yellow-200 font-semibold text-center">
+                      <span className="font-semibold">Секрет:</span> {item.secret}
+                    </div>
                   </div>
-                  
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    {Object.entries(item).map(([key, value]) => (
-                      <div key={key} className="space-y-1">
-                        <div className="text-sm font-medium text-gray-600 capitalize">
-                          {key.replace(/_/g, ' ')}
+                ))
+              ) : (
+                items.map((item, index) => (
+                  <div key={index} className="border rounded-lg p-4">
+                    <div className="flex justify-between items-start mb-3">
+                      <h3 className="font-medium text-lg">
+                        Элемент #{index + 1}
+                      </h3>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => copyToClipboard(
+                          Object.entries(item)
+                            .map(([key, value]) => `${key}: ${value}`)
+                            .join('\n')
+                        )}
+                      >
+                        <Copy className="w-4 h-4" />
+                      </Button>
+                    </div>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      {Object.entries(item).map(([key, value]) => (
+                        <div key={key} className="space-y-1">
+                          <div className="text-sm font-medium text-gray-600 capitalize">
+                            {key.replace(/_/g, ' ')}
+                          </div>
+                          <div className="text-base">
+                            {typeof value === 'string' ? value : JSON.stringify(value)}
+                          </div>
                         </div>
-                        <div className="text-base">
-                          {typeof value === 'string' ? value : JSON.stringify(value)}
-                        </div>
-                      </div>
-                    ))}
+                      ))}
+                    </div>
                   </div>
-                </div>
-              ))}
+                ))
+              )}
             </div>
           </CardContent>
         </Card>
