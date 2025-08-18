@@ -260,11 +260,10 @@ function fetchNpcFromAI(race, npcClass, prof, level) {
     }
     const systemInstruction = 'Всегда пиши ответы без оформления, без markdown, без кавычек и звёздочек. Разделяй результат NPC на смысловые блоки с заголовками: Описание, Внешность, Черты характера, Особенности поведения, Короткая характеристика. В блоке Короткая характеристика выведи отдельными строками: Оружие, Урон, Способность, Хиты. Каждый блок начинай с заголовка.';
     const prompt = `Создай NPC для DnD. Раса: ${race}. Класс: ${npcClass}. Профессия: ${prof}. Уровень: ${level}. Добавь имя. ${traderExamples}`;
-    // --- Новый способ: отправляем запрос на серверный обработчик ---
     fetch('ai.php', {
         method: 'POST',
         headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-        body: 'prompt=' + encodeURIComponent(prompt) + '&system=' + encodeURIComponent(systemInstruction)
+        body: 'prompt=' + encodeURIComponent(prompt) + '&system=' + encodeURIComponent(systemInstruction) + '&type=npc'
     })
     .then(r => r.json())
     .then(data => {
@@ -402,4 +401,25 @@ if (window.allNotes) {
         console.log('Заметка', i, 'превью:', preview);
     });
 }
+// --- Чат: отправка сообщения ---
+document.querySelector('form').onsubmit = function(e) {
+    e.preventDefault();
+    var msg = this.message.value.trim();
+    if (!msg) return false;
+    fetch('ai.php', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: 'prompt=' + encodeURIComponent(msg) + '&type=chat'
+    })
+    .then(r => r.json())
+    .then(data => {
+        if (data && data.result) {
+            // Добавить сообщение в чат (можно обновить страницу или динамически)
+            location.reload();
+        } else {
+            alert(data.error || 'Ошибка AI');
+        }
+    });
+    return false;
+};
 </script>

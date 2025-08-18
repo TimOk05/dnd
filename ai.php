@@ -8,22 +8,25 @@ $api_key = 'sk-1e898ddba737411e948af435d767e893';
 $api_url = 'https://api.deepseek.com/v1/chat/completions';
 $prompt = isset($_POST['prompt']) ? trim($_POST['prompt']) : '';
 $system = isset($_POST['system']) ? trim($_POST['system']) : '';
-// --- Фильтрация prompt ---
-$maxLen = 500;
-$minLen = 5;
-$allowedPattern = '/^[a-zA-Zа-яА-ЯёЁ0-9 .,!?;:\-()\[\]{}"\'\\\/@#\n\r]+$/u';
-$prompt = preg_replace('/\s+/u', ' ', $prompt); // убрать лишние пробелы
-if (mb_strlen($prompt, 'UTF-8') > $maxLen) {
-    echo json_encode(['error' => 'Запрос слишком длинный (максимум 500 символов).']);
-    exit;
-}
-if (mb_strlen($prompt, 'UTF-8') < $minLen) {
-    echo json_encode(['error' => 'Запрос слишком короткий.']);
-    exit;
-}
-if (!preg_match($allowedPattern, $prompt)) {
-    echo json_encode(['error' => 'Запрос содержит недопустимые символы. Разрешены только буквы, цифры, пробелы и базовые знаки препинания.']);
-    exit;
+$type = isset($_POST['type']) ? $_POST['type'] : 'chat';
+// --- Фильтрация только для пользовательских сообщений (чата) ---
+if ($type === 'chat') {
+    $maxLen = 500;
+    $minLen = 5;
+    $allowedPattern = '/^[a-zA-Zа-яА-ЯёЁ0-9 .,!?;:\-()\[\]{}"\'\\\/@#\n\r]+$/u';
+    $prompt = preg_replace('/\s+/u', ' ', $prompt); // убрать лишние пробелы
+    if (mb_strlen($prompt, 'UTF-8') > $maxLen) {
+        echo json_encode(['error' => 'Запрос слишком длинный (максимум 500 символов).']);
+        exit;
+    }
+    if (mb_strlen($prompt, 'UTF-8') < $minLen) {
+        echo json_encode(['error' => 'Запрос слишком короткий.']);
+        exit;
+    }
+    if (!preg_match($allowedPattern, $prompt)) {
+        echo json_encode(['error' => 'Запрос содержит недопустимые символы. Разрешены только буквы, цифры, пробелы и базовые знаки препинания.']);
+        exit;
+    }
 }
 if (!$prompt) {
     echo json_encode(['error' => 'No prompt']);
