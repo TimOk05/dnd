@@ -103,7 +103,8 @@ if (isset($_GET['reset'])) {
     exit;
 }
 
-$systemInstruction = 'Всегда пиши ответы без оформления, без markdown, без кавычек и звёздочек. Разбивай текст на короткие строки для удобства чтения во время игры.';
+// --- Новый systemInstruction для AI ---
+const systemInstruction = 'Всегда пиши параметры NPC строго в формате: Имя: ..., Раса: ..., Класс: ..., Черты характера: ... (через запятую), Особенности поведения: ... (через запятую), Короткая характеристика: ... (через запятую или отдельными строками). Не используй markdown, не добавляй лишних символов.';
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['message']) && !isset($_POST['add_note']) && !isset($_POST['remove_note'])) {
     $userMessage = trim($_POST['message']);
     if ($userMessage !== '') {
@@ -290,7 +291,7 @@ function openNpcStep3WithLevel() {
 function formatNpcBlocks(txt) {
     txt = txt.replace(/[\#\*`>]+/g, '');
     const blockTitles = [
-        'Описание', 'Внешность', 'Черты характера', 'Особенности поведения', 'Короткая характеристика'
+        'Имя', 'Раса', 'Класс', 'Описание', 'Внешность', 'Черты характера', 'Особенности поведения', 'Короткая характеристика'
     ];
     let blocks = [];
     let current = null;
@@ -304,50 +305,22 @@ function formatNpcBlocks(txt) {
             if (current) blocks.push(current);
             current = {title: found, content: line.slice(found.length+1).trim()};
         } else if (current) {
-            current.content += (current.content ? '\n' : '') + line;
+            current.content += (current.content ? ' ' : '') + line;
         }
     }
     if (current) blocks.push(current);
-    let mergedBlocks = [];
-    let traitsBlock = null;
-    let summaryBlock = null;
-    for (let block of blocks) {
-        if (block.title === 'Черты характера') {
-            if (!traitsBlock) traitsBlock = {title: block.title, content: ''};
-            traitsBlock.content += (traitsBlock.content ? '\n' : '') + block.content;
-        } else if (block.title === 'Короткая характеристика') {
-            if (!summaryBlock) summaryBlock = {title: block.title, content: ''};
-            summaryBlock.content += (summaryBlock.content ? '\n' : '') + block.content;
-        } else {
-            mergedBlocks.push(block);
-        }
-    }
-    if (traitsBlock) mergedBlocks.push(traitsBlock);
-    if (summaryBlock) mergedBlocks.push(summaryBlock);
     let out = '';
-    if (foundBlock && mergedBlocks.length) {
-        let alt = false;
-        for (let block of mergedBlocks) {
-            if (block.title === 'Черты характера' || block.title === 'Короткая характеристика') {
-                let isTraits = block.title === 'Черты характера';
-                let blockClass = isTraits ? 'traits-block' : 'npc-summary-special';
-                // Удаляем любые дефисы, тире, пробелы, табы в начале строки
-                let items = block.content.split(/\n/).map(s => s.replace(/^[\s\-–—]+/, '').trim()).filter(Boolean);
-                let listHtml = '<ul class="traits-list">' + items.map(s => `<li>${s}</li>`).join('') + '</ul>';
-                out += `<div class=\"result-segment-alt\"><b>${block.title}</b></div>`;
-                out += `<div class=\"${blockClass}\">${listHtml}</div>`;
-            } else {
-                out += `<div class=\"${alt ? 'result-segment-alt' : 'result-segment'}\"><b>${block.title}:</b> ${block.content}</div>`;
-                alt = !alt;
-            }
-        }
-    } else {
-        let alt = false;
-        for (let line of lines) {
-            if (line) {
-                out += `<div class=\"${alt ? 'result-segment-alt' : 'result-segment'}\">${line}</div>`;
-                alt = !alt;
-            }
+    let alt = false;
+    for (let block of blocks) {
+        if (block.title === 'Черты характера' || block.title === 'Особенности поведения' || block.title === 'Короткая характеристика') {
+            // Разбиваем по запятым
+            let items = block.content.split(',').map(s => s.trim()).filter(Boolean);
+            let listHtml = '<ul class="traits-list">' + items.map(s => `<li>${s}</li>`).join('') + '</ul>';
+            out += `<div class=\"result-segment-alt\"><b>${block.title}</b></div>`;
+            out += `<div class=\"traits-block\">${listHtml}</div>`;
+        } else {
+            out += `<div class=\"${alt ? 'result-segment-alt' : 'result-segment'}\"><b>${block.title}:</b> ${block.content}</div>`;
+            alt = !alt;
         }
     }
     return out;
