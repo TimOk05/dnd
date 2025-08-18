@@ -200,40 +200,60 @@ export default function AssistantPage() {
               const { npc, warning } = parseNpc(msg.content);
               if (npc && !npc.raw) {
                 return (
-                  <div key={i} className="mb-3 flex justify-start">
-                    <div className="rounded-lg px-4 py-2 max-w-[80%] bg-green-100 text-left w-full">
-                      <div className="mb-2 text-lg font-bold">
-                        {npc.name}
+                  <div key={i} className="mb-6 flex justify-start">
+                    <div className="w-full max-w-lg mx-auto bg-white/90 shadow-xl rounded-2xl p-6 border border-yellow-200">
+                      {/* Имя и раса/класс */}
+                      <div className="flex items-center gap-3 mb-2">
+                        <span className="text-3xl">🎭</span>
+                        <span className="text-2xl font-extrabold text-gray-800">{npc.name}</span>
                       </div>
+                      {(npc.race || npc.class) && (
+                        <div className="text-sm text-gray-500 mb-4 ml-10">
+                          {npc.race && <span>{npc.race}</span>}
+                          {npc.race && npc.class && <span> • </span>}
+                          {npc.class && <span>{npc.class}</span>}
+                        </div>
+                      )}
+                      {/* Описание */}
                       {npc.description && (
-                        <div className="mb-2">
-                          <span className="font-semibold">Описание:</span> {npc.description}
-                        </div>
+                        <div className="italic text-gray-700 mb-4 ml-2">{npc.description}</div>
                       )}
+                      {/* Внешность */}
                       {npc.appearance && (
-                        <div className="mb-2">
-                          <span className="font-semibold">Внешность:</span> {npc.appearance}
+                        <div className="mb-4 flex items-start gap-2 ml-2">
+                          <span className="text-xl">👁️</span>
+                          <span className="text-gray-800">{npc.appearance}</span>
                         </div>
                       )}
+                      {/* Черты характера */}
                       {npc.traits && (
-                        <div className="mb-2">
-                          <span className="font-semibold">Черты характера:</span>
-                          <ul className="list-disc ml-5">
+                        <div className="mb-4 ml-2">
+                          <div className="flex items-center gap-2 mb-1">
+                            <span className="text-xl">🧠</span>
+                            <span className="font-semibold text-gray-700">Черты характера:</span>
+                          </div>
+                          <ul className="list-disc ml-8 text-gray-800">
                             {npc.traits.split(/\n|\r|•|-/).map((t, idx) => t.trim() && <li key={idx}>{t.trim()}</li>)}
                           </ul>
                         </div>
                       )}
+                      {/* Особенности поведения */}
                       {npc.behavior && (
-                        <div className="mb-2">
-                          <span className="font-semibold">Особенности поведения:</span>
-                          <ul className="list-disc ml-5">
+                        <div className="mb-4 ml-2">
+                          <div className="flex items-center gap-2 mb-1">
+                            <span className="text-xl">⚡</span>
+                            <span className="font-semibold text-gray-700">Особенности поведения:</span>
+                          </div>
+                          <ul className="list-disc ml-8 text-gray-800">
                             {npc.behavior.split(/\n|\r|•|-/).map((b, idx) => b.trim() && <li key={idx}>{b.trim()}</li>)}
                           </ul>
                         </div>
                       )}
+                      {/* Краткая характеристика */}
                       {npc.summary && (
-                        <div className="mt-3 p-2 rounded bg-yellow-200 font-semibold text-center">
-                          {npc.summary}
+                        <div className="mt-4 p-3 rounded-xl bg-yellow-100 border border-yellow-300 font-bold text-center text-yellow-900 shadow-inner text-lg flex items-center justify-center gap-2">
+                          <span>⚔️</span>
+                          <span>{npc.summary}</span>
                         </div>
                       )}
                     </div>
