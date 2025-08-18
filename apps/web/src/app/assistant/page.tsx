@@ -108,17 +108,38 @@ export default function AssistantPage() {
             <div className="text-gray-400 text-center mt-16">Начните диалог с AI или используйте быстрые команды</div>
           )}
           {messages.map((msg, i) => {
-            // Попытка распарсить JSON-ответ для NPC
+            // Попытка распарсить JSON-ответ для NPC или текст с метками
             let npc = null
             if (msg.role === "assistant") {
               try {
+                // 1. Попытка найти JSON
                 const match = msg.content.match(/\{[\s\S]*\}/)
                 if (match) {
                   npc = JSON.parse(match[0])
+                } else {
+                  // 2. Попытка найти текстовые метки
+                  const name = msg.content.match(/Имя[:\-\s]+([^\n]+)/i)?.[1]?.trim()
+                  const race = msg.content.match(/Раса[:\-\s]+([^\n]+)/i)?.[1]?.trim()
+                  const cls = msg.content.match(/Класс[:\-\s]+([^\n]+)/i)?.[1]?.trim()
+                  const traits = msg.content.match(/Черты характера[:\-\s]+([\s\S]*?)(?:\n\s*Описание|\n\s*Внешность|\n\s*Особенности|\n\s*Короткая|$)/i)?.[1]?.trim()
+                  const appearance = msg.content.match(/(Описание внешности|Внешность|Особенности поведения)[:\-\s]+([\s\S]*?)(?:\n\s*Короткая|\n\s*Особенности|$)/i)?.[2]?.trim()
+                  const summary = msg.content.match(/Короткая характеристика[:\-\s]+([\s\S]*)/i)?.[1]?.trim()
+                  if (name || race || cls || traits || appearance || summary) {
+                    npc = {
+                      name: name || "NPC",
+                      race: race || "-",
+                      class: cls || "-",
+                      traits: traits || "-",
+                      appearance: appearance || "-",
+                      summary: summary || "-"
+                    }
+                  }
                 }
               } catch (e) {}
             }
             if (npc) {
+              // Черты характера — списком, если есть переносы
+              const traitsList = npc.traits.split(/\n|\r/).map(t => t.trim()).filter(Boolean)
               return (
                 <div key={i} className="mb-3 flex justify-start">
                   <div className="rounded-lg px-4 py-2 max-w-[80%] bg-green-100 text-left w-full">
@@ -126,10 +147,13 @@ export default function AssistantPage() {
                       {npc.name} <span className="text-base font-normal">({npc.race}, {npc.class})</span>
                     </div>
                     <div className="mb-2">
-                      <span className="font-semibold">Черты характера: </span>{npc.traits}
+                      <span className="font-semibold">Черты характера:</span>
+                      <ul className="list-disc ml-5">
+                        {traitsList.map((t, idx) => <li key={idx}>{t}</li>)}
+                      </ul>
                     </div>
                     <div className="mb-2">
-                      <span className="font-semibold">Внешность: </span>{npc.appearance}
+                      <span className="font-semibold">Внешность:</span> {npc.appearance}
                     </div>
                     <div className="mt-3 p-2 rounded bg-yellow-200 font-semibold text-center">
                       {npc.summary}
