@@ -254,13 +254,12 @@ fetch('pdf/d100_unique_traders.json')
   .then(data => { window.uniqueTraders = data; });
 function fetchNpcFromAI(race, npcClass, prof, level) {
     showModal('Генерация NPC...');
-    // --- Формируем примеры торговцев для prompt ---
+    // --- Формируем примеры из базы для любого NPC ---
     let traderExamples = '';
-    if (prof === 'Торговец' && window.uniqueTraders && window.uniqueTraders.length > 0) {
-        // Выбираем 2-3 случайных примера
+    if (window.uniqueTraders && window.uniqueTraders.length > 0) {
         let shuffled = window.uniqueTraders.slice().sort(() => Math.random() - 0.5);
         let examples = shuffled.slice(0, 3).map(e => e.description).join('\n---\n');
-        traderExamples = `Вот примеры необычных торговцев для вдохновения (не копируй их, а придумай нового на их основе):\n${examples}`;
+        traderExamples = `Вот примеры необычных NPC-торговцев и персонажей для вдохновения (не копируй их, а придумай нового на их основе):\n${examples}`;
     }
     const systemInstruction = 'Всегда пиши ответы без оформления, без markdown, без кавычек и звёздочек. Разделяй результат NPC на смысловые блоки с заголовками: Описание, Внешность, Черты характера, Особенности поведения, Короткая характеристика. В блоке Короткая характеристика выведи отдельными строками: Оружие, Урон, Способность, Хиты. Каждый блок начинай с заголовка.';
     const prompt = `Создай NPC для DnD. Раса: ${race}. Класс: ${npcClass}. Профессия: ${prof}. Уровень: ${level}. Добавь имя. ${traderExamples}`;
