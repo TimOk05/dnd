@@ -320,34 +320,36 @@ function formatNpcBlocks(txt) {
         if (block.title === 'Короткая характеристика') summary = block.content;
     }
     let out = '';
-    // Верхний блок: имя, раса, класс
-    if (name || race || cls) {
-        out += `<div class='npc-header'><b>${name}</b>${race ? ' · ' + race : ''}${cls ? ' · ' + cls : ''}</div>`;
+    // Имя — очень крупно
+    if (name) {
+        out += `<div class='npc-header'>${name}</div>`;
     }
-    // Описание и внешность (меньше, серым)
-    if (desc) {
-        out += `<div class='npc-desc'><b>Описание:</b> ${desc}</div>`;
+    // Раса и класс — крупно, в одну строку
+    if (race || cls) {
+        out += `<div class='npc-subheader'>${race ? race : ''}${race && cls ? ' · ' : ''}${cls ? cls : ''}</div>`;
     }
-    if (appear) {
-        out += `<div class='npc-desc'><b>Внешность:</b> ${appear}</div>`;
+    // Кнопка показать описание
+    if (desc || appear) {
+        out += `<span class='desc-toggle' onclick='this.nextElementSibling.classList.toggle("active")'>Показать описание</span>`;
+        out += `<div class='npc-desc'><b>Описание:</b> ${desc ? desc : ''}${desc && appear ? '<br>' : ''}${appear ? '<b>Внешность:</b> ' + appear : ''}</div>`;
     }
     // Черты характера
     if (traits) {
         let items = traits.split(',').map(s => s.replace(/^[\s\-–—]+/, '').trim()).filter(Boolean);
         let listHtml = '<ul class="traits-list">' + items.map(s => `<li>${s}</li>`).join('') + '</ul>';
-        out += `<div class='result-segment-alt'><b>Черты характера</b></div><div class='traits-block'>${listHtml}</div>`;
+        out += `<div class='result-segment-alt'><span style="font-size:1.1em;">🧠</span> <b>Черты характера</b></div><div class='traits-block'>${listHtml}</div>`;
     }
     // Особенности поведения
     if (behavior) {
         let items = behavior.split(',').map(s => s.replace(/^[\s\-–—]+/, '').trim()).filter(Boolean);
         let listHtml = '<ul class="traits-list">' + items.map(s => `<li>${s}</li>`).join('') + '</ul>';
-        out += `<div class='result-segment-alt'><b>Особенности поведения</b></div><div class='traits-block'>${listHtml}</div>`;
+        out += `<div class='result-segment-alt'><span style="font-size:1.1em;">🧠</span> <b>Особенности поведения</b></div><div class='traits-block'>${listHtml}</div>`;
     }
     // Короткая характеристика — всегда внизу, выделена
     if (summary) {
         let items = summary.split(',').map(s => s.replace(/^[\s\-–—]+/, '').trim()).filter(Boolean);
         let listHtml = '<ul class="traits-list">' + items.map(s => `<li>${s}</li>`).join('') + '</ul>';
-        out += `<div class='npc-summary-special'><b>Короткая характеристика</b>${listHtml}</div>`;
+        out += `<div class='npc-summary-special'><span class='icon'>⚔️</span><div><b>Короткая характеристика</b>${listHtml}</div></div>`;
     }
     // Fallback: если ничего не найдено — показать всё как есть
     if (!out && txt && txt.trim()) {
