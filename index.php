@@ -332,7 +332,7 @@ function formatNpcBlocks(txt) {
         let alt = false;
         for (let block of mergedBlocks) {
             if (block.title === 'Короткая характеристика') {
-                out += `<div class="npc-summary"><b>${block.title}:</b><br>${block.content}</div>`;
+                out += `<div class="npc-summary-special"><b>${block.title}:</b><br>${block.content}</div>`;
             } else if (block.title === 'Черты характера') {
                 out += `<div class="result-segment-alt"><b>${block.title}:</b> ${block.content}</div>`;
             } else {
