@@ -34,11 +34,22 @@ const QUICK_COMMANDS = [
   }
 ]
 
+const RACES = ["Человек", "Эльф", "Дварф", "Полуорк", "Гном", "Тифлинг", "Полурослик", "Драконорожденный"];
+const CLASSES = ["Воин", "Маг", "Паладин", "Плут", "Жрец", "Следопыт", "Бард", "Варвар", "Колдун"];
+const TRAITS = [
+  "Хитрый", "Честный", "Скрытный", "Добрый", "Жестокий", "Весёлый", "Молчаливый", "Циничный", "Отважный"
+];
+
 export default function AssistantPage() {
   const [messages, setMessages] = useState<Message[]>([])
   const [input, setInput] = useState("")
   const [isLoading, setIsLoading] = useState(false)
   const chatRef = useRef<HTMLDivElement>(null)
+
+  // Новое состояние для формы NPC
+  const [npcRace, setNpcRace] = useState("")
+  const [npcClass, setNpcClass] = useState("")
+  const [npcTrait, setNpcTrait] = useState("")
 
   // Загрузка истории из sessionStorage
   useEffect(() => {
@@ -83,10 +94,50 @@ export default function AssistantPage() {
     }
   }
 
+  // Новый prompt для AI с учётом выбранных параметров
+  const buildNpcPrompt = () => {
+    let prompt = `Сгенерируй NPC для DnD.`
+    if (npcRace) prompt += ` Раса: ${npcRace}.`
+    if (npcClass) prompt += ` Класс: ${npcClass}.`
+    if (npcTrait) prompt += ` Черта характера: ${npcTrait}.`
+    prompt += ` Остальные параметры (внешность, особенности поведения, краткая характеристика и т.д.) придумай сам, чтобы NPC был интересным и цельным. Верни результат в формате JSON: { "name": "...", "race": "...", "class": "...", "traits": "...", "appearance": "...", "behavior": "...", "summary": "..." } Пиши только JSON, без пояснений.`
+    return prompt
+  }
+
+  const sendNpcRequest = () => {
+    const prompt = buildNpcPrompt()
+    sendMessage(prompt)
+  }
+
   return (
     <div className="flex flex-col items-center justify-center min-h-screen bg-gray-50 p-4">
       <div className="w-full max-w-xl bg-white rounded-lg shadow-lg p-6 flex flex-col" style={{ minHeight: 500 }}>
         <h1 className="text-2xl font-bold text-center mb-4">AI-Чат для DnD Мастера</h1>
+        {/* Новая форма выбора NPC */}
+        <div className="mb-4 p-4 bg-yellow-50 rounded-lg border">
+          <div className="mb-2 font-semibold">Создать NPC с параметрами:</div>
+          <div className="flex flex-col gap-2 md:flex-row md:gap-4">
+            <select className="border rounded px-2 py-1" value={npcRace} onChange={e => setNpcRace(e.target.value)}>
+              <option value="">Раса (любой)</option>
+              {RACES.map(r => <option key={r} value={r}>{r}</option>)}
+            </select>
+            <select className="border rounded px-2 py-1" value={npcClass} onChange={e => setNpcClass(e.target.value)}>
+              <option value="">Класс (любой)</option>
+              {CLASSES.map(c => <option key={c} value={c}>{c}</option>)}
+            </select>
+            <select className="border rounded px-2 py-1" value={npcTrait} onChange={e => setNpcTrait(e.target.value)}>
+              <option value="">Черта (любая)</option>
+              {TRAITS.map(t => <option key={t} value={t}>{t}</option>)}
+            </select>
+            <button
+              className="bg-green-600 text-white px-4 py-2 rounded disabled:opacity-50"
+              onClick={sendNpcRequest}
+              disabled={isLoading}
+            >
+              Сгенерировать NPC
+            </button>
+          </div>
+        </div>
         <div className="flex gap-2 mb-4 justify-center">
           {QUICK_COMMANDS.map(cmd => (
             <button
