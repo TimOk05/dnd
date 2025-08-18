@@ -288,9 +288,7 @@ function openNpcStep3WithLevel() {
 }
 // --- Форматирование результата NPC по смысловым блокам ---
 function formatNpcBlocks(txt) {
-    // Очистка от markdown-символов и решёток
     txt = txt.replace(/[\#\*`>]+/g, '');
-    // Блоки: Описание, Внешность, Черты характера, Особенности поведения, Короткая характеристика
     const blockTitles = [
         'Описание', 'Внешность', 'Черты характера', 'Особенности поведения', 'Короткая характеристика'
     ];
@@ -310,7 +308,7 @@ function formatNpcBlocks(txt) {
         }
     }
     if (current) blocks.push(current);
-    // Объединяем все "Черты характера" в один блок, все "Короткая характеристика" в один блок
+    // Объединяем все "Черты характера" и "Короткая характеристика" в один блок
     let mergedBlocks = [];
     let traitsBlock = null;
     let summaryBlock = null;
@@ -331,17 +329,18 @@ function formatNpcBlocks(txt) {
     if (foundBlock && mergedBlocks.length) {
         let alt = false;
         for (let block of mergedBlocks) {
-            if (block.title === 'Короткая характеристика') {
-                out += `<div class="npc-summary-special"><b>${block.title}:</b><br>${block.content}</div>`;
-            } else if (block.title === 'Черты характера') {
-                out += `<div class="result-segment-alt"><b>${block.title}:</b> ${block.content}</div>`;
+            if (block.title === 'Черты характера') {
+                out += `<div class="result-segment-alt"><b>${block.title}</b></div>`;
+                out += `<div class="traits-block">${block.content}</div>`;
+            } else if (block.title === 'Короткая характеристика') {
+                out += `<div class="result-segment-alt"><b>${block.title}</b></div>`;
+                out += `<div class="npc-summary-special">${block.content}</div>`;
             } else {
                 out += `<div class="${alt ? 'result-segment-alt' : 'result-segment'}"><b>${block.title}:</b> ${block.content}</div>`;
                 alt = !alt;
             }
         }
     } else {
-        // Если нет блоков с заголовками — просто разбить по абзацам
         let alt = false;
         for (let line of lines) {
             if (line) {
