@@ -331,8 +331,8 @@ function formatNpcBlocks(txt) {
             if (block.title === 'Черты характера' || block.title === 'Короткая характеристика') {
                 let isTraits = block.title === 'Черты характера';
                 let blockClass = isTraits ? 'traits-block' : 'npc-summary-special';
-                // Формируем чистый список: убираем дефисы/тире, пустые строки
-                let items = block.content.split(/\n/).map(s => s.replace(/^[-–—\s]+/, '').trim()).filter(Boolean);
+                // Удаляем любые дефисы, тире, пробелы, табы в начале строки
+                let items = block.content.split(/\n/).map(s => s.replace(/^[\s\-–—]+/, '').trim()).filter(Boolean);
                 let listHtml = '<ul class="traits-list">' + items.map(s => `<li>${s}</li>`).join('') + '</ul>';
                 out += `<div class=\"result-segment-alt\"><b>${block.title}</b></div>`;
                 out += `<div class=\"${blockClass}\">${listHtml}</div>`;
