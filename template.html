@@ -387,6 +387,91 @@
             border-radius: 7px;
             padding: 7px 12px;
         }
+        /* --- Новый современный стиль NPC --- */
+        
+        .npc-block-modern {
+            background: #fffbe6;
+            border-radius: 18px;
+            box-shadow: 0 4px 24px #0002;
+            border: 2.5px solid #a67c52;
+            margin: 18px 0;
+            padding: 28px 22px 18px 22px;
+            max-width: 540px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        
+        .npc-modern-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 2.1em;
+            font-family: 'UnifrakturCook', cursive;
+            color: #7c4a02;
+            margin-bottom: 2px;
+        }
+        
+        .npc-modern-sub {
+            color: #a67c52;
+            font-size: 1.1em;
+            margin-bottom: 12px;
+            margin-left: 38px;
+        }
+        
+        .npc-modern-desc-toggle {
+            color: #205c3b;
+            font-size: 1em;
+            cursor: pointer;
+            margin-bottom: 8px;
+            display: inline-block;
+        }
+        
+        .npc-modern-desc {
+            background: #f8ecd0;
+            border-radius: 10px;
+            padding: 10px 14px;
+            color: #7a6c4a;
+            font-size: 1.04em;
+            margin-bottom: 12px;
+            display: none;
+        }
+        
+        .npc-modern-desc.active {
+            display: block;
+        }
+        
+        .npc-modern-block {
+            margin-bottom: 14px;
+            padding-left: 8px;
+        }
+        
+        .npc-modern-block .icon {
+            font-size: 1.2em;
+            margin-right: 6px;
+        }
+        
+        .npc-modern-list {
+            list-style: disc inside;
+            margin: 0 0 0 18px;
+            padding: 0;
+            color: #2d1b00;
+        }
+        
+        .npc-modern-summary {
+            background: #fff3c4;
+            border: 2px solid #e6b800;
+            border-radius: 12px;
+            font-weight: bold;
+            color: #a67c52;
+            font-size: 1.13em;
+            padding: 14px 10px;
+            margin-top: 18px;
+            box-shadow: 0 2px 8px #0001;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            justify-content: center;
+        }
         
         @media (max-width: 900px) {
             .parchment {
