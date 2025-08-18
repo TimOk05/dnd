@@ -247,10 +247,23 @@ function openNpcStepLevel(cls) {
 }
 const DEEPSEEK_API_KEY = "sk-1e898ddba737411e948af435d767e893";
 const DEEPSEEK_API_URL = "https://api.deepseek.com/v1/chat/completions";
+// --- Загрузка базы уникальных торговцев ---
+window.uniqueTraders = [];
+fetch('pdf/d100_unique_traders.json')
+  .then(r => r.json())
+  .then(data => { window.uniqueTraders = data; });
 function fetchNpcFromAI(race, npcClass, prof, level) {
     showModal('Генерация NPC...');
+    // --- Формируем примеры торговцев для prompt ---
+    let traderExamples = '';
+    if (prof === 'Торговец' && window.uniqueTraders && window.uniqueTraders.length > 0) {
+        // Выбираем 2-3 случайных примера
+        let shuffled = window.uniqueTraders.slice().sort(() => Math.random() - 0.5);
+        let examples = shuffled.slice(0, 3).map(e => e.description).join('\n---\n');
+        traderExamples = `Вот примеры необычных торговцев для вдохновения (не копируй их, а придумай нового на их основе):\n${examples}`;
+    }
     const systemInstruction = 'Всегда пиши ответы без оформления, без markdown, без кавычек и звёздочек. Разделяй результат NPC на смысловые блоки с заголовками: Описание, Внешность, Черты характера, Особенности поведения, Короткая характеристика. В блоке Короткая характеристика выведи отдельными строками: Оружие, Урон, Способность, Хиты. Каждый блок начинай с заголовка.';
-    const prompt = `Создай NPC для DnD. Раса: ${race}. Класс: ${npcClass}. Профессия: ${prof}. Уровень: ${level}. Добавь имя. ${systemInstruction}`;
+    const prompt = `Создай NPC для DnD. Раса: ${race}. Класс: ${npcClass}. Профессия: ${prof}. Уровень: ${level}. Добавь имя. ${traderExamples}`;
     const fetchBody = {
         model: "deepseek-chat",
         messages: [
