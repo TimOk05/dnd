@@ -296,12 +296,10 @@ function formatNpcBlocks(txt) {
     let blocks = [];
     let current = null;
     let lines = txt.split(/<br>|\n/).map(l => l.trim());
-    let foundBlock = false;
     for (let line of lines) {
         if (!line) continue;
         let found = blockTitles.find(t => line.toLowerCase().startsWith(t.toLowerCase() + ':'));
         if (found) {
-            foundBlock = true;
             if (current) blocks.push(current);
             current = {title: found, content: line.slice(found.length+1).trim()};
         } else if (current) {
@@ -309,27 +307,52 @@ function formatNpcBlocks(txt) {
         }
     }
     if (current) blocks.push(current);
+    // Собираем нужные блоки
+    let name = '', race = '', cls = '', desc = '', appear = '', traits = '', behavior = '', summary = '';
+    for (let block of blocks) {
+        if (block.title === 'Имя') name = block.content;
+        if (block.title === 'Раса') race = block.content;
+        if (block.title === 'Класс') cls = block.content;
+        if (block.title === 'Описание') desc = block.content;
+        if (block.title === 'Внешность') appear = block.content;
+        if (block.title === 'Черты характера') traits = block.content;
+        if (block.title === 'Особенности поведения') behavior = block.content;
+        if (block.title === 'Короткая характеристика') summary = block.content;
+    }
     let out = '';
-    let alt = false;
-    if (blocks.length) {
-        for (let block of blocks) {
-            if (block.title === 'Черты характера' || block.title === 'Особенности поведения' || block.title === 'Короткая характеристика') {
-                let items = block.content.split(',').map(s => s.trim()).filter(Boolean);
-                let listHtml = '<ul class="traits-list">' + items.map(s => `<li>${s}</li>`).join('') + '</ul>';
-                out += `<div class=\"result-segment-alt\"><b>${block.title}</b></div>`;
-                out += `<div class=\"traits-block\">${listHtml}</div>`;
-            } else {
-                out += `<div class=\"${alt ? 'result-segment-alt' : 'result-segment'}\"><b>${block.title}:</b> ${block.content}</div>`;
-                alt = !alt;
-            }
-        }
-    } else if (txt && txt.trim()) {
-        // Fallback: просто разбить по строкам
+    // Верхний блок: имя, раса, класс
+    if (name || race || cls) {
+        out += `<div class='npc-header'><b>${name}</b>${race ? ' · ' + race : ''}${cls ? ' · ' + cls : ''}</div>`;
+    }
+    // Описание и внешность (меньше, серым)
+    if (desc) {
+        out += `<div class='npc-desc'><b>Описание:</b> ${desc}</div>`;
+    }
+    if (appear) {
+        out += `<div class='npc-desc'><b>Внешность:</b> ${appear}</div>`;
+    }
+    // Черты характера
+    if (traits) {
+        let items = traits.split(',').map(s => s.replace(/^[\s\-–—]+/, '').trim()).filter(Boolean);
+        let listHtml = '<ul class="traits-list">' + items.map(s => `<li>${s}</li>`).join('') + '</ul>';
+        out += `<div class='result-segment-alt'><b>Черты характера</b></div><div class='traits-block'>${listHtml}</div>`;
+    }
+    // Особенности поведения
+    if (behavior) {
+        let items = behavior.split(',').map(s => s.replace(/^[\s\-–—]+/, '').trim()).filter(Boolean);
+        let listHtml = '<ul class="traits-list">' + items.map(s => `<li>${s}</li>`).join('') + '</ul>';
+        out += `<div class='result-segment-alt'><b>Особенности поведения</b></div><div class='traits-block'>${listHtml}</div>`;
+    }
+    // Короткая характеристика — всегда внизу, выделена
+    if (summary) {
+        let items = summary.split(',').map(s => s.replace(/^[\s\-–—]+/, '').trim()).filter(Boolean);
+        let listHtml = '<ul class="traits-list">' + items.map(s => `<li>${s}</li>`).join('') + '</ul>';
+        out += `<div class='npc-summary-special'><b>Короткая характеристика</b>${listHtml}</div>`;
+    }
+    // Fallback: если ничего не найдено — показать всё как есть
+    if (!out && txt && txt.trim()) {
         let fallbackLines = txt.split(/<br>|\n/).map(l => l.trim()).filter(Boolean);
         out = fallbackLines.map(l => `<div class='result-segment'>${l}</div>`).join('');
-    } else {
-        // Если совсем пусто — показать raw-ответ (для отладки)
-        out = `<div class='result-segment-alt'><b>AI не вернул результат. Raw-ответ:</b><br>${txt}</div>`;
     }
     return out;
 }
