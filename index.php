@@ -103,8 +103,8 @@ if (isset($_GET['reset'])) {
     exit;
 }
 
-// --- Новый systemInstruction для AI ---
-const systemInstruction = 'Всегда пиши параметры NPC строго в формате: Имя: ..., Раса: ..., Класс: ..., Черты характера: ... (через запятую), Особенности поведения: ... (через запятую), Короткая характеристика: ... (через запятую или отдельными строками). Не используй markdown, не добавляй лишних символов.';
+// --- Новый systemInstruction с примером ---
+const systemInstruction = 'Всегда пиши параметры NPC строго в формате: Имя: ..., Раса: ..., Класс: ..., Черты характера: ... (через запятую), Особенности поведения: ... (через запятую), Короткая характеристика: ... (через запятую или отдельными строками). Пример:\nИмя: Борис Громовержец\nРаса: Человек\nКласс: Воин\nЧерты характера: Храбрый, Упрямый, Верит в справедливость\nОсобенности поведения: Часто шутит, Любит рассказывать истории\nКороткая характеристика: Оружие — меч, Урон — 1d8+2, Способность — Ярость, Хиты — 32. Не используй markdown, не добавляй лишних символов.';
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['message']) && !isset($_POST['add_note']) && !isset($_POST['remove_note'])) {
     $userMessage = trim($_POST['message']);
     if ($userMessage !== '') {
@@ -311,17 +311,25 @@ function formatNpcBlocks(txt) {
     if (current) blocks.push(current);
     let out = '';
     let alt = false;
-    for (let block of blocks) {
-        if (block.title === 'Черты характера' || block.title === 'Особенности поведения' || block.title === 'Короткая характеристика') {
-            // Разбиваем по запятым
-            let items = block.content.split(',').map(s => s.trim()).filter(Boolean);
-            let listHtml = '<ul class="traits-list">' + items.map(s => `<li>${s}</li>`).join('') + '</ul>';
-            out += `<div class=\"result-segment-alt\"><b>${block.title}</b></div>`;
-            out += `<div class=\"traits-block\">${listHtml}</div>`;
-        } else {
-            out += `<div class=\"${alt ? 'result-segment-alt' : 'result-segment'}\"><b>${block.title}:</b> ${block.content}</div>`;
-            alt = !alt;
+    if (blocks.length) {
+        for (let block of blocks) {
+            if (block.title === 'Черты характера' || block.title === 'Особенности поведения' || block.title === 'Короткая характеристика') {
+                let items = block.content.split(',').map(s => s.trim()).filter(Boolean);
+                let listHtml = '<ul class="traits-list">' + items.map(s => `<li>${s}</li>`).join('') + '</ul>';
+                out += `<div class=\"result-segment-alt\"><b>${block.title}</b></div>`;
+                out += `<div class=\"traits-block\">${listHtml}</div>`;
+            } else {
+                out += `<div class=\"${alt ? 'result-segment-alt' : 'result-segment'}\"><b>${block.title}:</b> ${block.content}</div>`;
+                alt = !alt;
+            }
         }
+    } else if (txt && txt.trim()) {
+        // Fallback: просто разбить по строкам
+        let fallbackLines = txt.split(/<br>|\n/).map(l => l.trim()).filter(Boolean);
+        out = fallbackLines.map(l => `<div class='result-segment'>${l}</div>`).join('');
+    } else {
+        // Если совсем пусто — показать raw-ответ (для отладки)
+        out = `<div class='result-segment-alt'><b>AI не вернул результат. Raw-ответ:</b><br>${txt}</div>`;
     }
     return out;
 }
