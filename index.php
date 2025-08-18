@@ -304,21 +304,20 @@ function formatNpcBlocks(txt) {
             if (current) blocks.push(current);
             current = {title: found, content: line.slice(found.length+1).trim()};
         } else if (current) {
-            current.content += (current.content ? '<br>' : '') + line;
+            current.content += (current.content ? '\n' : '') + line;
         }
     }
     if (current) blocks.push(current);
-    // Объединяем все "Черты характера" и "Короткая характеристика" в один блок
     let mergedBlocks = [];
     let traitsBlock = null;
     let summaryBlock = null;
     for (let block of blocks) {
         if (block.title === 'Черты характера') {
             if (!traitsBlock) traitsBlock = {title: block.title, content: ''};
-            traitsBlock.content += (traitsBlock.content ? '<br>' : '') + block.content;
+            traitsBlock.content += (traitsBlock.content ? '\n' : '') + block.content;
         } else if (block.title === 'Короткая характеристика') {
             if (!summaryBlock) summaryBlock = {title: block.title, content: ''};
-            summaryBlock.content += (summaryBlock.content ? '<br>' : '') + block.content;
+            summaryBlock.content += (summaryBlock.content ? '\n' : '') + block.content;
         } else {
             mergedBlocks.push(block);
         }
