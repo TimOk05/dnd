@@ -390,12 +390,12 @@
         /* --- Новый современный стиль NPC --- */
         
         .npc-block-modern {
-            background: #fffbe6;
-            border-radius: 18px;
-            box-shadow: 0 4px 24px #0002;
+            background: linear-gradient(135deg, #fffbe6 80%, #f8ecd0 100%);
+            border-radius: 22px;
+            box-shadow: 0 6px 32px #0002;
             border: 2.5px solid #a67c52;
-            margin: 18px 0;
-            padding: 28px 22px 18px 22px;
+            margin: 22px 0;
+            padding: 36px 28px 22px 28px;
             max-width: 540px;
             margin-left: auto;
             margin-right: auto;
@@ -404,73 +404,144 @@
         .npc-modern-header {
             display: flex;
             align-items: center;
-            gap: 12px;
-            font-size: 2.1em;
+            gap: 10px;
+            font-size: 2.5em;
             font-family: 'UnifrakturCook', cursive;
             color: #7c4a02;
-            margin-bottom: 2px;
+            margin-bottom: 4px;
+            text-shadow: 0 2px 8px #fff8, 0 1px 0 #a67c5240;
+        }
+        
+        .npc-modern-header span:first-child {
+            font-size: 1.2em;
+            filter: drop-shadow(0 1px 2px #a67c5230);
         }
         
         .npc-modern-sub {
             color: #a67c52;
-            font-size: 1.1em;
-            margin-bottom: 12px;
-            margin-left: 38px;
+            font-size: 1.15em;
+            margin-bottom: 18px;
+            margin-left: 44px;
         }
         
         .npc-modern-desc-toggle {
             color: #205c3b;
-            font-size: 1em;
+            font-size: 1.08em;
             cursor: pointer;
-            margin-bottom: 8px;
+            margin-bottom: 10px;
             display: inline-block;
+            background: #e7d3a8;
+            border-radius: 7px;
+            padding: 4px 14px;
+            border: 1.5px solid #a67c52;
+            transition: background 0.2s, color 0.2s;
+        }
+        
+        .npc-modern-desc-toggle:hover {
+            background: #d0f7e0;
+            color: #7c4a02;
         }
         
         .npc-modern-desc {
             background: #f8ecd0;
             border-radius: 10px;
-            padding: 10px 14px;
+            padding: 14px 18px;
             color: #7a6c4a;
-            font-size: 1.04em;
-            margin-bottom: 12px;
+            font-size: 1.08em;
+            margin-bottom: 18px;
             display: none;
+            transition: all 0.3s;
         }
         
         .npc-modern-desc.active {
             display: block;
+            animation: fadeIn 0.4s;
+        }
+        
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: none;
+            }
         }
         
         .npc-modern-block {
-            margin-bottom: 14px;
+            margin-bottom: 18px;
             padding-left: 8px;
         }
         
         .npc-modern-block .icon {
-            font-size: 1.2em;
-            margin-right: 6px;
+            font-size: 1.15em;
+            margin-right: 7px;
         }
         
         .npc-modern-list {
-            list-style: disc inside;
+            list-style: none;
             margin: 0 0 0 18px;
             padding: 0;
             color: #2d1b00;
         }
         
+        .npc-modern-list li {
+            margin-bottom: 7px;
+            padding-left: 0;
+            position: relative;
+            line-height: 1.6;
+        }
+        
+        .npc-modern-list li:before {
+            content: '🟢';
+            margin-right: 7px;
+            font-size: 0.95em;
+            position: relative;
+            top: -1px;
+        }
+        
+        .npc-modern-block .icon {
+            vertical-align: middle;
+        }
+        
+        .npc-modern-block[data-type="behavior"] .npc-modern-list li:before {
+            content: '⚡';
+            color: #e6b800;
+        }
+        
         .npc-modern-summary {
-            background: #fff3c4;
-            border: 2px solid #e6b800;
-            border-radius: 12px;
+            background: linear-gradient(90deg, #fff3c4 80%, #ffe7b3 100%);
+            border: 2.5px solid #e6b800;
+            border-radius: 14px;
             font-weight: bold;
             color: #a67c52;
-            font-size: 1.13em;
-            padding: 14px 10px;
-            margin-top: 18px;
+            font-size: 1.18em;
+            padding: 16px 12px;
+            margin-top: 22px;
             box-shadow: 0 2px 8px #0001;
             display: flex;
             align-items: center;
-            gap: 10px;
+            gap: 12px;
             justify-content: center;
+        }
+        
+        .npc-modern-summary span:first-child {
+            font-size: 1.3em;
+        }
+        
+        @media (max-width: 700px) {
+            .npc-block-modern {
+                padding: 12px 2vw 8px 2vw;
+                max-width: 99vw;
+            }
+            .npc-modern-header {
+                font-size: 1.3em;
+            }
+            .npc-modern-summary {
+                font-size: 1em;
+                padding: 10px 4px;
+            }
         }
         
         @media (max-width: 900px) {
