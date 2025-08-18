@@ -256,38 +256,36 @@ function fetchNpcFromAI(race, npcClass, prof, level) {
     fetch('pdf/d100_unique_traders.json')
       .then(r => r.json())
       .then(json => {
-        let examples = [];
-        // 1. Пробуем взять NPC-примеры
-        if (json.data && json.data.npcs && Array.isArray(json.data.npcs) && json.data.npcs.length > 0) {
-          let shuffled = json.data.npcs.slice().sort(() => Math.random() - 0.5);
-          examples = shuffled.slice(0, 3).map(e => {
-            let parts = [];
-            if (e.name) parts.push('Имя: ' + e.name);
-            if (e.epithet) parts.push('Прозвище: ' + e.epithet);
-            if (e.occupation_free) parts.push('Профессия: ' + e.occupation_free);
-            if (e.appearance) parts.push('Внешность: ' + e.appearance);
-            if (e.personality) parts.push('Черты: ' + e.personality);
-            if (e.motivation) parts.push('Мотивация: ' + e.motivation);
-            if (e.biography) parts.push('Биография: ' + e.biography);
-            return parts.join(' | ');
-          });
+        // 1. Имя по расе или случайное
+        let name = '';
+        if (json.data && json.data.names && Array.isArray(json.data.names) && json.data.names.length > 0) {
+          let filtered = race ? json.data.names.filter(n => n.race && n.race.toLowerCase().includes(race.toLowerCase())) : json.data.names;
+          let pool = filtered.length ? filtered : json.data.names;
+          let rnd = pool[Math.floor(Math.random() * pool.length)];
+          name = rnd && rnd.name_ru ? rnd.name_ru : '';
         }
-        // 2. Если NPC-примеров нет, берём из других массивов
-        if (examples.length === 0 && json.data) {
-          let occ = json.data.occupations || [];
-          let occExamples = occ.slice().sort(() => Math.random() - 0.5).slice(0, 2).map(o => 'Профессия: ' + o.name_ru);
-          let traits = (json.data.traits || []).slice().sort(() => Math.random() - 0.5).slice(0, 2).map(t => 'Черта: ' + t);
-          let motiv = (json.data.motivation || []).slice().sort(() => Math.random() - 0.5).slice(0, 1).map(m => 'Мотивация: ' + m);
-          let appear = (json.data.appearance || []).slice().sort(() => Math.random() - 0.5).slice(0, 1).map(a => 'Внешность: ' + a);
-          let bio = (json.data.biography || []).slice().sort(() => Math.random() - 0.5).slice(0, 1).map(b => 'Биография: ' + b);
-          examples = [...occExamples, ...traits, ...motiv, ...appear, ...bio].filter(Boolean);
+        // 2. Черты, мотивация, профессия
+        let trait = '';
+        if (json.data && json.data.traits && Array.isArray(json.data.traits) && json.data.traits.length > 0) {
+          trait = json.data.traits[Math.floor(Math.random() * json.data.traits.length)];
         }
+        let motivation = '';
+        if (json.data && json.data.motivation && Array.isArray(json.data.motivation) && json.data.motivation.length > 0) {
+          motivation = json.data.motivation[Math.floor(Math.random() * json.data.motivation.length)];
+        }
+        let occ = '';
+        if (json.data && json.data.occupations && Array.isArray(json.data.occupations) && json.data.occupations.length > 0) {
+          occ = json.data.occupations[Math.floor(Math.random() * json.data.occupations.length)].name_ru;
+        }
+        // 3. Формируем контекст
         let contextBlock = '';
-        if (examples.length) {
-          contextBlock = '\nВот примеры для вдохновения:\n---\n' + examples.join('\n---\n') + '\n---\nНе копируй, а придумай нового NPC на их основе.';
-        }
+        if (name) contextBlock += `\nИмя: ${name} (используй это имя для NPC)`;
+        if (trait) contextBlock += `\nЧерта: ${trait}`;
+        if (motivation) contextBlock += `\nМотивация: ${motivation}`;
+        if (occ) contextBlock += `\nПрофессия: ${occ}`;
+        contextBlock += '\nИспользуй эти данные для вдохновения, но придумай цельного NPC.';
         const systemInstruction = 'Всегда пиши ответы без оформления, без markdown, без кавычек и звёздочек. Разделяй результат NPC на смысловые блоки с заголовками: Описание, Внешность, Черты характера, Особенности поведения, Короткая характеристика. В блоке Короткая характеристика выведи отдельными строками: Оружие, Урон, Способность, Хиты. Каждый блок начинай с заголовка.';
-        const prompt = `Создай NPC для DnD. Раса: ${race}. Класс: ${npcClass}. Профессия: ${prof}. Уровень: ${level}. Добавь имя.${contextBlock}`;
+        const prompt = `Создай NPC для DnD. Раса: ${race}. Класс: ${npcClass}. Профессия: ${prof}. Уровень: ${level}.${contextBlock}`;
         fetch('ai.php', {
             method: 'POST',
             headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
@@ -296,7 +294,7 @@ function fetchNpcFromAI(race, npcClass, prof, level) {
         .then(r => r.json())
         .then(data => {
             if (data && data.result) {
-                document.getElementById('modal-content').innerHTML = formatNpcBlocks(data.result);
+                document.getElementById('modal-content').innerHTML = formatNpcBlocks(data.result, name);
                 document.getElementById('modal-save').style.display = '';
                 document.getElementById('modal-save').onclick = function() { saveNote(document.getElementById('modal-content').innerHTML); closeModal(); };
             } else {
@@ -316,26 +314,41 @@ function openNpcStep3WithLevel() {
     document.getElementById('modal-save').style.display = 'none';
 }
 // --- Форматирование результата NPC по смысловым блокам ---
-function formatNpcBlocks(txt) {
+function formatNpcBlocks(txt, forcedName = '') {
     txt = txt.replace(/[\#\*`>]+/g, '');
     const blockTitles = [
         'Имя', 'Раса', 'Класс', 'Описание', 'Внешность', 'Черты характера', 'Особенности поведения', 'Короткая характеристика'
     ];
+    // 1. Разбиваем по ключевым словам даже если они не с новой строки
     let blocks = [];
-    let current = null;
-    let lines = txt.split(/<br>|\n/).map(l => l.trim());
-    for (let line of lines) {
-        if (!line) continue;
-        let found = blockTitles.find(t => line.toLowerCase().startsWith(t.toLowerCase() + ':'));
-        if (found) {
-            if (current) blocks.push(current);
-            current = {title: found, content: line.slice(found.length+1).trim()};
-        } else if (current) {
-            current.content += (current.content ? ' ' : '') + line;
+    let regex = /(Имя|Раса|Класс|Описание|Внешность|Черты характера|Особенности поведения|Короткая характеристика)\s*:/gi;
+    let matches = [...txt.matchAll(regex)];
+    if (matches.length > 0) {
+        for (let i = 0; i < matches.length; i++) {
+            let start = matches[i].index + matches[i][0].length;
+            let end = (i + 1 < matches.length) ? matches[i + 1].index : txt.length;
+            let title = matches[i][1];
+            let content = txt.slice(start, end).replace(/^\s+|\s+$/g, '');
+            if (content) blocks.push({ title, content });
         }
     }
-    if (current) blocks.push(current);
-    // Собираем нужные блоки
+    // 2. Если не удалось — fallback: разбить по \n и искать ключевые слова
+    if (blocks.length === 0) {
+        let lines = txt.split(/<br>|\n/).map(l => l.trim());
+        let current = null;
+        for (let line of lines) {
+            if (!line) continue;
+            let found = blockTitles.find(t => line.toLowerCase().startsWith(t.toLowerCase() + ':'));
+            if (found) {
+                if (current) blocks.push(current);
+                current = {title: found, content: line.slice(found.length+1).trim()};
+            } else if (current) {
+                current.content += (current.content ? ' ' : '') + line;
+            }
+        }
+        if (current) blocks.push(current);
+    }
+    // 3. Собираем нужные блоки
     let name = '', race = '', cls = '', desc = '', appear = '', traits = '', behavior = '', summary = '';
     for (let block of blocks) {
         if (block.title === 'Имя') name = block.content;
@@ -347,39 +360,40 @@ function formatNpcBlocks(txt) {
         if (block.title === 'Особенности поведения') behavior = block.content;
         if (block.title === 'Короткая характеристика') summary = block.content;
     }
+    // 4. Если имя не найдено, но есть forcedName — подставить
+    if (!name && forcedName) name = forcedName;
     let out = '';
     out += `<div class='npc-block-modern'>`;
-    // Имя — крупно, даже если его нет
     out += `<div class='npc-modern-header'>${name ? name : 'NPC'}</div>`;
-    // Раса и класс — под именем, если есть
     if (race || cls) {
         out += `<div class='npc-modern-sub'>${race ? race : ''}${race && cls ? ' · ' : ''}${cls ? cls : ''}</div>`;
     }
-    // Описание
     if (desc) {
         out += `<div class='npc-modern-block'><b>Описание</b><div style='margin-top:6px;'>${desc}</div></div>`;
     }
-    // Внешность
     if (appear) {
         out += `<div class='npc-modern-block'><b>Внешность</b><div style='margin-top:6px;'>${appear}</div></div>`;
     }
-    // Черты характера
     if (traits) {
         let items = traits.split(/\n|\r|•|-/).map(s => s.replace(/^[\s\-–—]+/, '').trim()).filter(Boolean);
-        let listHtml = '<ul class="npc-modern-list">' + items.map(s => `<li>${s}</li>`).join('') + '</ul>';
-        out += `<div class='npc-modern-block'><b>Черты характера</b>${listHtml}</div>`;
+        if (items.length) {
+            let listHtml = '<ul class="npc-modern-list">' + items.map(s => `<li>${s}</li>`).join('') + '</ul>';
+            out += `<div class='npc-modern-block'><b>Черты характера</b>${listHtml}</div>`;
+        }
     }
-    // Особенности поведения
     if (behavior) {
         let items = behavior.split(/\n|\r|•|-/).map(s => s.replace(/^[\s\-–—]+/, '').trim()).filter(Boolean);
-        let listHtml = '<ul class="npc-modern-list">' + items.map(s => `<li>${s}</li>`).join('') + '</ul>';
-        out += `<div class='npc-modern-block'><b>Особенности поведения</b>${listHtml}</div>`;
+        if (items.length) {
+            let listHtml = '<ul class="npc-modern-list">' + items.map(s => `<li>${s}</li>`).join('') + '</ul>';
+            out += `<div class='npc-modern-block'><b>Особенности поведения</b>${listHtml}</div>`;
+        }
     }
-    // Краткая характеристика
     if (summary) {
         let items = summary.split(/\n|\r|•|-/).map(s => s.replace(/^[\s\-–—]+/, '').trim()).filter(Boolean);
-        let listHtml = '<ul class="npc-modern-list">' + items.map(s => `<li>${s}</li>`).join('') + '</ul>';
-        out += `<div class='npc-modern-summary'><b>Краткая характеристика</b>${listHtml}</div>`;
+        if (items.length) {
+            let listHtml = '<ul class="npc-modern-list">' + items.map(s => `<li>${s}</li>`).join('') + '</ul>';
+            out += `<div class='npc-modern-summary'><b>Краткая характеристика</b>${listHtml}</div>`;
+        }
     }
     // Fallback: если ничего не найдено — показать всё как есть, но в современном блоке
     if (!name && !race && !cls && !desc && !appear && !traits && !behavior && !summary && txt && txt.trim()) {
