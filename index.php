@@ -333,11 +333,11 @@ function formatNpcBlocks(txt) {
                 let blockClass = isTraits ? 'traits-block' : 'npc-summary-special';
                 // Формируем чистый список: убираем дефисы/тире, пустые строки
                 let items = block.content.split(/\n/).map(s => s.replace(/^[-–—\s]+/, '').trim()).filter(Boolean);
-                let listHtml = items.map(s => `<div class='trait-line'>${s}</div>`).join('');
-                out += `<div class="result-segment-alt"><b>${block.title}</b></div>`;
-                out += `<div class="${blockClass}">${listHtml}</div>`;
+                let listHtml = '<ul class="traits-list">' + items.map(s => `<li>${s}</li>`).join('') + '</ul>';
+                out += `<div class=\"result-segment-alt\"><b>${block.title}</b></div>`;
+                out += `<div class=\"${blockClass}\">${listHtml}</div>`;
             } else {
-                out += `<div class="${alt ? 'result-segment-alt' : 'result-segment'}"><b>${block.title}:</b> ${block.content}</div>`;
+                out += `<div class=\"${alt ? 'result-segment-alt' : 'result-segment'}\"><b>${block.title}:</b> ${block.content}</div>`;
                 alt = !alt;
             }
         }
@@ -345,7 +345,7 @@ function formatNpcBlocks(txt) {
         let alt = false;
         for (let line of lines) {
             if (line) {
-                out += `<div class="${alt ? 'result-segment-alt' : 'result-segment'}">${line}</div>`;
+                out += `<div class=\"${alt ? 'result-segment-alt' : 'result-segment'}\">${line}</div>`;
                 alt = !alt;
             }
         }
