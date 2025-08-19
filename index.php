@@ -319,9 +319,9 @@ function formatNpcBlocks(txt, forcedName = '') {
     const blockTitles = [
         'Имя', 'Раса', 'Класс', 'Краткое описание', 'Черта характера', 'Слабость', 'Короткая характеристика', 'Описание', 'Внешность', 'Особенности поведения'
     ];
-    // 1. Разбиваем по ключевым словам с двоеточием или пробелом
+    // 1. Ищем блоки по всем вариантам (с/без двоеточия, с новой строки, по ключевым словам)
     let blocks = [];
-    let regex = /(Имя|Раса|Класс|Краткое описание|Черта характера|Слабость|Короткая характеристика|Описание|Внешность|Особенности поведения)\s*[: ]/gi;
+    let regex = /(Имя|Раса|Класс|Краткое описание|Черта характера|Слабость|Короткая характеристика|Описание|Внешность|Особенности поведения)\s*[:\- ]/gi;
     let matches = [...txt.matchAll(regex)];
     if (matches.length > 0) {
         for (let i = 0; i < matches.length; i++) {
@@ -332,37 +332,31 @@ function formatNpcBlocks(txt, forcedName = '') {
             if (content) blocks.push({ title, content });
         }
     }
-    // 2. Если не удалось — вручную разбить по ключевым словам
-    if (blocks.length === 0) {
-        let manual = {};
-        let keys = ['Описание', 'Внешность', 'Черты характера', 'Особенности поведения', 'Короткая характеристика'];
-        let last = 0;
-        for (let k of keys) {
-            let idx = txt.indexOf(k);
-            if (idx !== -1) {
-                manual[k] = txt.slice(idx + k.length).split(/[:\n]/)[1] || '';
-                last = idx + k.length;
-            }
-        }
-        if (Object.keys(manual).length) {
-            for (let k of keys) {
-                if (manual[k]) blocks.push({ title: k, content: manual[k].trim() });
-            }
-        }
-    }
-    // 3. Собираем нужные блоки
+    // 2. Если не найдено — делим текст на смысловые куски (fallback)
     let name = '', race = '', cls = '', shortdesc = '', trait = '', weakness = '', summary = '', desc = '', appear = '', behavior = '';
-    for (let block of blocks) {
-        if (block.title === 'Имя') name = block.content;
-        if (block.title === 'Раса') race = block.content;
-        if (block.title === 'Класс') cls = block.content;
-        if (block.title === 'Краткое описание') shortdesc = block.content;
-        if (block.title === 'Черта характера') trait = block.content;
-        if (block.title === 'Слабость') weakness = block.content;
-        if (block.title === 'Короткая характеристика') summary = block.content;
-        if (block.title === 'Описание') desc = block.content;
-        if (block.title === 'Внешность') appear = block.content;
-        if (block.title === 'Особенности поведения') behavior = block.content;
+    if (blocks.length === 0) {
+        // Пробуем делить по предложениям
+        let sentences = txt.split(/(?<=[.!?])\s+/);
+        if (sentences.length > 0) name = sentences[0];
+        if (sentences.length > 1) shortdesc = sentences[1];
+        if (sentences.length > 2) trait = sentences[2];
+        if (sentences.length > 3) weakness = sentences[3];
+        if (sentences.length > 4) summary = sentences[4];
+        // Остальное — подробности
+        if (sentences.length > 5) desc = sentences.slice(5).join(' ');
+    } else {
+        for (let block of blocks) {
+            if (block.title === 'Имя') name = block.content;
+            if (block.title === 'Раса') race = block.content;
+            if (block.title === 'Класс') cls = block.content;
+            if (block.title === 'Краткое описание') shortdesc = block.content;
+            if (block.title === 'Черта характера') trait = block.content;
+            if (block.title === 'Слабость') weakness = block.content;
+            if (block.title === 'Короткая характеристика') summary = block.content;
+            if (block.title === 'Описание') desc = block.content;
+            if (block.title === 'Внешность') appear = block.content;
+            if (block.title === 'Особенности поведения') behavior = block.content;
+        }
     }
     if (!name && forcedName) name = forcedName;
     let out = '';
@@ -374,32 +368,34 @@ function formatNpcBlocks(txt, forcedName = '') {
     // Две колонки: слева — короткая характеристика, справа — краткое описание, черта, слабость
     out += `<div style='display:flex;gap:18px;align-items:flex-start;margin-bottom:16px;flex-wrap:wrap;'>`;
     out += `<div style='flex:1 1 180px;min-width:160px;'>`;
-    if (summary) {
+    if (summary && summary !== '-') {
         let items = summary.split(/\n|\r|•|-/).map(s => s.replace(/^[\s\-–—]+/, '').trim()).filter(Boolean);
         if (items.length) {
             let listHtml = '<ul class="npc-modern-list">' + items.map(s => `<li>${s}</li>`).join('') + '</ul>';
             out += `<div class='npc-modern-block'><b>Короткая характеристика</b>${listHtml}</div>`;
+        } else {
+            out += `<div class='npc-modern-block'><b>Короткая характеристика</b>${summary}</div>`;
         }
     }
     out += `</div>`;
     out += `<div style='flex:1 1 220px;min-width:180px;'>`;
-    if (shortdesc) {
+    if (shortdesc && shortdesc !== '-') {
         out += `<div class='npc-modern-block'><b>Краткое описание</b><div style='margin-top:6px;'>${shortdesc}</div></div>`;
     }
-    if (trait) {
+    if (trait && trait !== '-') {
         out += `<div class='npc-modern-block'><b>Черта характера</b><div style='margin-top:6px;'>${trait}</div></div>`;
     }
-    if (weakness) {
+    if (weakness && weakness !== '-') {
         out += `<div class='npc-modern-block'><b>Слабость</b><div style='margin-top:6px;'>${weakness}</div></div>`;
     }
     out += `</div></div>`;
     // Кнопка показать описание
-    if (desc || appear || behavior) {
+    if ((desc && desc !== '-') || (appear && appear !== '-') || (behavior && behavior !== '-')) {
         out += `<button class='npc-desc-toggle-btn' onclick='this.nextElementSibling.classList.toggle("active")' style='margin:0 auto 12px auto;display:block;'>Показать описание</button>`;
         out += `<div class='npc-modern-block npc-desc-detail' style='display:none;'>`;
-        if (desc) out += `<div style='margin-bottom:8px;'><b>Описание:</b> ${desc}</div>`;
-        if (appear) out += `<div style='margin-bottom:8px;'><b>Внешность:</b> ${appear}</div>`;
-        if (behavior) out += `<div><b>Особенности поведения:</b> ${behavior}</div>`;
+        if (desc && desc !== '-') out += `<div style='margin-bottom:8px;'><b>Описание:</b> ${desc}</div>`;
+        if (appear && appear !== '-') out += `<div style='margin-bottom:8px;'><b>Внешность:</b> ${appear}</div>`;
+        if (behavior && behavior !== '-') out += `<div><b>Особенности поведения:</b> ${behavior}</div>`;
         out += `</div>`;
     }
     out += `</div>`;
@@ -411,11 +407,6 @@ function formatNpcBlocks(txt, forcedName = '') {
         };
       });
     }, 100);
-    // Проверка обязательных блоков (учитываем ‘-’ как отсутствие)
-    const requiredBlocks = [name, shortdesc, trait, weakness, summary];
-    if (requiredBlocks.some(b => !b || b.trim() === '' || b.trim() === '-' || b.trim() === '–')) {
-        return `<div class='npc-block-modern'><div class='npc-modern-header'>Ошибка</div><div class='npc-modern-block'>AI не вернул все обязательные блоки (Имя, Краткое описание, Черта характера, Слабость, Короткая характеристика). Попробуйте сгенерировать NPC ещё раз.</div></div>`;
-    }
     return out;
 }
 // --- Форматирование результата бросков ---
