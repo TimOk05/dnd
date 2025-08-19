@@ -355,7 +355,7 @@ function formatNpcBlocks(txt, forcedName = '') {
         }
     }
     if (!name && forcedName) name = forcedName;
-    // Левая колонка: только строки с ключевыми словами
+    // Левая верхняя: только строки с ключевыми словами
     let summaryLines = [];
     if (summary && summary !== '-') {
         summaryLines = summary.split(/\n|\r|•|-/).map(s => s.trim()).filter(Boolean).filter(s => /оружие|урон|хиты|способност/i.test(s));
@@ -371,8 +371,8 @@ function formatNpcBlocks(txt, forcedName = '') {
     if (race || cls) {
         out += `<div class='npc-modern-sub'>${race ? race : ''}${race && cls ? ' · ' : ''}${cls ? cls : ''}</div>`;
     }
-    // 4 колонки
-    out += `<div class='npc-columns-4'>`;
+    // 2x2 колонки
+    out += `<div class='npc-grid-2x2'>`;
     // 1. Короткая характеристика
     out += `<div class='npc-col-block'>`;
     if (summaryLines.length) {

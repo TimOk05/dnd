@@ -398,13 +398,41 @@
             border: 1.5px solid #e6d3a8;
             margin: 18px 0;
             padding: 22px 16px 14px 16px;
-            max-width: 520px;
+            max-width: 700px;
             margin-left: auto;
             margin-right: auto;
         }
         
+        .npc-grid-2x2 {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            grid-template-rows: 1fr 1fr;
+            gap: 18px 18px;
+            margin-bottom: 18px;
+        }
+        
+        .npc-col-block {
+            background: #f8ecd0;
+            border-radius: 8px;
+            padding: 12px 14px;
+            font-size: 0.97em;
+            min-height: 80px;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-start;
+            box-sizing: border-box;
+            box-shadow: 0 1px 4px #0001;
+        }
+        
+        .npc-col-block b {
+            color: #7c4a02;
+            font-weight: bold;
+            margin-bottom: 4px;
+            font-size: 1em;
+        }
+        
         .npc-modern-header {
-            font-size: 1.2em;
+            font-size: 1.15em;
             font-family: 'UnifrakturCook', cursive;
             color: #7c4a02;
             margin-bottom: 4px;
@@ -565,9 +593,12 @@
         }
         
         @media (max-width: 900px) {
-            .npc-columns-4 {
-                grid-template-columns: 1fr 1fr;
-                grid-auto-rows: minmax(80px, auto);
+            .npc-block-modern {
+                max-width: 99vw;
+            }
+            .npc-grid-2x2 {
+                grid-template-columns: 1fr;
+                grid-template-rows: auto auto auto auto;
             }
         }
         
