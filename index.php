@@ -335,14 +335,12 @@ function formatNpcBlocks(txt, forcedName = '') {
     // 2. Если не найдено — делим текст на смысловые куски (fallback)
     let name = '', race = '', cls = '', shortdesc = '', trait = '', weakness = '', summary = '', desc = '', appear = '', behavior = '';
     if (blocks.length === 0) {
-        // Пробуем делить по предложениям
         let sentences = txt.split(/(?<=[.!?])\s+/);
         if (sentences.length > 0) name = sentences[0];
         if (sentences.length > 1) shortdesc = sentences[1];
         if (sentences.length > 2) trait = sentences[2];
         if (sentences.length > 3) weakness = sentences[3];
         if (sentences.length > 4) summary = sentences[4];
-        // Остальное — подробности
         if (sentences.length > 5) desc = sentences.slice(5).join(' ');
     } else {
         for (let block of blocks) {
@@ -359,6 +357,17 @@ function formatNpcBlocks(txt, forcedName = '') {
         }
     }
     if (!name && forcedName) name = forcedName;
+    // Короткая характеристика: только строки с ключевыми словами
+    let summaryLines = [];
+    if (summary && summary !== '-') {
+        summaryLines = summary.split(/\n|\r|•|-/).map(s => s.trim()).filter(Boolean).filter(s => /оружие|урон|хиты|способност/i.test(s));
+    }
+    // В правой колонке брать только первое предложение (до первой точки)
+    function firstSentence(str) {
+        if (!str || str === '-') return '';
+        let m = str.match(/^[^.?!]+[.?!]?/);
+        return m ? m[0].trim() : str.trim();
+    }
     let out = '';
     out += `<div class='npc-block-modern'>`;
     out += `<div class='npc-modern-header'>${name ? name : 'NPC'}</div>`;
@@ -368,25 +377,20 @@ function formatNpcBlocks(txt, forcedName = '') {
     // Две колонки: слева — короткая характеристика, справа — краткое описание, черта, слабость
     out += `<div style='display:flex;gap:18px;align-items:flex-start;margin-bottom:16px;flex-wrap:wrap;'>`;
     out += `<div style='flex:1 1 180px;min-width:160px;'>`;
-    if (summary && summary !== '-') {
-        let items = summary.split(/\n|\r|•|-/).map(s => s.replace(/^[\s\-–—]+/, '').trim()).filter(Boolean);
-        if (items.length) {
-            let listHtml = '<ul class="npc-modern-list">' + items.map(s => `<li>${s}</li>`).join('') + '</ul>';
-            out += `<div class='npc-modern-block'><b>Короткая характеристика</b>${listHtml}</div>`;
-        } else {
-            out += `<div class='npc-modern-block'><b>Короткая характеристика</b>${summary}</div>`;
-        }
+    if (summaryLines.length) {
+        let listHtml = '<ul class="npc-modern-list">' + summaryLines.map(s => `<li>${s}</li>`).join('') + '</ul>';
+        out += `<div class='npc-modern-block'><b>Короткая характеристика</b>${listHtml}</div>`;
     }
     out += `</div>`;
     out += `<div style='flex:1 1 220px;min-width:180px;'>`;
     if (shortdesc && shortdesc !== '-') {
-        out += `<div class='npc-modern-block'><b>Краткое описание</b><div style='margin-top:6px;'>${shortdesc}</div></div>`;
+        out += `<div class='npc-modern-block'><b>Краткое описание</b><div style='margin-top:6px;'>${firstSentence(shortdesc)}</div></div>`;
     }
     if (trait && trait !== '-') {
-        out += `<div class='npc-modern-block'><b>Черта характера</b><div style='margin-top:6px;'>${trait}</div></div>`;
+        out += `<div class='npc-modern-block'><b>Черта характера</b><div style='margin-top:6px;'>${firstSentence(trait)}</div></div>`;
     }
     if (weakness && weakness !== '-') {
-        out += `<div class='npc-modern-block'><b>Слабость</b><div style='margin-top:6px;'>${weakness}</div></div>`;
+        out += `<div class='npc-modern-block'><b>Слабость</b><div style='margin-top:6px;'>${firstSentence(weakness)}</div></div>`;
     }
     out += `</div></div>`;
     // Кнопка показать описание
