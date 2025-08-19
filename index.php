@@ -319,7 +319,6 @@ function formatNpcBlocks(txt, forcedName = '') {
     const blockTitles = [
         'Имя', 'Раса', 'Класс', 'Краткое описание', 'Черта характера', 'Слабость', 'Короткая характеристика', 'Описание', 'Внешность', 'Особенности поведения'
     ];
-    // 1. Ищем блоки по всем вариантам (с/без двоеточия, с новой строки, по ключевым словам)
     let blocks = [];
     let regex = /(Имя|Раса|Класс|Краткое описание|Черта характера|Слабость|Короткая характеристика|Описание|Внешность|Особенности поведения)\s*[:\- ]/gi;
     let matches = [...txt.matchAll(regex)];
@@ -332,7 +331,6 @@ function formatNpcBlocks(txt, forcedName = '') {
             if (content) blocks.push({ title, content });
         }
     }
-    // 2. Если не найдено — делим текст на смысловые куски (fallback)
     let name = '', race = '', cls = '', shortdesc = '', trait = '', weakness = '', summary = '', desc = '', appear = '', behavior = '';
     if (blocks.length === 0) {
         let sentences = txt.split(/(?<=[.!?])\s+/);
@@ -357,12 +355,11 @@ function formatNpcBlocks(txt, forcedName = '') {
         }
     }
     if (!name && forcedName) name = forcedName;
-    // Короткая характеристика: только строки с ключевыми словами
+    // Левая колонка: только строки с ключевыми словами
     let summaryLines = [];
     if (summary && summary !== '-') {
         summaryLines = summary.split(/\n|\r|•|-/).map(s => s.trim()).filter(Boolean).filter(s => /оружие|урон|хиты|способност/i.test(s));
     }
-    // В правой колонке брать только первое предложение (до первой точки)
     function firstSentence(str) {
         if (!str || str === '-') return '';
         let m = str.match(/^[^.?!]+[.?!]?/);
@@ -374,28 +371,37 @@ function formatNpcBlocks(txt, forcedName = '') {
     if (race || cls) {
         out += `<div class='npc-modern-sub'>${race ? race : ''}${race && cls ? ' · ' : ''}${cls ? cls : ''}</div>`;
     }
-    // Две колонки: слева — короткая характеристика, справа — краткое описание, черта, слабость
-    out += `<div style='display:flex;gap:18px;align-items:flex-start;margin-bottom:16px;flex-wrap:wrap;'>`;
-    out += `<div style='flex:1 1 180px;min-width:160px;'>`;
+    // 4 колонки
+    out += `<div class='npc-columns-4'>`;
+    // 1. Короткая характеристика
+    out += `<div class='npc-col-block'>`;
     if (summaryLines.length) {
         let listHtml = '<ul class="npc-modern-list">' + summaryLines.map(s => `<li>${s}</li>`).join('') + '</ul>';
-        out += `<div class='npc-modern-block'><b>Короткая характеристика</b>${listHtml}</div>`;
+        out += `<b>Короткая характеристика</b>${listHtml}`;
     }
     out += `</div>`;
-    out += `<div style='flex:1 1 220px;min-width:180px;'>`;
+    // 2. Краткое описание
+    out += `<div class='npc-col-block'>`;
     if (shortdesc && shortdesc !== '-') {
-        out += `<div class='npc-modern-block'><b>Краткое описание</b><div style='margin-top:6px;'>${firstSentence(shortdesc)}</div></div>`;
+        out += `<b>Краткое описание</b>${firstSentence(shortdesc)}`;
     }
+    out += `</div>`;
+    // 3. Черта характера
+    out += `<div class='npc-col-block'>`;
     if (trait && trait !== '-') {
-        out += `<div class='npc-modern-block'><b>Черта характера</b><div style='margin-top:6px;'>${firstSentence(trait)}</div></div>`;
+        out += `<b>Черта характера</b>${firstSentence(trait)}`;
     }
+    out += `</div>`;
+    // 4. Слабость
+    out += `<div class='npc-col-block'>`;
     if (weakness && weakness !== '-') {
-        out += `<div class='npc-modern-block'><b>Слабость</b><div style='margin-top:6px;'>${firstSentence(weakness)}</div></div>`;
+        out += `<b>Слабость</b>${firstSentence(weakness)}`;
     }
-    out += `</div></div>`;
+    out += `</div>`;
+    out += `</div>`;
     // Кнопка показать описание
     if ((desc && desc !== '-') || (appear && appear !== '-') || (behavior && behavior !== '-')) {
-        out += `<button class='npc-desc-toggle-btn' onclick='this.nextElementSibling.classList.toggle("active")' style='margin:0 auto 12px auto;display:block;'>Показать описание</button>`;
+        out += `<button class='npc-desc-toggle-btn' onclick='this.nextElementSibling.classList.toggle("active")'>Показать описание</button>`;
         out += `<div class='npc-modern-block npc-desc-detail' style='display:none;'>`;
         if (desc && desc !== '-') out += `<div style='margin-bottom:8px;'><b>Описание:</b> ${desc}</div>`;
         if (appear && appear !== '-') out += `<div style='margin-bottom:8px;'><b>Внешность:</b> ${appear}</div>`;
