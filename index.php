@@ -355,7 +355,7 @@ function formatNpcBlocks(txt, forcedName = '') {
         }
     }
     if (!name && forcedName) name = forcedName;
-    // Левая верхняя: только строки с ключевыми словами
+    // Технические параметры: только строки с ключевыми словами
     let summaryLines = [];
     if (summary && summary !== '-') {
         summaryLines = summary.split(/\n|\r|•|-/).map(s => s.trim()).filter(Boolean).filter(s => /оружие|урон|хиты|способност/i.test(s));
@@ -371,34 +371,20 @@ function formatNpcBlocks(txt, forcedName = '') {
     if (race || cls) {
         out += `<div class='npc-modern-sub'>${race ? race : ''}${race && cls ? ' · ' : ''}${cls ? cls : ''}</div>`;
     }
-    // 2x2 колонки
-    out += `<div class='npc-grid-2x2'>`;
-    // 1. Короткая характеристика
-    out += `<div class='npc-col-block'>`;
+    // Адаптивные карточки
     if (summaryLines.length) {
         let listHtml = '<ul class="npc-modern-list">' + summaryLines.map(s => `<li>${s}</li>`).join('') + '</ul>';
-        out += `<b>Короткая характеристика</b>${listHtml}`;
+        out += `<div class='npc-col-block'><span style='font-size:1.2em;'>⚔️</span> <b>Короткая характеристика</b>${listHtml}</div>`;
     }
-    out += `</div>`;
-    // 2. Краткое описание
-    out += `<div class='npc-col-block'>`;
     if (shortdesc && shortdesc !== '-') {
-        out += `<b>Краткое описание</b>${firstSentence(shortdesc)}`;
+        out += `<div class='npc-col-block'><span style='font-size:1.2em;'>📜</span> <b>Краткое описание</b>${firstSentence(shortdesc)}</div>`;
     }
-    out += `</div>`;
-    // 3. Черта характера
-    out += `<div class='npc-col-block'>`;
     if (trait && trait !== '-') {
-        out += `<b>Черта характера</b>${firstSentence(trait)}`;
+        out += `<div class='npc-col-block'><span style='font-size:1.2em;'>🧠</span> <b>Черта характера</b>${firstSentence(trait)}</div>`;
     }
-    out += `</div>`;
-    // 4. Слабость
-    out += `<div class='npc-col-block'>`;
     if (weakness && weakness !== '-') {
-        out += `<b>Слабость</b>${firstSentence(weakness)}`;
+        out += `<div class='npc-col-block'><span style='font-size:1.2em;'>⚡</span> <b>Слабость</b>${firstSentence(weakness)}</div>`;
     }
-    out += `</div>`;
-    out += `</div>`;
     // Кнопка показать описание
     if ((desc && desc !== '-') || (appear && appear !== '-') || (behavior && behavior !== '-')) {
         out += `<button class='npc-desc-toggle-btn' onclick='this.nextElementSibling.classList.toggle("active")'>Показать описание</button>`;
