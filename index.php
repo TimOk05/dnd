@@ -104,7 +104,7 @@ if (isset($_GET['reset'])) {
 }
 
 // --- Новый systemInstruction с усиленными требованиями ---
-const systemInstruction = 'Всегда пиши параметры NPC строго по блокам, каждый блок с заголовком и двоеточием, без markdown, без кавычек, без лишних символов. Строго соблюдай порядок и названия блоков: Имя: ..., Раса: ..., Класс: ..., Описание: ..., Внешность: ..., Черты характера: ... (через запятую), Особенности поведения: ... (через запятую), Короткая характеристика: ... (через запятую или отдельными строками). Не добавляй пустые блоки. Пример:\nИмя: Борис Громовержец\nРаса: Человек\nКласс: Воин\nОписание: Храбрый воин, сражающийся за справедливость.\nВнешность: Высокий, с густой бородой и шрамом на щеке.\nЧерты характера: Храбрый, Упрямый, Верит в справедливость\nОсобенности поведения: Часто шутит, Любит рассказывать истории\nКороткая характеристика: Оружие — меч, Урон — 1d8+2, Способность — Ярость, Хиты — 32.';
+const systemInstruction = 'Всегда пиши параметры NPC строго по блокам, каждый блок с заголовком и двоеточием, без markdown, без кавычек, без лишних символов. Строго соблюдай порядок и названия блоков: Имя: ..., Раса: ..., Класс: ..., Краткое описание: ..., Черта характера: ..., Слабость: ..., Короткая характеристика: ... (через запятую или отдельными строками), Описание: ..., Внешность: ..., Особенности поведения: ... Не добавляй пустые блоки. Пример:\nИмя: Борис Громовержец\nРаса: Человек\nКласс: Воин\nКраткое описание: Храбрый воин, сражающийся за справедливость.\nЧерта характера: Упрямый\nСлабость: Не умеет прощать\nКороткая характеристика: Оружие — меч, Урон — 1d8+2, Способность — Ярость, Хиты — 32.\nОписание: ...\nВнешность: ...\nОсобенности поведения: ...';
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['message']) && !isset($_POST['add_note']) && !isset($_POST['remove_note'])) {
     $userMessage = trim($_POST['message']);
     if ($userMessage !== '') {
@@ -317,11 +317,11 @@ function openNpcStep3WithLevel() {
 function formatNpcBlocks(txt, forcedName = '') {
     txt = txt.replace(/[\#\*`>]+/g, '');
     const blockTitles = [
-        'Имя', 'Раса', 'Класс', 'Описание', 'Внешность', 'Черты характера', 'Особенности поведения', 'Короткая характеристика'
+        'Имя', 'Раса', 'Класс', 'Краткое описание', 'Черта характера', 'Слабость', 'Короткая характеристика', 'Описание', 'Внешность', 'Особенности поведения'
     ];
     // 1. Разбиваем по ключевым словам даже если они не с новой строки
     let blocks = [];
-    let regex = /(Имя|Раса|Класс|Описание|Внешность|Черты характера|Особенности поведения|Короткая характеристика)\s*:/gi;
+    let regex = /(Имя|Раса|Класс|Краткое описание|Черта характера|Слабость|Короткая характеристика|Описание|Внешность|Особенности поведения)\s*:/gi;
     let matches = [...txt.matchAll(regex)];
     if (matches.length > 0) {
         for (let i = 0; i < matches.length; i++) {
@@ -349,18 +349,19 @@ function formatNpcBlocks(txt, forcedName = '') {
         if (current) blocks.push(current);
     }
     // 3. Собираем нужные блоки
-    let name = '', race = '', cls = '', desc = '', appear = '', traits = '', behavior = '', summary = '';
+    let name = '', race = '', cls = '', shortdesc = '', trait = '', weakness = '', summary = '', desc = '', appear = '', behavior = '';
     for (let block of blocks) {
         if (block.title === 'Имя') name = block.content;
         if (block.title === 'Раса') race = block.content;
         if (block.title === 'Класс') cls = block.content;
+        if (block.title === 'Краткое описание') shortdesc = block.content;
+        if (block.title === 'Черта характера') trait = block.content;
+        if (block.title === 'Слабость') weakness = block.content;
+        if (block.title === 'Короткая характеристика') summary = block.content;
         if (block.title === 'Описание') desc = block.content;
         if (block.title === 'Внешность') appear = block.content;
-        if (block.title === 'Черты характера') traits = block.content;
         if (block.title === 'Особенности поведения') behavior = block.content;
-        if (block.title === 'Короткая характеристика') summary = block.content;
     }
-    // 4. Если имя не найдено, но есть forcedName — подставить
     if (!name && forcedName) name = forcedName;
     let out = '';
     out += `<div class='npc-block-modern'>`;
@@ -368,39 +369,47 @@ function formatNpcBlocks(txt, forcedName = '') {
     if (race || cls) {
         out += `<div class='npc-modern-sub'>${race ? race : ''}${race && cls ? ' · ' : ''}${cls ? cls : ''}</div>`;
     }
-    if (desc) {
-        out += `<div class='npc-modern-block'><b>Описание</b><div style='margin-top:6px;'>${desc}</div></div>`;
-    }
-    if (appear) {
-        out += `<div class='npc-modern-block'><b>Внешность</b><div style='margin-top:6px;'>${appear}</div></div>`;
-    }
-    if (traits) {
-        let items = traits.split(/\n|\r|•|-/).map(s => s.replace(/^[\s\-–—]+/, '').trim()).filter(Boolean);
-        if (items.length) {
-            let listHtml = '<ul class="npc-modern-list">' + items.map(s => `<li>${s}</li>`).join('') + '</ul>';
-            out += `<div class='npc-modern-block'><b>Черты характера</b>${listHtml}</div>`;
-        }
-    }
-    if (behavior) {
-        let items = behavior.split(/\n|\r|•|-/).map(s => s.replace(/^[\s\-–—]+/, '').trim()).filter(Boolean);
-        if (items.length) {
-            let listHtml = '<ul class="npc-modern-list">' + items.map(s => `<li>${s}</li>`).join('') + '</ul>';
-            out += `<div class='npc-modern-block'><b>Особенности поведения</b>${listHtml}</div>`;
-        }
-    }
+    // Две колонки: слева — короткая характеристика, справа — краткое описание, черта, слабость
+    out += `<div style='display:flex;gap:18px;align-items:flex-start;margin-bottom:16px;flex-wrap:wrap;'>`;
+    out += `<div style='flex:1 1 180px;min-width:160px;'>`;
     if (summary) {
         let items = summary.split(/\n|\r|•|-/).map(s => s.replace(/^[\s\-–—]+/, '').trim()).filter(Boolean);
         if (items.length) {
             let listHtml = '<ul class="npc-modern-list">' + items.map(s => `<li>${s}</li>`).join('') + '</ul>';
-            out += `<div class='npc-modern-summary'><b>Краткая характеристика</b>${listHtml}</div>`;
+            out += `<div class='npc-modern-block'><b>Короткая характеристика</b>${listHtml}</div>`;
         }
     }
-    // Fallback: если ничего не найдено — показать всё как есть, но в современном блоке
-    if (!name && !race && !cls && !desc && !appear && !traits && !behavior && !summary && txt && txt.trim()) {
-        let fallbackLines = txt.split(/<br>|\n/).map(l => l.trim()).filter(Boolean);
-        out += fallbackLines.map(l => `<div class='npc-modern-block'>${l}</div>`).join('');
+    out += `</div>`;
+    out += `<div style='flex:1 1 220px;min-width:180px;'>`;
+    if (shortdesc) {
+        out += `<div class='npc-modern-block'><b>Краткое описание</b><div style='margin-top:6px;'>${shortdesc}</div></div>`;
+    }
+    if (trait) {
+        out += `<div class='npc-modern-block'><b>Черта характера</b><div style='margin-top:6px;'>${trait}</div></div>`;
+    }
+    if (weakness) {
+        out += `<div class='npc-modern-block'><b>Слабость</b><div style='margin-top:6px;'>${weakness}</div></div>`;
+    }
+    out += `</div></div>`;
+    // Кнопка показать описание
+    if (desc || appear || behavior) {
+        out += `<button class='npc-desc-toggle-btn' onclick='this.nextElementSibling.classList.toggle("active")' style='margin:0 auto 12px auto;display:block;'>Показать описание</button>`;
+        out += `<div class='npc-modern-block npc-desc-detail' style='display:none;'>`;
+        if (desc) out += `<div style='margin-bottom:8px;'><b>Описание:</b> ${desc}</div>`;
+        if (appear) out += `<div style='margin-bottom:8px;'><b>Внешность:</b> ${appear}</div>`;
+        if (behavior) out += `<div><b>Особенности поведения:</b> ${behavior}</div>`;
+        out += `</div>`;
     }
     out += `</div>`;
+    // JS для плавного раскрытия
+    setTimeout(() => {
+      document.querySelectorAll('.npc-desc-toggle-btn').forEach(btn => {
+        btn.onclick = function() {
+          let block = this.nextElementSibling;
+          block.style.display = block.style.display === 'block' ? 'none' : 'block';
+        };
+      });
+    }, 100);
     return out;
 }
 // --- Форматирование результата бросков ---
