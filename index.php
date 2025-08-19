@@ -319,9 +319,9 @@ function formatNpcBlocks(txt, forcedName = '') {
     const blockTitles = [
         'Имя', 'Раса', 'Класс', 'Краткое описание', 'Черта характера', 'Слабость', 'Короткая характеристика', 'Описание', 'Внешность', 'Особенности поведения'
     ];
-    // 1. Разбиваем по ключевым словам даже если они не с новой строки
+    // 1. Разбиваем по ключевым словам с двоеточием или пробелом
     let blocks = [];
-    let regex = /(Имя|Раса|Класс|Краткое описание|Черта характера|Слабость|Короткая характеристика|Описание|Внешность|Особенности поведения)\s*:/gi;
+    let regex = /(Имя|Раса|Класс|Краткое описание|Черта характера|Слабость|Короткая характеристика|Описание|Внешность|Особенности поведения)\s*[: ]/gi;
     let matches = [...txt.matchAll(regex)];
     if (matches.length > 0) {
         for (let i = 0; i < matches.length; i++) {
@@ -332,21 +332,23 @@ function formatNpcBlocks(txt, forcedName = '') {
             if (content) blocks.push({ title, content });
         }
     }
-    // 2. Если не удалось — fallback: разбить по \n и искать ключевые слова
+    // 2. Если не удалось — вручную разбить по ключевым словам
     if (blocks.length === 0) {
-        let lines = txt.split(/<br>|\n/).map(l => l.trim());
-        let current = null;
-        for (let line of lines) {
-            if (!line) continue;
-            let found = blockTitles.find(t => line.toLowerCase().startsWith(t.toLowerCase() + ':'));
-            if (found) {
-                if (current) blocks.push(current);
-                current = {title: found, content: line.slice(found.length+1).trim()};
-            } else if (current) {
-                current.content += (current.content ? ' ' : '') + line;
+        let manual = {};
+        let keys = ['Описание', 'Внешность', 'Черты характера', 'Особенности поведения', 'Короткая характеристика'];
+        let last = 0;
+        for (let k of keys) {
+            let idx = txt.indexOf(k);
+            if (idx !== -1) {
+                manual[k] = txt.slice(idx + k.length).split(/[:\n]/)[1] || '';
+                last = idx + k.length;
             }
         }
-        if (current) blocks.push(current);
+        if (Object.keys(manual).length) {
+            for (let k of keys) {
+                if (manual[k]) blocks.push({ title: k, content: manual[k].trim() });
+            }
+        }
     }
     // 3. Собираем нужные блоки
     let name = '', race = '', cls = '', shortdesc = '', trait = '', weakness = '', summary = '', desc = '', appear = '', behavior = '';
@@ -401,7 +403,6 @@ function formatNpcBlocks(txt, forcedName = '') {
         out += `</div>`;
     }
     out += `</div>`;
-    // JS для плавного раскрытия
     setTimeout(() => {
       document.querySelectorAll('.npc-desc-toggle-btn').forEach(btn => {
         btn.onclick = function() {
@@ -410,12 +411,6 @@ function formatNpcBlocks(txt, forcedName = '') {
         };
       });
     }, 100);
-    // Fallback: если нет ни одного блока кроме имени, выводить весь текст
-    const hasBlocks = shortdesc || trait || weakness || summary || desc || appear || behavior;
-    if (!hasBlocks) {
-        let fallbackLines = txt.split(/<br>|\n/).map(l => l.trim()).filter(Boolean);
-        return `<div class='npc-block-modern'><div class='npc-modern-header'>${name ? name : 'NPC'}</div>` + fallbackLines.map(l => `<div class='npc-modern-block'>${l}</div>`).join('') + `</div>`;
-    }
     return out;
 }
 // --- Форматирование результата бросков ---
