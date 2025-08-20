@@ -557,18 +557,12 @@ function formatNpcBlocks(txt, forcedName = '') {
                 
                 // Радикальная очистка от дублирования технических параметров
                 if (cleanAbility.includes('Короткая характеристика')) {
-                    // Ищем последнее вхождение "Способность:" и берем только его
-                    let lastAbilityIndex = cleanAbility.lastIndexOf('Способность:');
-                    if (lastAbilityIndex !== -1) {
-                        cleanAbility = cleanAbility.substring(lastAbilityIndex);
-                    }
+                    // Полностью убираем "Короткая характеристика" и все что после нее
+                    cleanAbility = cleanAbility.replace(/короткая характеристика.*/i, '').trim();
                     
-                    // Если все еще есть дублирование оружия, убираем его
-                    if (cleanAbility.includes('Оружие:')) {
-                        let weaponIndex = cleanAbility.indexOf('Оружие:');
-                        if (weaponIndex > 0) {
-                            cleanAbility = cleanAbility.substring(0, weaponIndex).trim();
-                        }
+                    // Если способность стала пустой, ищем альтернативу
+                    if (cleanAbility.length < 5) {
+                        cleanAbility = null;
                     }
                 }
                 
@@ -581,14 +575,11 @@ function formatNpcBlocks(txt, forcedName = '') {
                 cleanAbility = cleanAbility.replace(/\s+/g, ' ').replace(/^\s+|\s+$/g, '');
                 
                 // Проверяем, что способность не пустая и не содержит дублирования
-                if (cleanAbility.length > 10) {
+                if (cleanAbility && cleanAbility.length > 10 && !cleanAbility.includes('Оружие:') && !cleanAbility.includes('Хиты:') && !cleanAbility.includes('Урон:')) {
                                     // Финальная проверка на дублирование
                 if (cleanAbility.includes('Оружие:') || cleanAbility.includes('Хиты:') || cleanAbility.includes('Урон:')) {
-                    // Если все еще есть дублирование технических параметров, убираем их
-                    let parts = cleanAbility.split(/\s+(?:Оружие|Урон|Хиты):/);
-                    if (parts.length > 1) {
-                        cleanAbility = parts[0].trim();
-                    }
+                    // Полностью убираем все технические параметры
+                    cleanAbility = cleanAbility.replace(/\s*(?:Оружие|Урон|Хиты):\s*[^\s]+/gi, '').trim();
                     
                     // Если способность стала слишком короткой, ищем альтернативу
                     if (cleanAbility.length < 5) {
@@ -658,13 +649,43 @@ function formatNpcBlocks(txt, forcedName = '') {
         let allLines = txt.split(/[.!?]/).map(s => s.trim()).filter(Boolean);
         for (let line of allLines) {
             let lineLower = line.toLowerCase();
-            if (/способност|маги|стихийн|удар|ярость|вдохновение|защита|атака|лечение|исцеление|невидимость|телепортация|иллюзия|превращение|призыв|контроль|проклятие|благословение|кара|стиль/i.test(lineLower) && line.length > 10 && line.length < 100) {
+            // Ищем строки с ключевыми словами способностей, но исключаем технические параметры
+            if (/способност|маги|стихийн|удар|ярость|вдохновение|защита|атака|лечение|исцеление|невидимость|телепортация|иллюзия|превращение|призыв|контроль|проклятие|благословение|кара|стиль|божественн|священн|меткая|стрела|непоколебим/i.test(lineLower) && 
+                line.length > 10 && line.length < 100 &&
+                !line.includes('Оружие:') && !line.includes('Хиты:') && !line.includes('Урон:')) {
+                
                 // Берем первые 3-4 слова как способность
                 let words = line.split(/\s+/).slice(0, 4).join(' ');
                 if (words.length > 5 && words.length < 50) {
                     techParams.ability = 'Способность: ' + words;
                     break;
                 }
+            }
+        }
+    }
+    
+    // 5.6. Финальный резерв - создаем способность на основе класса
+    if (!techParams.ability && cls) {
+        let classLower = cls.toLowerCase();
+        let abilityMap = {
+            'паладин': 'Божественная кара',
+            'варвар': 'Ярость',
+            'бард': 'Вдохновение',
+            'жрец': 'Божественное исцеление',
+            'друид': 'Превращение',
+            'воин': 'Боевой стиль',
+            'плут': 'Скрытность',
+            'волшебник': 'Магия',
+            'колдун': 'Договор',
+            'следопыт': 'Связь с природой',
+            'монах': 'Боевые искусства',
+            'изобретатель': 'Технические устройства'
+        };
+        
+        for (let className in abilityMap) {
+            if (classLower.includes(className)) {
+                techParams.ability = 'Способность: ' + abilityMap[className];
+                break;
             }
         }
     }
