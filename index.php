@@ -381,9 +381,9 @@ function formatNpcBlocks(txt, forcedName = '') {
         }
     }
     
-    // Исправляем неправильную классификацию
-    if (trait && /служит|академи|обучает|преподает/i.test(trait)) {
-        // Это не черта характера, а описание деятельности
+    // Исправляем неправильную классификацию блоков
+    if (trait && /служит|академи|обучает|преподает|мастерская|мешок|инструменты|станок|разбирает|носит/i.test(trait)) {
+        // Это не черта характера, а описание деятельности или предметов
         if (!desc) desc = trait;
         trait = '';
     }
@@ -398,6 +398,12 @@ function formatNpcBlocks(txt, forcedName = '') {
     if (weakness && /высокий|низкий|стройный|полный|волосы|глаза|лицо|одежда/i.test(weakness)) {
         if (!appear) appear = weakness;
         weakness = '';
+    }
+    
+    // Если в черте характера описание внешности - переносим
+    if (trait && /высокий|низкий|стройный|полный|волосы|глаза|лицо|одежда|длинные|короткие|светлые|темные/i.test(trait)) {
+        if (!appear) appear = trait;
+        trait = '';
     }
     if (!name && forcedName) name = forcedName;
     // Улучшенное извлечение технических параметров
@@ -449,7 +455,21 @@ function formatNpcBlocks(txt, forcedName = '') {
         }
     }
     
-    // 4. Очищаем описание от технических параметров
+    // 4. Ищем внешность в тексте, если не найдена в блоках
+    if (!appear || appear === '-') {
+        let allText = txt.toLowerCase();
+        let lines = txt.split(/[.!?]/).map(s => s.trim()).filter(Boolean);
+        
+        for (let line of lines) {
+            let lineLower = line.toLowerCase();
+            if (/высокий|низкий|стройный|полный|волосы|глаза|лицо|одежда|длинные|короткие|светлые|темные|красивые|острые|широкие|узкие|борода|усы|морщины/i.test(lineLower) && line.length > 10 && line.length < 200) {
+                appear = line;
+                break;
+            }
+        }
+    }
+    
+    // 5. Очищаем описание от технических параметров
     if (desc) {
         let descLines = desc.split(/[.!?]/).map(s => s.trim()).filter(Boolean);
         let cleanLines = [];
@@ -469,13 +489,13 @@ function formatNpcBlocks(txt, forcedName = '') {
         if (desc.endsWith('. ')) desc = desc.slice(0, -2);
     }
     
-    // 5. Формируем строки для отображения
+    // 6. Формируем строки для отображения
     if (techParams.weapon) summaryLines.push(techParams.weapon);
     if (techParams.damage) summaryLines.push(techParams.damage);
     if (techParams.hp) summaryLines.push(techParams.hp);
     if (techParams.ability) summaryLines.push(techParams.ability);
     
-    // 6. Если нашли хотя бы 2 параметра - показываем результат
+    // 7. Если нашли хотя бы 2 параметра - показываем результат
     const foundParams = [techParams.weapon, techParams.damage, techParams.hp, techParams.ability].filter(p => p).length;
     if (foundParams < 2) {
         return `<div class='npc-block-modern'><div class='npc-modern-header'>Ошибка</div><div class='npc-modern-block'>AI не вернул достаточно технических параметров. Найдено: ${foundParams}/4. Попробуйте сгенерировать NPC ещё раз.</div></div>`;
@@ -502,13 +522,15 @@ function formatNpcBlocks(txt, forcedName = '') {
     if (trait && trait !== '-') {
         out += `<div class='npc-col-block'><span style='font-size:1.2em;'>🧠</span> <b>Черта характера</b>${firstSentence(trait)}</div>`;
     }
+    if (appear && appear !== '-') {
+        out += `<div class='npc-col-block'><span style='font-size:1.2em;'>👤</span> <b>Внешность</b>${firstSentence(appear)}</div>`;
+    }
     // Убираем блок слабости - он не нужен
     // Кнопка показать описание
-    if ((desc && desc !== '-') || (appear && appear !== '-') || (behavior && behavior !== '-')) {
+    if ((desc && desc !== '-') || (behavior && behavior !== '-')) {
         out += `<button class='npc-desc-toggle-btn' onclick='this.nextElementSibling.classList.toggle("active")'>Показать описание</button>`;
         out += `<div class='npc-modern-block npc-desc-detail' style='display:none;'>`;
         if (desc && desc !== '-') out += `<div style='margin-bottom:8px;'><b>Описание:</b> ${desc}</div>`;
-        if (appear && appear !== '-') out += `<div style='margin-bottom:8px;'><b>Внешность:</b> ${appear}</div>`;
         if (behavior && behavior !== '-') out += `<div><b>Особенности поведения:</b> ${behavior}</div>`;
         out += `</div>`;
     }
