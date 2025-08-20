@@ -7,46 +7,20 @@ if (DEBUG_MODE) {
     ini_set('display_errors', 1);
 }
 
-try {
-    require_once 'auth.php';
-    
-    session_start();
-    
-    // Инициализация базы данных при первом запуске
-    if (!isset($_SESSION['db_initialized'])) {
-        if (initDatabase()) {
-            $_SESSION['db_initialized'] = true;
-        } else {
-            // Если база данных не инициализирована, перенаправляем на страницу входа
-            header('Location: login.php');
-            exit;
-        }
-    }
-    
-    // Проверка авторизации
-    $auth = new Auth();
-    if (!$auth->isAuthenticated()) {
-        header('Location: login.php');
-        exit;
-    }
-    
-    // Получение данных текущего пользователя
-    $currentUser = $auth->getCurrentUser();
-    
-} catch (Exception $e) {
-    // Если есть ошибка с базой данных, перенаправляем на setup
-    if (strpos($e->getMessage(), 'баз') !== false || strpos($e->getMessage(), 'database') !== false) {
-        header('Location: setup.php');
-        exit;
-    }
-    
-    // Для других ошибок показываем сообщение
-    if (DEBUG_MODE) {
-        die('Ошибка: ' . $e->getMessage());
-    } else {
-        die('Произошла ошибка. Проверьте настройки.');
-    }
+session_start();
+
+// Простая проверка авторизации (без базы данных)
+if (!isset($_SESSION['authenticated']) || !$_SESSION['authenticated']) {
+    header('Location: simple-login.php');
+    exit;
 }
+
+// Данные текущего пользователя
+$currentUser = [
+    'id' => $_SESSION['user_id'] ?? 1,
+    'username' => $_SESSION['username'] ?? 'admin',
+    'role' => $_SESSION['role'] ?? 'admin'
+];
 
 if (isset($_GET['curltest'])) {
     $ch = curl_init('https://api.deepseek.com/v1/chat/completions');

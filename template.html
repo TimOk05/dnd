@@ -1533,7 +1533,6 @@
         <div class="user-info">
             <div class="user-details">
                 <span class="username">{{username}}</span>
-                <a href="profile.php" class="profile-btn" title="Профиль">👤</a>
                 <button id="logout-btn" class="logout-btn" title="Выйти">🚪</button>
             </div>
             <div class="theme-toggle">
@@ -1595,24 +1594,7 @@
             // Обработка выхода из системы
             logoutBtn.addEventListener('click', function() {
                 if (confirm('Вы уверены, что хотите выйти из системы?')) {
-                    const formData = new FormData();
-                    formData.append('action', 'logout');
-
-                    fetch('auth.php', {
-                            method: 'POST',
-                            body: formData
-                        })
-                        .then(response => response.json())
-                        .then(data => {
-                            if (data.success) {
-                                window.location.href = 'login.php';
-                            } else {
-                                alert('Ошибка при выходе из системы');
-                            }
-                        })
-                        .catch(error => {
-                            alert('Ошибка соединения');
-                        });
+                    window.location.href = 'logout.php';
                 }
             });
 
