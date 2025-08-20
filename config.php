@@ -4,10 +4,15 @@
 define('DEEPSEEK_API_KEY', 'sk-1e898ddba737411e948af435d767e893');
 
 // Настройки базы данных для системы регистрации
+// Попробуйте один из этих вариантов пароля:
+// define('DB_PASS', '');        // Пустой пароль
+// define('DB_PASS', 'root');    // Пароль 'root'
+// define('DB_PASS', 'password'); // Пароль 'password'
+// define('DB_PASS', 'admin');   // Пароль 'admin'
 define('DB_HOST', 'localhost');
 define('DB_NAME', 'dnd_copilot');
 define('DB_USER', 'root');
-define('DB_PASS', '');
+define('DB_PASS', 'root');
 
 // Настройки приложения
 define('APP_NAME', 'DnD Copilot');

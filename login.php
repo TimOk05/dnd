@@ -15,9 +15,8 @@ if (!isset($_SESSION['db_initialized'])) {
     if (initDatabase()) {
         $_SESSION['db_initialized'] = true;
     } else {
-        // Если база данных не инициализирована, перенаправляем на приветственную страницу
-        header('Location: welcome.php');
-        exit;
+        // Если база данных не инициализирована, показываем ошибку
+        die('Ошибка: База данных не настроена. Проверьте настройки в config.php');
     }
 }
 ?>
