@@ -377,7 +377,7 @@ function fetchNpcFromAI(race, npcClass, prof, level) {
         if (motivation) contextBlock += `\nМотивация: ${motivation}`;
         if (occ) contextBlock += `\nПрофессия: ${occ}`;
         contextBlock += '\nИспользуй эти данные для вдохновения, но придумай цельного NPC.';
-        const systemInstruction = 'Создай уникального NPC для D&D. Используй этот формат:\n\nИмя и Профессия\n[имя и профессия персонажа]\n\nОписание\n[3-4 предложения о прошлом, мотивации, целях персонажа]\n\nВнешность\n[2-3 предложения о внешнем виде, одежде, особенностях]\n\nЧерты характера\n[1-2 предложения о личности, поведении, привычках]\n\nТехнические параметры\nОружие: [подходящее оружие для класса]\nУрон: [формат урона, например 1d6 рубящий]\nХиты: [количество хитов]\n\nВАЖНО: Создавай уникальных, детальных персонажей. Не используй шаблонные фразы.';
+        const systemInstruction = 'Создай уникального NPC для D&D. СТРОГО следуй этому формату:\n\nИмя и Профессия\n[только имя и профессия, например: "Торин Каменщик"]\n\nОписание\n[3-4 предложения о прошлом, мотивации, целях персонажа БЕЗ упоминания имени]\n\nВнешность\n[2-3 предложения о внешнем виде, одежде, особенностях]\n\nЧерты характера\n[1-2 предложения о личности, поведении, привычках]\n\nТехнические параметры\nОружие: [подходящее оружие для класса]\nУрон: [формат урона, например 1d6 рубящий]\nХиты: [количество хитов]\n\nВАЖНО: Имя указывай ТОЛЬКО в блоке "Имя и Профессия". НЕ используй имя в других блоках.';
         const prompt = `Создай NPC для DnD. Раса: ${race}. Класс: ${npcClass}. Уровень: ${level}. Придумай подходящую профессию для этого персонажа.${contextBlock}`;
         fetch('ai.php', {
             method: 'POST',
@@ -744,13 +744,24 @@ function formatNpcBlocks(txt, forcedName = '') {
     if (!name || !desc || !appear || !trait) {
         let lines = txt.split(/\n/).map(s => s.trim()).filter(Boolean);
         
-        // Ищем имя в первой строке
-        if (!name && lines.length > 0) {
-            let firstLine = lines[0];
-            if (firstLine.length < 50 && !firstLine.includes(':')) {
-                name = firstLine;
-            }
+            // Ищем имя в первой строке
+    if (!name && lines.length > 0) {
+        let firstLine = lines[0];
+        if (firstLine.length < 50 && !firstLine.includes(':')) {
+            name = firstLine;
         }
+    }
+    
+    // Если имя не найдено, ищем его в описании (часто AI помещает имя туда)
+    if (!name && desc) {
+        let nameMatch = desc.match(/^([А-ЯЁ][а-яё]+(?:\s+[А-ЯЁ][а-яё]+)*)(?:\s*[,\-]\s*[а-яё\s]+)?/);
+        if (nameMatch && nameMatch[1]) {
+            name = nameMatch[1];
+            // Убираем имя из описания
+            desc = desc.replace(nameMatch[0], '').trim();
+            desc = desc.replace(/^[,\s]+/, '').replace(/[,\s]+$/, '');
+        }
+    }
         
         // Ищем описание (обычно после имени)
         if (!desc && lines.length > 1) {
@@ -926,8 +937,14 @@ function formatNpcBlocks(txt, forcedName = '') {
     let out = '';
     out += `<div class='npc-block-modern'>`;
     
-    // Очищаем имя
-    let cleanName = name.split(/\s+/)[0].replace(/[^\wа-яё]/gi, '').trim();
+    // Очищаем имя и извлекаем только имя (без профессии)
+    let cleanName = name;
+    if (name.includes(',')) {
+        cleanName = name.split(',')[0].trim();
+    } else if (name.includes('-')) {
+        cleanName = name.split('-')[0].trim();
+    }
+    cleanName = cleanName.split(/\s+/)[0].replace(/[^\wа-яё]/gi, '').trim();
     out += `<div class='npc-modern-header'>${cleanName || 'NPC'}</div>`;
     
     // Технические параметры
