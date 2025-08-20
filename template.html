@@ -1064,127 +1064,70 @@
             border-color: var(--accent-success);
             color: var(--accent-success);
             background: var(--bg-secondary);
-            font-weight: 600;
-            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
         }
         
         .player-btn:hover {
             background: var(--accent-success);
-            color: #000;
+            color: var(--bg-secondary);
             border-color: var(--accent-success);
             font-weight: 700;
-            text-shadow: 0 1px 2px rgba(255, 255, 255, 0.5);
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
         }
         
         .enemy-btn {
             border-color: var(--accent-danger);
             color: var(--accent-danger);
             background: var(--bg-secondary);
-            font-weight: 600;
-            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
         }
         
         .enemy-btn:hover {
             background: var(--accent-danger);
-            color: #fff;
+            color: var(--bg-secondary);
             border-color: var(--accent-danger);
             font-weight: 700;
-            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
         }
         
         .other-btn {
             border-color: var(--accent-warning);
             color: var(--accent-warning);
             background: var(--bg-secondary);
-            font-weight: 600;
-            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
-        }
-        /* Специальная обработка для светлой темы - кнопка "Ещё" */
-        
-        [data-theme="light"] .other-btn {
-            color: #b8860b;
-            border-color: #b8860b;
-            background: #fffbe6;
-            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
-        }
-        
-        [data-theme="light"] .other-btn:hover {
-            background: #b8860b;
-            color: #fffbe6;
-            border-color: #b8860b;
-            font-weight: 700;
-            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
-        }
-        /* Улучшенная видимость кнопок инициативы в тёмной теме */
-        
-        [data-theme="dark"] .initiative-btn {
-            font-weight: 600;
-            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
-        }
-        
-        [data-theme="dark"] .player-btn {
-            color: #06ffa5;
-            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
-        }
-        
-        [data-theme="dark"] .enemy-btn {
-            color: #ff006e;
-            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
-        }
-        
-        [data-theme="dark"] .other-btn {
-            color: #f72585;
-            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
-        }
-        
-        [data-theme="dark"] .clear-btn {
-            color: #ff006e;
-            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
-        }
-        
-        [data-theme="dark"] .round-btn {
-            color: #06ffa5;
-            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
         }
         
         .other-btn:hover {
             background: var(--accent-warning);
-            color: #000;
+            color: var(--bg-secondary);
             border-color: var(--accent-warning);
             font-weight: 700;
-            text-shadow: 0 1px 2px rgba(255, 255, 255, 0.5);
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
         }
         
         .clear-btn {
             border-color: var(--accent-danger);
             color: var(--accent-danger);
             background: var(--bg-secondary);
-            font-weight: 600;
-            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
         }
         
         .clear-btn:hover {
             background: var(--accent-danger);
-            color: #fff;
+            color: var(--bg-secondary);
             border-color: var(--accent-danger);
             font-weight: 700;
-            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
         }
         
         .round-btn {
             border-color: var(--accent-success);
             color: var(--accent-success);
             background: var(--bg-secondary);
-            font-weight: 600;
-            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
         }
         
         .round-btn:hover {
             background: var(--accent-success);
-            color: #000;
+            color: var(--bg-secondary);
             border-color: var(--accent-success);
             font-weight: 700;
-            text-shadow: 0 1px 2px rgba(255, 255, 255, 0.5);
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
         }
         
         .initiative-current {
@@ -1264,7 +1207,7 @@
         
         .dice-btn {
             background: var(--accent-color);
-            color: #fff;
+            color: var(--bg-secondary);
             border: 2px solid var(--accent-color);
             padding: 10px 20px;
             border-radius: 8px;
@@ -1274,16 +1217,14 @@
             transition: all 0.3s ease;
             box-shadow: 0 3px 10px var(--shadow-color);
             font-size: 1em;
-            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
         }
         
         .dice-btn:hover {
             background: var(--accent-secondary);
             border-color: var(--accent-secondary);
-            color: #fff;
             transform: translateY(-2px);
             box-shadow: 0 5px 15px var(--shadow-color);
-            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
         }
         
         .entry-buttons {
@@ -1353,83 +1294,13 @@
             border-bottom: 2px solid var(--border-primary);
             padding-bottom: 8px;
         }
-        /* Информация о пользователе */
+        /* Переключатель темы */
         
-        .user-info {
+        .theme-toggle {
             position: absolute;
             top: 20px;
             right: 20px;
             z-index: 100;
-            display: flex;
-            align-items: center;
-            gap: 15px;
-        }
-        
-        .user-details {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            background: var(--bg-secondary);
-            border: 2px solid var(--border-primary);
-            border-radius: 12px;
-            padding: 8px 12px;
-            box-shadow: 0 2px 8px var(--shadow-primary);
-        }
-        
-        .username {
-            color: var(--text-tertiary);
-            font-weight: 600;
-            font-size: 0.95em;
-        }
-        
-        .logout-btn {
-            background: var(--accent-danger);
-            color: var(--bg-secondary);
-            border: none;
-            border-radius: 8px;
-            width: 32px;
-            height: 32px;
-            cursor: pointer;
-            font-size: 1em;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: all 0.3s ease;
-            box-shadow: 0 2px 4px var(--shadow-primary);
-        }
-        
-        .logout-btn:hover {
-            background: #d32f2f;
-            transform: scale(1.1);
-            box-shadow: 0 4px 8px var(--shadow-secondary);
-        }
-        
-        .profile-btn {
-            background: var(--accent-primary);
-            color: var(--bg-secondary);
-            border: none;
-            border-radius: 8px;
-            width: 32px;
-            height: 32px;
-            cursor: pointer;
-            font-size: 1em;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: all 0.3s ease;
-            box-shadow: 0 2px 4px var(--shadow-primary);
-            text-decoration: none;
-        }
-        
-        .profile-btn:hover {
-            background: var(--accent-secondary);
-            transform: scale(1.1);
-            box-shadow: 0 4px 8px var(--shadow-secondary);
-        }
-        /* Переключатель темы */
-        
-        .theme-toggle {
-            position: static;
         }
         
         .theme-btn {
@@ -1530,16 +1401,10 @@
 
 <body>
     <div class="parchment">
-        <div class="user-info">
-            <div class="user-details">
-                <span class="username">{{username}}</span>
-                <button id="logout-btn" class="logout-btn" title="Выйти">🚪</button>
-            </div>
-            <div class="theme-toggle">
-                <button id="theme-toggle" class="theme-btn" title="Переключить тему">
-                    <span class="theme-icon">🌙</span>
-                </button>
-            </div>
+        <div class="theme-toggle">
+            <button id="theme-toggle" class="theme-btn" title="Переключить тему">
+                <span class="theme-icon">🌙</span>
+            </button>
         </div>
         <h1>DnD AI Чат</h1>
         <div class="fast-bar">
@@ -1570,11 +1435,10 @@
     <script>
         // JS для модального окна и заметок будет добавлен через PHP
 
-        // Переключатель темы и выход из системы
+        // Переключатель темы
         document.addEventListener('DOMContentLoaded', function() {
             const themeToggle = document.getElementById('theme-toggle');
             const themeIcon = themeToggle.querySelector('.theme-icon');
-            const logoutBtn = document.getElementById('logout-btn');
             const body = document.body;
 
             // Загружаем сохраненную тему
@@ -1589,13 +1453,6 @@
                 body.setAttribute('data-theme', newTheme);
                 localStorage.setItem('theme', newTheme);
                 updateThemeIcon(newTheme);
-            });
-
-            // Обработка выхода из системы
-            logoutBtn.addEventListener('click', function() {
-                if (confirm('Вы уверены, что хотите выйти из системы?')) {
-                    window.location.href = 'logout.php';
-                }
             });
 
             function updateThemeIcon(theme) {
