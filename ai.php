@@ -13,7 +13,7 @@ $type = isset($_POST['type']) ? $_POST['type'] : 'chat';
 if ($type === 'chat') {
     $maxLen = 500;
     $minLen = 5;
-    $allowedPattern = '/^[a-zA-Zа-яА-ЯёЁ0-9 .,!?;:\-()\[\]{}"\'\\\/@#\n\r]+$/u';
+    $allowedPattern = '/^[\p{L}\p{N}\s.,!?;:\-()\[\]{}"\'\\\/@#\n\r]+$/u';
     $prompt = preg_replace('/\s+/u', ' ', $prompt); // убрать лишние пробелы
     if (mb_strlen($prompt, 'UTF-8') > $maxLen) {
         echo json_encode(['error' => 'Запрос слишком длинный (максимум 500 символов).']);
@@ -24,7 +24,7 @@ if ($type === 'chat') {
         exit;
     }
     if (!preg_match($allowedPattern, $prompt)) {
-        echo json_encode(['error' => 'Запрос содержит недопустимые символы. Разрешены только буквы, цифры, пробелы и базовые знаки препинания.']);
+        echo json_encode(['error' => 'Запрос содержит недопустимые символы. Разрешены только буквы (включая кириллицу), цифры, пробелы и базовые знаки препинания.']);
         exit;
     }
 }

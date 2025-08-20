@@ -660,8 +660,17 @@
         }
         
         .initiative-stats {
+            display: flex;
+            gap: 20px;
             color: #7c4a02;
             font-weight: bold;
+        }
+        
+        .stat-item {
+            background: #f8ecd0;
+            padding: 5px 12px;
+            border-radius: 8px;
+            border: 1px solid #a67c52;
         }
         
         .initiative-current-turn {
@@ -835,11 +844,17 @@
         
         .initiative-controls {
             display: flex;
+            flex-direction: column;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        
+        .control-group {
+            display: flex;
             align-items: center;
             gap: 12px;
-            margin-bottom: 20px;
-            flex-wrap: wrap;
             justify-content: center;
+            flex-wrap: wrap;
         }
         
         .initiative-btn {
@@ -895,6 +910,16 @@
         
         .clear-btn:hover {
             background: #cc0000;
+            color: white;
+        }
+        
+        .round-btn {
+            border-color: #2bb07b;
+            color: #2bb07b;
+        }
+        
+        .round-btn:hover {
+            background: #2bb07b;
             color: white;
         }
         
