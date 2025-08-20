@@ -396,7 +396,7 @@ function fetchNpcFromAI(race, npcClass, prof, level) {
             default: classAbility = 'Обычный навык'; break;
         }
         
-        const systemInstruction = 'Всегда пиши ответы без оформления, без markdown, без кавычек и звёздочек. Разделяй результат NPC на смысловые блоки с заголовками: Описание, Внешность, Черты характера, Короткая характеристика. В блоке Короткая характеристика обязательно выведи отдельными строками: Оружие: [название оружия], Урон: [формат урона, например 1d6], Хиты: [количество хитов], Способность: [' + classAbility + ']. \n\nВАЖНО: НЕ используй слово "Описание" в начале блоков. Начинай блоки сразу с содержимого. НЕ дублируй информацию между блоками. Каждый блок должен содержать только релевантную информацию.\n\nВАЖНО: Способность должна быть именно "' + classAbility + '" для класса ' + npcClass + '. НЕ пиши описания способности, только название. ОБЯЗАТЕЛЬНО указывай способность для каждого класса кроме "Без класса".\n\nЧерты характера - это личностные качества (храбрый, мудрый, вспыльчивый). Описание должно быть кратким и содержать основную информацию о персонаже. Внешность - описание внешнего вида. Придумай подходящую профессию для NPC. Каждый блок начинай с заголовка. Технические параметры обязательны!';
+        const systemInstruction = 'Всегда пиши ответы без оформления, без markdown, без кавычек и звёздочек. Разделяй результат NPC на смысловые блоки с заголовками: Описание, Внешность, Черты характера, Короткая характеристика. В блоке Короткая характеристика обязательно выведи отдельными строками: Оружие: [название оружия], Урон: [формат урона, например 1d6], Хиты: [количество хитов], Способность: [' + classAbility + ']. \n\nВАЖНО: НЕ используй слово "Описание" в начале блоков. Начинай блоки сразу с содержимого. НЕ дублируй информацию между блоками. Каждый блок должен содержать только релевантную информацию.\n\nВАЖНО: Способность должна быть именно "' + classAbility + '" для класса ' + npcClass + '. НЕ пиши описания способности, только название. ОБЯЗАТЕЛЬНО указывай способность для каждого класса кроме "Без класса".\n\nЧерты характера - это личностные качества (храбрый, мудрый, вспыльчивый). Описание должно быть подробным (2-3 предложения) и содержать основную информацию о персонаже, его мотивацию и цели. Внешность - детальное описание внешнего вида (2-3 предложения). Придумай подходящую профессию для NPC. Каждый блок начинай с заголовка. Технические параметры обязательны! Делай NPC более детальными и интересными!';
         const prompt = `Создай NPC для DnD. Раса: ${race}. Класс: ${npcClass}. Уровень: ${level}. Придумай подходящую профессию для этого персонажа.${contextBlock}`;
         fetch('ai.php', {
             method: 'POST',
@@ -461,14 +461,18 @@ let currentInitiativeIndex = 0;
 
 function openInitiativeModal() {
     showModal('<div class="initiative-container">' +
+        '<div class="initiative-header">' +
+            '<h3>🎯 Инициатива</h3>' +
+            '<div class="initiative-stats">Участников: <span id="initiative-count">0</span></div>' +
+        '</div>' +
+        '<div class="initiative-current-turn" id="initiative-current-turn"></div>' +
         '<div class="initiative-list" id="initiative-list"></div>' +
         '<div class="initiative-controls">' +
-            '<div class="initiative-label">Добавить:</div>' +
-            '<button class="initiative-btn player-btn" onclick="addInitiativeEntry(\'player\')">Игрок</button>' +
-            '<button class="initiative-btn enemy-btn" onclick="addInitiativeEntry(\'enemy\')">Противник</button>' +
-            '<button class="initiative-btn other-btn" onclick="addInitiativeEntry(\'other\')">Ещё</button>' +
+            '<button class="initiative-btn player-btn" onclick="addInitiativeEntry(\'player\')">👤 Игрок</button>' +
+            '<button class="initiative-btn enemy-btn" onclick="addInitiativeEntry(\'enemy\')">👹 Противник</button>' +
+            '<button class="initiative-btn other-btn" onclick="addInitiativeEntry(\'other\')">⚡ Ещё</button>' +
+            '<button class="initiative-btn clear-btn" onclick="clearInitiative()">🗑️ Очистить</button>' +
         '</div>' +
-        '<div class="initiative-current" id="initiative-current"></div>' +
     '</div>');
     document.getElementById('modal-save').style.display = '';
     document.getElementById('modal-save').onclick = function() { saveInitiativeNote(); closeModal(); };
@@ -536,32 +540,58 @@ function sortInitiativeList() {
 }
 
 function updateInitiativeDisplay() {
+    // Обновляем счетчик участников
+    document.getElementById('initiative-count').textContent = initiativeList.length;
+    
+    // Показываем текущего участника
+    if (initiativeList.length > 0) {
+        let current = initiativeList[currentInitiativeIndex];
+        let typeIcon = current.type === 'player' ? '👤' : 
+                      current.type === 'enemy' ? '👹' : '⚡';
+        
+        document.getElementById('initiative-current-turn').innerHTML = 
+            '<div class="current-turn-display">' +
+                '<div class="current-turn-icon">' + typeIcon + '</div>' +
+                '<div class="current-turn-info">' +
+                    '<div class="current-turn-name">' + current.name + '</div>' +
+                    '<div class="current-turn-value">Инициатива: ' + current.value + '</div>' +
+                '</div>' +
+                '<div class="current-turn-actions">' +
+                    '<button class="turn-btn prev-btn" onclick="prevInitiative()">◀</button>' +
+                    '<button class="turn-btn next-btn" onclick="nextInitiative()">▶</button>' +
+                '</div>' +
+            '</div>';
+    } else {
+        document.getElementById('initiative-current-turn').innerHTML = 
+            '<div class="no-initiative">Добавьте участников для начала боя</div>';
+    }
+    
+    // Обновляем список участников
     let listHtml = '';
     initiativeList.forEach((entry, index) => {
         let isActive = index === currentInitiativeIndex;
         let typeClass = entry.type === 'player' ? 'player-entry' : 
                        entry.type === 'enemy' ? 'enemy-entry' : 'other-entry';
         let activeClass = isActive ? ' active' : '';
+        let typeIcon = entry.type === 'player' ? '👤' : 
+                      entry.type === 'enemy' ? '👹' : '⚡';
         
         listHtml += '<div class="initiative-item ' + typeClass + activeClass + '" onclick="setActiveInitiative(' + index + ')">' +
-            '<div class="initiative-name">' + entry.name + '</div>' +
-            '<div class="initiative-value">' + entry.value + '</div>' +
-            '<button class="edit-btn" onclick="editInitiativeEntry(' + entry.id + ')">✏️</button>' +
-            '<button class="delete-btn" onclick="deleteInitiativeEntry(' + entry.id + ')">🗑️</button>' +
+            '<div class="initiative-item-content">' +
+                '<div class="initiative-icon">' + typeIcon + '</div>' +
+                '<div class="initiative-info">' +
+                    '<div class="initiative-name">' + entry.name + '</div>' +
+                    '<div class="initiative-value">' + entry.value + '</div>' +
+                '</div>' +
+            '</div>' +
+            '<div class="initiative-actions">' +
+                '<button class="edit-btn" onclick="event.stopPropagation(); editInitiativeEntry(' + entry.id + ')">✏️</button>' +
+                '<button class="delete-btn" onclick="event.stopPropagation(); deleteInitiativeEntry(' + entry.id + ')">🗑️</button>' +
+            '</div>' +
         '</div>';
     });
     
     document.getElementById('initiative-list').innerHTML = listHtml;
-    
-    // Показываем текущего участника
-    if (initiativeList.length > 0) {
-        let current = initiativeList[currentInitiativeIndex];
-        document.getElementById('initiative-current').innerHTML = 
-            '<div class="current-turn">Ход: <strong>' + current.name + '</strong> (' + current.value + ')</div>' +
-            '<button class="next-btn" onclick="nextInitiative()">Следующий</button>';
-    } else {
-        document.getElementById('initiative-current').innerHTML = '';
-    }
 }
 
 function setActiveInitiative(index) {
@@ -569,9 +599,24 @@ function setActiveInitiative(index) {
     updateInitiativeDisplay();
 }
 
+function prevInitiative() {
+    if (initiativeList.length > 0) {
+        currentInitiativeIndex = (currentInitiativeIndex - 1 + initiativeList.length) % initiativeList.length;
+        updateInitiativeDisplay();
+    }
+}
+
 function nextInitiative() {
     if (initiativeList.length > 0) {
         currentInitiativeIndex = (currentInitiativeIndex + 1) % initiativeList.length;
+        updateInitiativeDisplay();
+    }
+}
+
+function clearInitiative() {
+    if (confirm('Очистить всех участников инициативы?')) {
+        initiativeList = [];
+        currentInitiativeIndex = 0;
         updateInitiativeDisplay();
     }
 }
@@ -806,17 +851,25 @@ function formatNpcBlocks(txt, forcedName = '') {
     
     // Убираем имя из других блоков
     if (name) {
-        if (trait && trait.includes(name)) {
-            trait = trait.replace(new RegExp(name + '\\s*', 'gi'), '').trim();
+        // Очищаем имя от лишних слов
+        let cleanName = name;
+        let nameWords = name.split(/\s+/);
+        if (nameWords.length > 1) {
+            cleanName = nameWords[0];
         }
-        if (desc && desc.includes(name)) {
-            desc = desc.replace(new RegExp(name + '\\s*', 'gi'), '').trim();
+        cleanName = cleanName.replace(/[^\wа-яё]/gi, '').trim();
+        
+        if (trait && trait.includes(cleanName)) {
+            trait = trait.replace(new RegExp(cleanName + '\\s*', 'gi'), '').trim();
         }
-        if (appear && appear.includes(name)) {
-            appear = appear.replace(new RegExp(name + '\\s*', 'gi'), '').trim();
+        if (desc && desc.includes(cleanName)) {
+            desc = desc.replace(new RegExp(cleanName + '\\s*', 'gi'), '').trim();
         }
-        if (shortdesc && shortdesc.includes(name)) {
-            shortdesc = shortdesc.replace(new RegExp(name + '\\s*', 'gi'), '').trim();
+        if (appear && appear.includes(cleanName)) {
+            appear = appear.replace(new RegExp(cleanName + '\\s*', 'gi'), '').trim();
+        }
+        if (shortdesc && shortdesc.includes(cleanName)) {
+            shortdesc = shortdesc.replace(new RegExp(cleanName + '\\s*', 'gi'), '').trim();
         }
     }
     

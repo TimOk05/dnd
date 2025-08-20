@@ -640,12 +640,98 @@
         /* --- Стили для инициативы --- */
         
         .initiative-container {
-            max-width: 600px;
+            max-width: 700px;
             margin: 0 auto;
         }
         
+        .initiative-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #a67c52;
+        }
+        
+        .initiative-header h3 {
+            margin: 0;
+            color: #7c4a02;
+            font-size: 1.4em;
+        }
+        
+        .initiative-stats {
+            color: #7c4a02;
+            font-weight: bold;
+        }
+        
+        .initiative-current-turn {
+            margin-bottom: 20px;
+        }
+        
+        .current-turn-display {
+            display: flex;
+            align-items: center;
+            background: linear-gradient(135deg, #fff8dc, #f8ecd0);
+            border: 3px solid #ffd700;
+            border-radius: 15px;
+            padding: 15px;
+            box-shadow: 0 4px 15px rgba(255, 215, 0, 0.3);
+        }
+        
+        .current-turn-icon {
+            font-size: 2em;
+            margin-right: 15px;
+        }
+        
+        .current-turn-info {
+            flex: 1;
+        }
+        
+        .current-turn-name {
+            font-size: 1.3em;
+            font-weight: bold;
+            color: #2d1b00;
+            margin-bottom: 5px;
+        }
+        
+        .current-turn-value {
+            color: #7c4a02;
+            font-weight: bold;
+        }
+        
+        .current-turn-actions {
+            display: flex;
+            gap: 10px;
+        }
+        
+        .turn-btn {
+            background: #a67c52;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            padding: 8px 12px;
+            font-size: 1.1em;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .turn-btn:hover {
+            background: #7c4a02;
+            transform: scale(1.05);
+        }
+        
+        .no-initiative {
+            text-align: center;
+            color: #7c4a02;
+            font-style: italic;
+            padding: 20px;
+            background: #f8ecd0;
+            border-radius: 10px;
+            border: 2px dashed #a67c52;
+        }
+        
         .initiative-list {
-            max-height: 400px;
+            max-height: 350px;
             overflow-y: auto;
             margin-bottom: 20px;
             border: 2px solid #a67c52;
@@ -658,52 +744,71 @@
             display: flex;
             align-items: center;
             justify-content: space-between;
-            padding: 8px 12px;
+            padding: 12px;
             margin-bottom: 8px;
-            border-radius: 8px;
+            border-radius: 10px;
             cursor: pointer;
-            transition: all 0.2s;
+            transition: all 0.3s;
             border: 2px solid transparent;
+            background: white;
         }
         
         .initiative-item:hover {
-            transform: translateY(-1px);
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
         }
         
         .initiative-item.active {
             border-color: #ffd700;
             background: #fff8dc;
-            box-shadow: 0 0 10px rgba(255, 215, 0, 0.3);
+            box-shadow: 0 0 15px rgba(255, 215, 0, 0.4);
+            transform: scale(1.02);
         }
         
-        .player-entry {
-            border-color: #0066cc;
-            background: #e6f3ff;
+        .initiative-item-content {
+            display: flex;
+            align-items: center;
+            flex: 1;
         }
         
-        .enemy-entry {
-            border-color: #cc0000;
-            background: #ffe6e6;
+        .initiative-icon {
+            font-size: 1.5em;
+            margin-right: 12px;
+            width: 30px;
+            text-align: center;
         }
         
-        .other-entry {
-            border-color: #ffcc00;
-            background: #fff8e6;
+        .initiative-info {
+            flex: 1;
         }
         
         .initiative-name {
-            flex: 1;
             font-weight: bold;
             color: #2d1b00;
+            font-size: 1.1em;
         }
         
         .initiative-value {
-            font-weight: bold;
             color: #7c4a02;
-            margin: 0 10px;
-            min-width: 30px;
-            text-align: center;
+            font-weight: bold;
+            font-size: 0.9em;
+        }
+        
+        .initiative-actions {
+            display: flex;
+            gap: 5px;
+        }
+        
+        .player-entry {
+            border-left: 4px solid #0066cc;
+        }
+        
+        .enemy-entry {
+            border-left: 4px solid #cc0000;
+        }
+        
+        .other-entry {
+            border-left: 4px solid #ffcc00;
         }
         
         .edit-btn,
@@ -731,25 +836,26 @@
         .initiative-controls {
             display: flex;
             align-items: center;
-            gap: 10px;
+            gap: 12px;
             margin-bottom: 20px;
             flex-wrap: wrap;
-        }
-        
-        .initiative-label {
-            font-weight: bold;
-            color: #7c4a02;
-            margin-right: 10px;
+            justify-content: center;
         }
         
         .initiative-btn {
-            padding: 8px 16px;
+            padding: 10px 18px;
             border: 2px solid;
-            border-radius: 8px;
+            border-radius: 10px;
             background: white;
             cursor: pointer;
             font-weight: bold;
-            transition: all 0.2s;
+            transition: all 0.3s;
+            font-size: 0.95em;
+        }
+        
+        .initiative-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
         }
         
         .player-btn {
@@ -780,6 +886,16 @@
         .other-btn:hover {
             background: #ffcc00;
             color: #2d1b00;
+        }
+        
+        .clear-btn {
+            border-color: #cc0000;
+            color: #cc0000;
+        }
+        
+        .clear-btn:hover {
+            background: #cc0000;
+            color: white;
         }
         
         .initiative-current {
