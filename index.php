@@ -480,14 +480,30 @@ function formatNpcBlocks(txt, forcedName = '') {
             }
             if (!techParams.ability && /способност\s*:/i.test(lineLower) && line.length < 100) {
                 // Очищаем способность от дублирования технических параметров
-                let cleanAbility = line.replace(/короткая характеристика.*?способность\s*:/i, 'Способность:').trim();
-                // Убираем повторение оружия, урона и хитов
-                cleanAbility = cleanAbility.replace(/оружие\s*:.*?хиты\s*:\s*\d+/i, '').trim();
-                // Убираем повторение способности
-                cleanAbility = cleanAbility.replace(/способность\s*:.*?способность\s*:/i, 'Способность:').trim();
+                let cleanAbility = line;
+                
+                // Убираем только если есть явное дублирование
+                if (cleanAbility.includes('Короткая характеристика')) {
+                    cleanAbility = cleanAbility.replace(/короткая характеристика.*?способность\s*:/i, 'Способность:').trim();
+                }
+                
+                // Убираем повторение оружия, урона и хитов только если они есть
+                if (cleanAbility.includes('Оружие:') && cleanAbility.includes('Хиты:')) {
+                    cleanAbility = cleanAbility.replace(/оружие\s*:.*?хиты\s*:\s*\d+/i, '').trim();
+                }
+                
+                // Убираем повторение способности только если оно есть
+                if ((cleanAbility.match(/способность\s*:/gi) || []).length > 1) {
+                    cleanAbility = cleanAbility.replace(/способность\s*:.*?способность\s*:/i, 'Способность:').trim();
+                }
+                
                 // Убираем лишние пробелы и точки
                 cleanAbility = cleanAbility.replace(/\s+/g, ' ').replace(/^\s+|\s+$/g, '');
-                techParams.ability = cleanAbility;
+                
+                // Проверяем, что способность не пустая
+                if (cleanAbility.length > 10) {
+                    techParams.ability = cleanAbility;
+                }
             }
         }
     }
@@ -496,14 +512,28 @@ function formatNpcBlocks(txt, forcedName = '') {
     if (!techParams.ability && desc) {
         let descLines = desc.split(/[.!?]/).map(s => s.trim()).filter(Boolean);
         for (let line of descLines) {
-            if (/стихийн|удар|способност|маги|заклинани/i.test(line.toLowerCase())) {
+            if (/стихийн|удар|способност|маги|заклинани|ярость|неистовая|барда|вдохновение|манипуляция|шантаж|компрометирующей|информации/i.test(line.toLowerCase())) {
                 techParams.ability = 'Способность: ' + line;
                 break;
             }
         }
     }
     
-    // 4. Ищем внешность в тексте, если не найдена в блоках
+    // 4. Если способность все еще не найдена, ищем во всем тексте
+    if (!techParams.ability) {
+        let allText = txt.toLowerCase();
+        let lines = txt.split(/[.!?]/).map(s => s.trim()).filter(Boolean);
+        
+        for (let line of lines) {
+            let lineLower = line.toLowerCase();
+            if (/ярость|неистовая|барда|вдохновение|манипуляция|шантаж|компрометирующей|информации|стихийн|удар|способност|маги|заклинани/i.test(lineLower) && line.length > 5 && line.length < 100) {
+                techParams.ability = 'Способность: ' + line;
+                break;
+            }
+        }
+    }
+    
+    // 5. Ищем внешность в тексте, если не найдена в блоках
     if (!appear || appear === '-') {
         let allText = txt.toLowerCase();
         let lines = txt.split(/[.!?]/).map(s => s.trim()).filter(Boolean);
@@ -521,7 +551,7 @@ function formatNpcBlocks(txt, forcedName = '') {
         }
     }
     
-    // 5. Очищаем описание и извлекаем прочее
+    // 6. Очищаем описание и извлекаем прочее
     if (desc) {
         let descLines = desc.split(/[.!?]/).map(s => s.trim()).filter(Boolean);
         let cleanLines = [];
@@ -552,7 +582,7 @@ function formatNpcBlocks(txt, forcedName = '') {
         }
     }
     
-    // 6. Если в блоке "Дополнительно" есть черты характера, переносим их в "Черта характера"
+    // 7. Если в блоке "Дополнительно" есть черты характера, переносим их в "Черта характера"
     if (other && /черты характера|любознательный|обаятельный|нетерпеливый|преданный|наивный|хитрый|наблюдательный|амбициозный|артистичный|осторожный|циничный|обаятельный/i.test(other.toLowerCase())) {
         if (!trait || trait === '-') {
             trait = other;
@@ -564,13 +594,13 @@ function formatNpcBlocks(txt, forcedName = '') {
         }
     }
     
-    // 7. Формируем строки для отображения
+    // 8. Формируем строки для отображения
     if (techParams.weapon) summaryLines.push(techParams.weapon);
     if (techParams.damage) summaryLines.push(techParams.damage);
     if (techParams.hp) summaryLines.push(techParams.hp);
     if (techParams.ability) summaryLines.push(techParams.ability);
     
-    // 8. Если нашли хотя бы 2 параметра - показываем результат
+    // 9. Если нашли хотя бы 2 параметра - показываем результат
     const foundParams = [techParams.weapon, techParams.damage, techParams.hp, techParams.ability].filter(p => p).length;
     if (foundParams < 2) {
         return `<div class='npc-block-modern'><div class='npc-modern-header'>Ошибка</div><div class='npc-modern-block'>AI не вернул достаточно технических параметров. Найдено: ${foundParams}/4. Попробуйте сгенерировать NPC ещё раз.</div></div>`;
