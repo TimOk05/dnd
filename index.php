@@ -169,16 +169,24 @@ foreach ($_SESSION['chat'] as $msg) {
 // --- Генерация блока заметок ---
 $notesBlock = '';
 foreach ($_SESSION['notes'] as $i => $note) {
-    // Ищем строку с именем по разным вариантам
+    // Ищем имя NPC в заметке
     $plain = strip_tags(str_replace(['<br>', "\n"], "\n", $note));
     $lines = array_filter(array_map('trim', explode("\n", $plain)));
     $nameLine = '';
-    foreach ($lines as $line) {
-        if (preg_match('/^(Имя|Name|Имя NPC|Имя персонажа)\s*:/iu', $line)) {
-            $nameLine = $line;
-            break;
+    
+    // Сначала ищем в специальном заголовке
+    if (preg_match('/<div class="npc-name-header">([^<]+)<\/div>/iu', $note, $matches)) {
+        $nameLine = trim($matches[1]);
+    } else {
+        // Ищем строку с именем по разным вариантам
+        foreach ($lines as $line) {
+            if (preg_match('/^(Имя|Name|Имя NPC|Имя персонажа)\s*:/iu', $line)) {
+                $nameLine = $line;
+                break;
+            }
         }
     }
+    
     $previewSrc = $nameLine ?: (count($lines) ? $lines[0] : '(нет данных)');
     // Обрезаем превью до 30 символов или 3 слов
     $words = preg_split('/\s+/', $previewSrc);
@@ -258,12 +266,28 @@ function fetchNpcFromAI(race, npcClass, prof, level) {
       .then(json => {
         // 1. Имя по расе или случайное
         let name = '';
-        if (json.data && json.data.names && Array.isArray(json.data.names) && json.data.names.length > 0) {
-          let filtered = race ? json.data.names.filter(n => n.race && n.race.toLowerCase().includes(race.toLowerCase())) : json.data.names;
-          let pool = filtered.length ? filtered : json.data.names;
-          let rnd = pool[Math.floor(Math.random() * pool.length)];
-          name = rnd && rnd.name_ru ? rnd.name_ru : '';
-        }
+        // Используем предустановленные имена для каждой расы
+        const raceNames = {
+            'человек': ['Александр', 'Елена', 'Михаил', 'Анна', 'Дмитрий', 'Мария', 'Сергей', 'Ольга', 'Андрей', 'Татьяна'],
+            'эльф': ['Лиран', 'Аэлиус', 'Талас', 'Сильвана', 'Элронд', 'Галадриэль', 'Леголас', 'Арвен', 'Трандуил', 'Келебриан'],
+            'гном': ['Торин', 'Гимли', 'Балин', 'Дорин', 'Нори', 'Бифур', 'Бофур', 'Бомбур', 'Двалин', 'Оин'],
+            'полуорк': ['Гром', 'Ургаш', 'Краг', 'Шака', 'Мог', 'Гар', 'Торг', 'Зуг', 'Руг', 'Буг'],
+            'полурослик': ['Бильбо', 'Фродо', 'Сэм', 'Пиппин', 'Мерри', 'Том', 'Дик', 'Гарри', 'Рори', 'Нори'],
+            'тифлинг': ['Зара', 'Малик', 'Аш', 'Люцифер', 'Бел', 'Кейн', 'Азазель', 'Маммон', 'Левиафан', 'Асмодей'],
+            'драконорожденный': ['Дракс', 'Рекс', 'Торн', 'Скай', 'Блейз', 'Фрост', 'Эмбер', 'Сторм', 'Фанг', 'Клод'],
+            'полуэльф': ['Элрон', 'Арагорн', 'Арвен', 'Элронд', 'Келебриан', 'Элронд', 'Галадриэль', 'Леголас', 'Трандуил', 'Сильвана'],
+            'дворф': ['Торин', 'Гимли', 'Балин', 'Дорин', 'Нори', 'Бифур', 'Бофур', 'Бомбур', 'Двалин', 'Оин'],
+            'гоблин': ['Сник', 'Гоб', 'Ниб', 'Зог', 'Рат', 'Скрит', 'Грим', 'Твич', 'Скваб', 'Гриз'],
+            'орк': ['Гром', 'Ургаш', 'Краг', 'Шака', 'Мог', 'Гар', 'Торг', 'Зуг', 'Руг', 'Буг'],
+            'кобольд': ['Сник', 'Гоб', 'Ниб', 'Зог', 'Рат', 'Скрит', 'Грим', 'Твич', 'Скваб', 'Гриз'],
+            'ящеролюд': ['Зар', 'Кеш', 'Тал', 'Рекс', 'Скай', 'Торн', 'Фанг', 'Клод', 'Блейз', 'Фрост'],
+            'хоббит': ['Бильбо', 'Фродо', 'Сэм', 'Пиппин', 'Мерри', 'Том', 'Дик', 'Гарри', 'Рори', 'Нори']
+        };
+        
+        // Выбираем имя по расе или случайное
+        let raceKey = race ? race.toLowerCase() : 'человек';
+        let namePool = raceNames[raceKey] || raceNames['человек'];
+        name = namePool[Math.floor(Math.random() * namePool.length)];
         // 2. Черты, мотивация, профессия
         let trait = '';
         if (json.data && json.data.traits && Array.isArray(json.data.traits) && json.data.traits.length > 0) {
@@ -431,8 +455,10 @@ function formatNpcBlocks(txt, forcedName = '') {
         
         for (let line of descLines) {
             let lineLower = line.toLowerCase();
-            // Пропускаем строки с техническими параметрами
-            if (/оружие|урон|хиты|способност|стихийн|удар|d\d+|1d\d+|2d\d+/i.test(lineLower)) {
+            // Пропускаем строки с техническими параметрами и длинные описания
+            if (/оружие|урон|хиты|способност|стихийн|удар|d\d+|1d\d+|2d\d+/i.test(lineLower) || 
+                line.length > 200 || 
+                /эльфийка|эльф|человек|гном|полуорк|полурослик|тифлинг|драконорожденный|полуэльф|дворф|гоблин|орк|кобольд|ящеролюд|хоббит/i.test(lineLower)) {
                 continue;
             }
             cleanLines.push(line);
@@ -531,10 +557,18 @@ document.getElementById('modal-bg').onclick = function(e) { if (e.target === thi
 function saveNote(content) {
     // Сохраняем HTML содержимого модального окна
     var content = document.getElementById('modal-content').innerHTML;
+    
+    // Извлекаем имя NPC из заголовка
+    var headerElement = document.querySelector('.npc-modern-header');
+    var npcName = headerElement ? headerElement.textContent.trim() : 'NPC';
+    
+    // Добавляем имя в начало заметки для лучшей идентификации
+    var noteWithName = '<div class="npc-name-header">' + npcName + '</div>' + content;
+    
     fetch('', {
         method: 'POST',
         headers: {'Content-Type': 'application/x-www-form-urlencoded'},
-        body: 'add_note=1&note_content=' + encodeURIComponent(content)
+        body: 'add_note=1&note_content=' + encodeURIComponent(noteWithName)
     }).then(() => location.reload());
 }
 function removeNote(idx) {
