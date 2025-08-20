@@ -492,6 +492,12 @@ function formatNpcBlocks(txt, forcedName = '') {
                     cleanAbility = cleanAbility.replace(/оружие\s*:.*?хиты\s*:\s*\d+/i, '').trim();
                 }
                 
+                // Убираем повторение способности в конце
+                if (cleanAbility.includes('Способность:') && cleanAbility.split('Способность:').length > 2) {
+                    let parts = cleanAbility.split('Способность:');
+                    cleanAbility = 'Способность:' + parts[parts.length - 1];
+                }
+                
                 // Убираем повторение способности только если оно есть
                 if ((cleanAbility.match(/способность\s*:/gi) || []).length > 1) {
                     cleanAbility = cleanAbility.replace(/способность\s*:.*?способность\s*:/i, 'Способность:').trim();
@@ -540,7 +546,7 @@ function formatNpcBlocks(txt, forcedName = '') {
         
         for (let line of lines) {
             let lineLower = line.toLowerCase();
-            if (/высокий|низкий|стройный|полный|волосы|глаза|лицо|одежда|длинные|короткие|светлые|темные|красивые|острые|широкие|узкие|борода|усы|морщины|крепкий|мужчина|плечи|руки|шрамы|фартук|хвост|серебристые|заплетённые|косы|ярко-голубые|проницательные|внешность|стройная|женщина|собранными|тёмными|пучок|форменном|платье|формария|следят|движения|точны|экономны/i.test(lineLower) && line.length > 10 && line.length < 200) {
+            if (/высокий|низкий|стройный|полный|волосы|глаза|лицо|одежда|длинные|короткие|светлые|темные|красивые|острые|широкие|узкие|борода|усы|морщины|крепкий|мужчина|плечи|руки|шрамы|фартук|хвост|серебристые|заплетённые|косы|ярко-голубые|проницательные|внешность|стройная|женщина|собранными|тёмными|пучок|форменном|платье|формария|следят|движения|точны|экономны|мускулистым|телосложением|покрытым|старыми|шрамами|доспехов|брони/i.test(lineLower) && line.length > 5 && line.length < 250) {
                 if (!appear || appear === '-') {
                     appear = line;
                 } else {
@@ -561,7 +567,7 @@ function formatNpcBlocks(txt, forcedName = '') {
             let lineLower = line.toLowerCase();
             // Пропускаем строки с техническими параметрами, длинные описания и описания рас
             if (/оружие|урон|хиты|способност|стихийн|удар|d\d+|1d\d+|2d\d+/i.test(lineLower) || 
-                line.length > 150 || 
+                line.length > 200 || 
                 /эльфийка|эльф|человек|гном|полуорк|полурослик|тифлинг|драконорожденный|полуэльф|дворф|гоблин|орк|кобольд|ящеролюд|хоббит|который|которая|нашел|нашла|оставил|оставила/i.test(lineLower)) {
                 continue;
             }
@@ -646,7 +652,13 @@ function formatNpcBlocks(txt, forcedName = '') {
         let sentences = appearText.split(/[.!?]/).map(s => s.trim()).filter(Boolean);
         let uniqueSentences = [];
         for (let sentence of sentences) {
-            if (!uniqueSentences.some(s => s.toLowerCase().includes(sentence.toLowerCase().substring(0, 20)))) {
+            // Проверяем на дублирование более точно
+            let isDuplicate = uniqueSentences.some(s => {
+                let sLower = s.toLowerCase();
+                let sentenceLower = sentence.toLowerCase();
+                return sLower.includes(sentenceLower.substring(0, 30)) || sentenceLower.includes(sLower.substring(0, 30));
+            });
+            if (!isDuplicate) {
                 uniqueSentences.push(sentence);
             }
         }
@@ -663,7 +675,13 @@ function formatNpcBlocks(txt, forcedName = '') {
         let sentences = descText.split(/[.!?]/).map(s => s.trim()).filter(Boolean);
         let uniqueSentences = [];
         for (let sentence of sentences) {
-            if (!uniqueSentences.some(s => s.toLowerCase().includes(sentence.toLowerCase().substring(0, 25)))) {
+            // Проверяем на дублирование более точно
+            let isDuplicate = uniqueSentences.some(s => {
+                let sLower = s.toLowerCase();
+                let sentenceLower = sentence.toLowerCase();
+                return sLower.includes(sentenceLower.substring(0, 40)) || sentenceLower.includes(sLower.substring(0, 40));
+            });
+            if (!isDuplicate) {
                 uniqueSentences.push(sentence);
             }
         }
