@@ -12,7 +12,7 @@ define('DB_PASS', '');
 // Настройки приложения
 define('APP_NAME', 'DnD Copilot');
 define('APP_VERSION', '1.0.0');
-define('DEBUG_MODE', false);
+define('DEBUG_MODE', true);
 
 // Настройки безопасности
 define('SALT_ROUNDS', 12); // Для password_hash

@@ -14,6 +14,10 @@ if (isset($_SESSION['user_id'])) {
 if (!isset($_SESSION['db_initialized'])) {
     if (initDatabase()) {
         $_SESSION['db_initialized'] = true;
+    } else {
+        // Если база данных не инициализирована, перенаправляем на приветственную страницу
+        header('Location: welcome.php');
+        exit;
     }
 }
 ?>

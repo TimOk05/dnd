@@ -7,7 +7,7 @@ class Auth {
     public function __construct() {
         $this->pdo = getDbConnection();
         if (!$this->pdo) {
-            throw new Exception('Ошибка подключения к базе данных');
+            throw new Exception('Ошибка подключения к базе данных. Проверьте настройки в config.php');
         }
     }
     
