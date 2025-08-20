@@ -284,7 +284,7 @@ function fetchNpcFromAI(race, npcClass, prof, level) {
         if (motivation) contextBlock += `\nМотивация: ${motivation}`;
         if (occ) contextBlock += `\nПрофессия: ${occ}`;
         contextBlock += '\nИспользуй эти данные для вдохновения, но придумай цельного NPC.';
-        const systemInstruction = 'Всегда пиши ответы без оформления, без markdown, без кавычек и звёздочек. Разделяй результат NPC на смысловые блоки с заголовками: Описание, Внешность, Черты характера, Особенности поведения, Короткая характеристика. В блоке Короткая характеристика выведи отдельными строками: Оружие, Урон, Способность, Хиты. Каждый блок начинай с заголовка.';
+        const systemInstruction = 'Всегда пиши ответы без оформления, без markdown, без кавычек и звёздочек. Разделяй результат NPC на смысловые блоки с заголовками: Описание, Внешность, Черты характера, Особенности поведения, Короткая характеристика. В блоке Короткая характеристика обязательно выведи отдельными строками: Оружие: [название оружия], Урон: [формат урона, например 1d6], Хиты: [количество хитов], Способность: [основная способность]. Каждый блок начинай с заголовка. Технические параметры обязательны!';
         const prompt = `Создай NPC для DnD. Раса: ${race}. Класс: ${npcClass}. Профессия: ${prof}. Уровень: ${level}.${contextBlock}`;
         fetch('ai.php', {
             method: 'POST',
@@ -294,6 +294,8 @@ function fetchNpcFromAI(race, npcClass, prof, level) {
         .then(r => r.json())
         .then(data => {
             if (data && data.result) {
+                // Отладочная информация
+                console.log('AI Response:', data.result);
                 document.getElementById('modal-content').innerHTML = formatNpcBlocks(data.result, name);
                 document.getElementById('modal-save').style.display = '';
                 document.getElementById('modal-save').onclick = function() { saveNote(document.getElementById('modal-content').innerHTML); closeModal(); };
@@ -355,15 +357,53 @@ function formatNpcBlocks(txt, forcedName = '') {
         }
     }
     if (!name && forcedName) name = forcedName;
-    // Технические параметры: только строки с ключевыми словами
+    // Улучшенное извлечение технических параметров
     let summaryLines = [];
+    let techParams = { weapon: '', damage: '', hp: '', ability: '' };
+    
+    // 1. Сначала ищем в блоке "Короткая характеристика"
     if (summary && summary !== '-') {
-        summaryLines = summary.split(/\n|\r|•|-/).map(s => s.trim()).filter(Boolean).filter(s => /оружие|урон|хиты|способност/i.test(s));
+        let lines = summary.split(/\n|\r|•|-/).map(s => s.trim()).filter(Boolean);
+        for (let line of lines) {
+            if (/оружие|weapon/i.test(line)) techParams.weapon = line;
+            if (/урон|damage/i.test(line)) techParams.damage = line;
+            if (/хиты|hp|здоровье|health/i.test(line)) techParams.hp = line;
+            if (/способност|ability|skill/i.test(line)) techParams.ability = line;
+        }
     }
-    // Если нет хотя бы одного из технических параметров — предупреждение
-    const hasTech = summaryLines.some(s => /оружие/i.test(s)) && summaryLines.some(s => /урон/i.test(s)) && summaryLines.some(s => /хиты/i.test(s)) && summaryLines.some(s => /способност/i.test(s));
-    if (!hasTech) {
-        return `<div class='npc-block-modern'><div class='npc-modern-header'>Ошибка</div><div class='npc-modern-block'>AI не вернул все технические параметры (Оружие, Урон, Хиты, Способность). Попробуйте сгенерировать NPC ещё раз.</div></div>`;
+    
+    // 2. Если не нашли в блоке, ищем во всем тексте
+    if (!techParams.weapon || !techParams.damage || !techParams.hp || !techParams.ability) {
+        let allText = txt.toLowerCase();
+        let lines = txt.split(/\n|\r|•|-/).map(s => s.trim()).filter(Boolean);
+        
+        for (let line of lines) {
+            let lineLower = line.toLowerCase();
+            if (!techParams.weapon && /оружие|weapon|меч|топор|лук|кинжал|посох/i.test(lineLower)) {
+                techParams.weapon = line;
+            }
+            if (!techParams.damage && /урон|damage|d\d+|1d\d+|2d\d+/i.test(lineLower)) {
+                techParams.damage = line;
+            }
+            if (!techParams.hp && /хиты|hp|здоровье|health|жизн/i.test(lineLower)) {
+                techParams.hp = line;
+            }
+            if (!techParams.ability && /способност|ability|skill|маги|заклинани/i.test(lineLower)) {
+                techParams.ability = line;
+            }
+        }
+    }
+    
+    // 3. Формируем строки для отображения
+    if (techParams.weapon) summaryLines.push(techParams.weapon);
+    if (techParams.damage) summaryLines.push(techParams.damage);
+    if (techParams.hp) summaryLines.push(techParams.hp);
+    if (techParams.ability) summaryLines.push(techParams.ability);
+    
+    // 4. Если нашли хотя бы 2 параметра - показываем результат
+    const foundParams = [techParams.weapon, techParams.damage, techParams.hp, techParams.ability].filter(p => p).length;
+    if (foundParams < 2) {
+        return `<div class='npc-block-modern'><div class='npc-modern-header'>Ошибка</div><div class='npc-modern-block'>AI не вернул достаточно технических параметров. Найдено: ${foundParams}/4. Попробуйте сгенерировать NPC ещё раз.</div></div>`;
     }
     function firstSentence(str) {
         if (!str || str === '-') return '';
@@ -379,7 +419,7 @@ function formatNpcBlocks(txt, forcedName = '') {
     // Адаптивные карточки
     if (summaryLines.length) {
         let listHtml = '<ul class="npc-modern-list">' + summaryLines.map(s => `<li>${s}</li>`).join('') + '</ul>';
-        out += `<div class='npc-col-block'><span style='font-size:1.2em;'>⚔️</span> <b>Короткая характеристика</b>${listHtml}</div>`;
+        out += `<div class='npc-col-block'><span style='font-size:1.2em;'>⚔️</span> <b>Технические параметры</b>${listHtml}</div>`;
     }
     if (shortdesc && shortdesc !== '-') {
         out += `<div class='npc-col-block'><span style='font-size:1.2em;'>📜</span> <b>Краткое описание</b>${firstSentence(shortdesc)}</div>`;
