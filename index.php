@@ -498,6 +498,15 @@ function formatNpcBlocks(txt, forcedName = '') {
                     cleanAbility = 'Способность:' + parts[parts.length - 1];
                 }
                 
+                // Радикальная очистка от дублирования технических параметров
+                if (cleanAbility.includes('Короткая характеристика')) {
+                    // Ищем последнее вхождение "Способность:" и берем только его
+                    let lastAbilityIndex = cleanAbility.lastIndexOf('Способность:');
+                    if (lastAbilityIndex !== -1) {
+                        cleanAbility = cleanAbility.substring(lastAbilityIndex);
+                    }
+                }
+                
                 // Убираем повторение способности только если оно есть
                 if ((cleanAbility.match(/способность\s*:/gi) || []).length > 1) {
                     cleanAbility = cleanAbility.replace(/способность\s*:.*?способность\s*:/i, 'Способность:').trim();
@@ -506,8 +515,16 @@ function formatNpcBlocks(txt, forcedName = '') {
                 // Убираем лишние пробелы и точки
                 cleanAbility = cleanAbility.replace(/\s+/g, ' ').replace(/^\s+|\s+$/g, '');
                 
-                // Проверяем, что способность не пустая
+                // Проверяем, что способность не пустая и не содержит дублирования
                 if (cleanAbility.length > 10) {
+                    // Финальная проверка на дублирование
+                    if (cleanAbility.includes('Оружие:') && cleanAbility.includes('Хиты:')) {
+                        // Если все еще есть дублирование, берем только последнюю часть
+                        let lastAbilityIndex = cleanAbility.lastIndexOf('Способность:');
+                        if (lastAbilityIndex !== -1) {
+                            cleanAbility = cleanAbility.substring(lastAbilityIndex);
+                        }
+                    }
                     techParams.ability = cleanAbility;
                 }
             }
@@ -518,7 +535,7 @@ function formatNpcBlocks(txt, forcedName = '') {
     if (!techParams.ability && desc) {
         let descLines = desc.split(/[.!?]/).map(s => s.trim()).filter(Boolean);
         for (let line of descLines) {
-            if (/стихийн|удар|способност|маги|заклинани|ярость|неистовая|барда|вдохновение|манипуляция|шантаж|компрометирующей|информации/i.test(line.toLowerCase())) {
+            if (/стихийн|удар|способност|маги|заклинани|ярость|неистовая|барда|вдохновение|манипуляция|шантаж|компрометирующей|информации|боевой стиль|защита|атака|оборона/i.test(line.toLowerCase())) {
                 techParams.ability = 'Способность: ' + line;
                 break;
             }
@@ -532,7 +549,7 @@ function formatNpcBlocks(txt, forcedName = '') {
         
         for (let line of lines) {
             let lineLower = line.toLowerCase();
-            if (/ярость|неистовая|барда|вдохновение|манипуляция|шантаж|компрометирующей|информации|стихийн|удар|способност|маги|заклинани/i.test(lineLower) && line.length > 5 && line.length < 100) {
+            if (/ярость|неистовая|барда|вдохновение|манипуляция|шантаж|компрометирующей|информации|стихийн|удар|способност|маги|заклинани|боевой стиль|защита|атака|оборона/i.test(lineLower) && line.length > 5 && line.length < 100) {
                 techParams.ability = 'Способность: ' + line;
                 break;
             }
