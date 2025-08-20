@@ -783,6 +783,22 @@ function formatNpcBlocks(txt, forcedName = '') {
     }
     
     // Убираем имя из других блоков
+    if (name) {
+        if (trait && trait.includes(name)) {
+            trait = trait.replace(new RegExp(name + '\\s*', 'gi'), '').trim();
+        }
+        if (desc && desc.includes(name)) {
+            desc = desc.replace(new RegExp(name + '\\s*', 'gi'), '').trim();
+        }
+        if (appear && appear.includes(name)) {
+            appear = appear.replace(new RegExp(name + '\\s*', 'gi'), '').trim();
+        }
+        if (shortdesc && shortdesc.includes(name)) {
+            shortdesc = shortdesc.replace(new RegExp(name + '\\s*', 'gi'), '').trim();
+        }
+    }
+    
+    // Убираем формальные ссылки на имя
     if (trait && trait.includes('Имя:')) {
         trait = trait.replace(/.*?Имя:\s*[^.]*\.?/i, '').trim();
     }
@@ -1070,7 +1086,34 @@ function formatNpcBlocks(txt, forcedName = '') {
     if (techParams.weapon) summaryLines.push(techParams.weapon);
     if (techParams.damage) summaryLines.push(techParams.damage);
     if (techParams.hp) summaryLines.push(techParams.hp);
-    if (correctedAbility) summaryLines.push('Способность: ' + correctedAbility);
+    
+    // Всегда добавляем способность, если есть класс
+    if (correctedAbility) {
+        summaryLines.push('Способность: ' + correctedAbility);
+    } else if (cls && cls !== 'Без класса') {
+        // Если способность не найдена, но есть класс, создаем базовую
+        const classAbilities = {
+            'Воин': 'Двойная атака',
+            'Паладин': 'Божественная кара',
+            'Колдун': 'Пакт с патроном',
+            'Маг': 'Магическое исследование',
+            'Разбойник': 'Скрытная атака',
+            'Следопыт': 'Связь с природой',
+            'Жрец': 'Божественное вмешательство',
+            'Бард': 'Вдохновение',
+            'Варвар': 'Ярость',
+            'Плут': 'Скрытные способности',
+            'Монах': 'Боевые искусства',
+            'Чародей': 'Элементальная магия',
+            'Друид': 'Дикий облик'
+        };
+        
+        if (classAbilities[cls]) {
+            summaryLines.push('Способность: ' + classAbilities[cls]);
+        } else {
+            summaryLines.push('Способность: Базовые навыки');
+        }
+    }
     
     // 10. Если нашли хотя бы 2 параметра - показываем результат
     const foundParams = [techParams.weapon, techParams.damage, techParams.hp, techParams.ability].filter(p => p).length;
@@ -1094,7 +1137,17 @@ function formatNpcBlocks(txt, forcedName = '') {
         out += `<div class='npc-col-block'><span style='font-size:1.2em;'>⚔️</span> <b>Технические параметры</b>${listHtml}</div>`;
     }
     if (shortdesc && shortdesc !== '-') {
-        out += `<div class='npc-col-block'><span style='font-size:1.2em;'>📜</span> <b>Описание</b>${firstSentence(shortdesc)}</div>`;
+        // Очищаем краткое описание от дублирования имени
+        let cleanShortDesc = shortdesc;
+        if (name && shortdesc.includes(name)) {
+            cleanShortDesc = shortdesc.replace(new RegExp(name + '\\s*', 'gi'), '').trim();
+        }
+        // Убираем слово "Описание" из начала
+        cleanShortDesc = cleanShortDesc.replace(/^описание\s*/i, '').trim();
+        
+        if (cleanShortDesc && cleanShortDesc !== '-') {
+            out += `<div class='npc-col-block'><span style='font-size:1.2em;'>📜</span> <b>Описание</b>${firstSentence(cleanShortDesc)}</div>`;
+        }
     }
     if (trait && trait !== '-' && trait.trim().length > 0) {
         // Проверяем, что это действительно черта характера, а не описание предметов или внешности
@@ -1142,6 +1195,12 @@ function formatNpcBlocks(txt, forcedName = '') {
         if (desc.includes('Описание')) {
             descText = desc.replace(/^описание\s*/i, '').trim();
         }
+        
+        // Убираем дублирование имени из описания
+        if (name && descText.includes(name)) {
+            descText = descText.replace(new RegExp(name + '\\s*', 'gi'), '').trim();
+        }
+        
         // Убираем дублирование описаний
         let sentences = descText.split(/[.!?]/).map(s => s.trim()).filter(Boolean);
         let uniqueSentences = [];
@@ -1149,7 +1208,8 @@ function formatNpcBlocks(txt, forcedName = '') {
             // Убираем нерелевантный контент
             if (sentence.includes('Имя:') || sentence.includes('Профессия:') || 
                 sentence.includes('Черты характера') || sentence.includes('Короткая характеристика') ||
-                sentence.includes('Оружие:') || sentence.includes('Урон:') || sentence.includes('Хиты:')) {
+                sentence.includes('Оружие:') || sentence.includes('Урон:') || sentence.includes('Хиты:') ||
+                sentence.length < 10) {
                 continue;
             }
             // Проверяем на дублирование более точно
@@ -1163,7 +1223,24 @@ function formatNpcBlocks(txt, forcedName = '') {
             }
         }
         descText = uniqueSentences.join('. ');
-        out += `<div class='npc-col-block'><span style='font-size:1.2em;'>📜</span> <b>Описание</b>${firstSentence(descText)}</div>`;
+        
+        // Проверяем, что описание не дублирует краткое описание
+        if (shortdesc && shortdesc !== '-' && descText) {
+            let shortDescClean = shortdesc.replace(/^описание\s*/i, '').trim();
+            if (name && shortDescClean.includes(name)) {
+                shortDescClean = shortDescClean.replace(new RegExp(name + '\\s*', 'gi'), '').trim();
+            }
+            
+            // Если описание похоже на краткое описание, не показываем его
+            if (descText.toLowerCase().includes(shortDescClean.toLowerCase().substring(0, 30)) ||
+                shortDescClean.toLowerCase().includes(descText.toLowerCase().substring(0, 30))) {
+                descText = '';
+            }
+        }
+        
+        if (descText && descText.trim()) {
+            out += `<div class='npc-col-block'><span style='font-size:1.2em;'>📜</span> <b>Описание</b>${firstSentence(descText)}</div>`;
+        }
     }
     if (behavior && behavior !== '-') {
         out += `<div class='npc-col-block'><span style='font-size:1.2em;'>🎭</span> <b>Прочее</b>${firstSentence(behavior)}</div>`;
