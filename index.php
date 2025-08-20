@@ -228,20 +228,42 @@ foreach ($_SESSION['notes'] as $i => $note) {
         }
     }
     
+    // Очищаем имя - берем только первое слово с большой буквы
+    if ($nameLine) {
+        $words = preg_split('/\s+/', $nameLine);
+        if (count($words) > 1) {
+            // Берем только первое слово как имя
+            $nameLine = $words[0];
+        }
+        // Убираем лишние символы, оставляем только буквы
+        $nameLine = preg_replace('/[^\wа-яё]/ui', '', $nameLine);
+        $nameLine = trim($nameLine);
+    }
+    
     $previewSrc = $nameLine ?: (count($lines) ? $lines[0] : '(нет данных)');
     // Убираем лишние слова из превью
     $previewSrc = preg_replace('/^описание\s+/i', '', $previewSrc);
     $previewSrc = preg_replace('/^\s*—\s*/', '', $previewSrc);
     $previewSrc = preg_replace('/^npc\s+/i', '', $previewSrc);
     
-    // Обрезаем превью до 30 символов или 3 слов
-    $words = preg_split('/\s+/', $previewSrc);
-    if (count($words) > 3) {
-        $preview = implode(' ', array_slice($words, 0, 3)) . '…';
-    } else if (mb_strlen($previewSrc) > 30) {
-        $preview = mb_substr($previewSrc, 0, 30) . '…';
+    // Очищаем превью - берем только первое слово если это имя
+    if ($nameLine) {
+        $words = preg_split('/\s+/', $previewSrc);
+        if (count($words) > 1) {
+            $preview = $words[0];
+        } else {
+            $preview = $previewSrc;
+        }
     } else {
-        $preview = $previewSrc;
+        // Обрезаем превью до 30 символов или 3 слов
+        $words = preg_split('/\s+/', $previewSrc);
+        if (count($words) > 3) {
+            $preview = implode(' ', array_slice($words, 0, 3)) . '…';
+        } else if (mb_strlen($previewSrc) > 30) {
+            $preview = mb_substr($previewSrc, 0, 30) . '…';
+        } else {
+            $preview = $previewSrc;
+        }
     }
     $notesBlock .= '<div class="note-item" onclick="expandNote(' . $i . ')">' . htmlspecialchars($preview, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8') . '<button class="note-remove" onclick="event.stopPropagation();removeNote(' . $i . ')">×</button></div>';
 }
@@ -1127,7 +1149,19 @@ function formatNpcBlocks(txt, forcedName = '') {
     }
     let out = '';
     out += `<div class='npc-block-modern'>`;
-    out += `<div class='npc-modern-header'>${name ? name : 'NPC'}</div>`;
+    
+    // Очищаем имя - берем только первое слово
+    let cleanName = name;
+    if (name && name !== 'NPC') {
+        let nameWords = name.split(/\s+/);
+        if (nameWords.length > 1) {
+            cleanName = nameWords[0];
+        }
+        // Убираем лишние символы
+        cleanName = cleanName.replace(/[^\wа-яё]/gi, '').trim();
+    }
+    
+    out += `<div class='npc-modern-header'>${cleanName ? cleanName : 'NPC'}</div>`;
     if (race || cls) {
         out += `<div class='npc-modern-sub'>${race ? race : ''}${race && cls ? ' · ' : ''}${cls ? cls : ''}</div>`;
     }
@@ -1319,6 +1353,17 @@ function saveNote(content) {
         }
     }
     
+    // Очищаем имя от лишних слов (только первое слово с большой буквы)
+    if (npcName && npcName !== 'NPC') {
+        var words = npcName.split(/\s+/);
+        if (words.length > 1) {
+            // Берем только первое слово как имя
+            npcName = words[0];
+        }
+        // Убираем лишние символы
+        npcName = npcName.replace(/[^\wа-яё]/gi, '').trim();
+    }
+    
     // Добавляем имя в начало заметки для лучшей идентификации
     var noteWithName = '<div class="npc-name-header">' + npcName + '</div>' + content;
     
@@ -1381,6 +1426,14 @@ if (window.allNotes) {
         
         // Очищаем превью от лишних слов
         preview = preview.replace(/^описание\s+/i, '').replace(/^\s*—\s*/, '').replace(/^npc\s+/i, '');
+        
+        // Очищаем превью - берем только первое слово если это имя
+        if (nameMatch || headerMatch) {
+            let words = preview.split(/\s+/);
+            if (words.length > 1) {
+                preview = words[0];
+            }
+        }
         
         console.log('Заметка', i, 'превью:', preview || '(нет данных)');
     });
