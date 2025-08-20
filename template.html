@@ -1324,6 +1324,44 @@
             transform: scale(1.1);
             box-shadow: 0 4px 12px var(--shadow-secondary);
         }
+        /* Стили для информации о пользователе */
+        
+        .user-info {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            z-index: 100;
+        }
+        
+        .welcome-text {
+            color: var(--text-tertiary);
+            font-weight: bold;
+            font-size: 1.1em;
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+        }
+        
+        .logout-btn {
+            background: var(--accent-danger);
+            color: var(--bg-secondary);
+            border: 2px solid var(--accent-danger);
+            border-radius: 8px;
+            padding: 8px 16px;
+            font-size: 0.9em;
+            font-family: inherit;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 8px var(--shadow-primary);
+        }
+        
+        .logout-btn:hover {
+            background: var(--bg-secondary);
+            color: var(--accent-danger);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px var(--shadow-secondary);
+        }
         /* Улучшенные мобильные стили */
         
         @media (max-width: 768px) {
@@ -1331,6 +1369,20 @@
                 margin: 10px;
                 padding: 20px 15px;
                 border-radius: 16px;
+            }
+            .user-info {
+                position: relative;
+                top: auto;
+                left: auto;
+                margin-bottom: 15px;
+                justify-content: center;
+            }
+            .welcome-text {
+                font-size: 1em;
+            }
+            .logout-btn {
+                padding: 6px 12px;
+                font-size: 0.8em;
             }
             h1 {
                 font-size: 1.8em;
@@ -1406,6 +1458,10 @@
                 <span class="theme-icon">🌙</span>
             </button>
         </div>
+        <div class="user-info">
+            <span class="welcome-text">Добро пожаловать, <?php echo htmlspecialchars($currentUser); ?>!</span>
+            <button class="logout-btn" onclick="logout()">Выйти</button>
+        </div>
         <h1>DnD AI Чат</h1>
         <div class="fast-bar">
             {{fast_buttons}}
@@ -1459,6 +1515,29 @@
                 themeIcon.textContent = theme === 'dark' ? '☀️' : '🌙';
             }
         });
+
+        // Функция выхода
+        function logout() {
+            if (confirm('Вы уверены, что хотите выйти?')) {
+                fetch('users.php', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/x-www-form-urlencoded'
+                        },
+                        body: 'action=logout'
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            window.location.href = 'login.php';
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Ошибка выхода:', error);
+                        window.location.href = 'login.php';
+                    });
+            }
+        }
     </script>
 </body>
 

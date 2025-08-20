@@ -1,0 +1,31 @@
+# Защита файлов пользователей
+<Files "users.json">
+    Order allow,deny
+    Deny from all
+</Files>
+
+# Защита конфигурационных файлов
+<Files "config.php">
+    Order allow,deny
+    Deny from all
+</Files>
+
+# Защита файлов .json в корне
+<Files "*.json">
+    Order allow,deny
+    Deny from all
+</Files>
+
+# Разрешаем доступ к JSON файлам в папке pdf
+<Files "pdf/*.json">
+    Order allow,deny
+    Allow from all
+</Files>
+
+# Настройки безопасности
+ServerSignature Off
+Options -Indexes
+
+# Перенаправление ошибок
+ErrorDocument 403 /login.php
+ErrorDocument 404 /login.php

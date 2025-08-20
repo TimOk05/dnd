@@ -116,3 +116,8 @@ models/
 
 # Docker
 docker-compose.override.yml
+
+# User data (security)
+users.json
+*.json
+!pdf/*.json
