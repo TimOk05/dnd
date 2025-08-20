@@ -377,7 +377,7 @@ function fetchNpcFromAI(race, npcClass, prof, level) {
         if (motivation) contextBlock += `\nМотивация: ${motivation}`;
         if (occ) contextBlock += `\nПрофессия: ${occ}`;
         contextBlock += '\nИспользуй эти данные для вдохновения, но придумай цельного NPC.';
-        const systemInstruction = 'Создавай NPC в следующем строгом формате:\n\nИмя и Профессия\n[Полное имя и профессия/занятие персонажа]\n\nОписание\n[Подробное описание персонажа, его мотивации, целей, прошлого, текущей ситуации - минимум 3-4 предложения с деталями]\n\nВнешность\n[Детальное описание внешнего вида, одежды, аксессуаров, особенностей - минимум 2-3 предложения]\n\nЧерты характера\n[Личностные качества, особенности поведения, привычки - минимум 1-2 предложения]\n\nТехнические параметры\nОружие: [название оружия]\nУрон: [формат урона, например 1d6 рубящий]\nХиты: [количество хитов]\n\nВАЖНО: \n- Используй ТОЛЬКО эти заголовки\n- НЕ дублируй информацию между блоками\n- Каждый блок должен быть содержательным и детальным\n- НЕ используй имя персонажа в других блоках\n- Делай NPC живыми и интересными с богатой историей!';
+        const systemInstruction = 'Создавай NPC в СТРОГОМ формате без лишних символов:\n\nИмя и Профессия\n[Только имя и профессия, например: "Торин Каменщик"]\n\nОписание\n[3-4 предложения о прошлом, мотивации, целях персонажа]\n\nВнешность\n[2-3 предложения о внешнем виде, одежде, особенностях]\n\nЧерты характера\n[1-2 предложения о личности и поведении]\n\nТехнические параметры\nОружие: [название оружия]\nУрон: [формат урона]\nХиты: [число]\n\nПРАВИЛА:\n- НЕ используй скобки, кавычки, лишние символы\n- НЕ дублируй информацию\n- НЕ используй имя в других блоках\n- Каждый блок начинай с заголовка\n- Делай NPC детальными и интересными';
         const prompt = `Создай NPC для DnD. Раса: ${race}. Класс: ${npcClass}. Уровень: ${level}. Придумай подходящую профессию для этого персонажа.${contextBlock}`;
         fetch('ai.php', {
             method: 'POST',
@@ -706,102 +706,63 @@ function saveInitiativeNote() {
 }
 // --- Форматирование результата NPC по смысловым блокам ---
 function formatNpcBlocks(txt, forcedName = '') {
-
+    // Очищаем текст от лишних символов
+    txt = txt.replace(/[\#\*`>\[\]]+/g, '');
     
-    txt = txt.replace(/[\#\*`>]+/g, '');
+    // Ищем блоки по заголовкам
     const blockTitles = [
-        'Имя и Профессия', 'Раса', 'Класс', 'Краткое описание', 'Черта характера', 'Слабость', 'Короткая характеристика', 'Описание', 'Внешность', 'Особенности поведения'
+        'Имя и Профессия', 'Описание', 'Внешность', 'Черты характера', 'Технические параметры'
     ];
+    
     let blocks = [];
-    let regex = /(Имя и Профессия|Раса|Класс|Краткое описание|Черта характера|Слабость|Короткая характеристика|Описание|Внешность|Особенности поведения)\s*[:\- ]/gi;
+    let regex = /(Имя и Профессия|Описание|Внешность|Черты характера|Технические параметры)\s*[:\- ]/gi;
     let matches = [...txt.matchAll(regex)];
+    
     if (matches.length > 0) {
         for (let i = 0; i < matches.length; i++) {
             let start = matches[i].index + matches[i][0].length;
             let end = (i + 1 < matches.length) ? matches[i + 1].index : txt.length;
             let title = matches[i][1];
             let content = txt.slice(start, end).replace(/^\s+|\s+$/g, '');
-            if (content) blocks.push({ title, content });
+            if (content && content.length > 5) {
+                blocks.push({ title, content });
+            }
         }
     }
-    let name = '', race = '', cls = '', shortdesc = '', trait = '', weakness = '', summary = '', desc = '', appear = '', behavior = '', other = '';
-    if (blocks.length === 0) {
-        let sentences = txt.split(/(?<=[.!?])\s+/);
-        if (sentences.length > 0) name = sentences[0];
-        if (sentences.length > 1) shortdesc = sentences[1];
-        if (sentences.length > 2) trait = sentences[2];
-        if (sentences.length > 3) weakness = sentences[3];
-        if (sentences.length > 4) summary = sentences[4];
-        if (sentences.length > 5) desc = sentences.slice(5).join(' ');
-    } else {
-        for (let block of blocks) {
-            if (block.title === 'Имя и Профессия') name = block.content;
-            if (block.title === 'Раса') race = block.content;
-            if (block.title === 'Класс') cls = block.content;
-            if (block.title === 'Краткое описание') shortdesc = block.content;
-            if (block.title === 'Черта характера') trait = block.content;
-            if (block.title === 'Слабость') weakness = block.content;
-            if (block.title === 'Короткая характеристика') summary = block.content;
-            if (block.title === 'Описание') desc = block.content;
-            if (block.title === 'Внешность') appear = block.content;
-            if (block.title === 'Особенности поведения') behavior = block.content;
-        }
+    let name = '', desc = '', appear = '', trait = '', techBlock = '';
+    
+    // Извлекаем данные из блоков
+    for (let block of blocks) {
+        if (block.title === 'Имя и Профессия') name = block.content;
+        if (block.title === 'Описание') desc = block.content;
+        if (block.title === 'Внешность') appear = block.content;
+        if (block.title === 'Черты характера') trait = block.content;
+        if (block.title === 'Технические параметры') techBlock = block.content;
     }
     
-    // Исправляем неправильную классификацию блоков
-    if (trait && /служит|академи|обучает|преподает|мастерская|мешок|инструменты|станок|разбирает|носит|мечтает|стать|известным|советником|влияния|события|работает|рынке|призвание|собирать|слухи|истории|рубит|мясо|управляет|лавкой|продаёт|продукты|травы|ингредиенты/i.test(trait)) {
-        // Это не черта характера, а описание деятельности, целей или предметов
-        if (!desc) desc = trait;
-        trait = '';
-    }
+    // Если блоки не найдены, используем принудительное имя
+    if (!name && forcedName) name = forcedName;
     
-    if (weakness && /преданность|ценный|союзник|знания|стабильности/i.test(weakness)) {
-        // Это не слабость, а положительная характеристика
-        if (!trait) trait = weakness;
-        weakness = '';
-    }
-    
-    // Если в слабости внешность - убираем слабость
-    if (weakness && /высокий|низкий|стройный|полный|волосы|глаза|лицо|одежда/i.test(weakness)) {
-        if (!appear) appear = weakness;
-        weakness = '';
-    }
-    
-    // Если в черте характера описание внешности - переносим
-    if (trait && /высокий|низкий|стройный|полный|волосы|глаза|лицо|одежда|длинные|короткие|светлые|темные|крепкий|мужчина|плечи|руки|шрамы|фартук|хвост|внешность|стройная|женщина|собранными|тёмными|волосами|пучок|форменном|платье|формария|следят|движения|точны|экономны|кулон|амулет|кольцо|ожерелье|браслет|пояс|мешок|зерно|носит|висит|за спиной|на поясе|на шее|серебристые|заплетённые|косы|пронзительные|зелёные|морской|волны|холодными|острыми|чертами|унаследованными|эльфийской|крови/i.test(trait)) {
-        if (!appear) appear = trait;
-        trait = '';
-    }
+    // Очищаем блоки от лишних символов и форматирования
+    if (name) name = name.replace(/[\[\]()]/g, '').trim();
+    if (desc) desc = desc.replace(/[\[\]()]/g, '').trim();
+    if (appear) appear = appear.replace(/[\[\]()]/g, '').trim();
+    if (trait) trait = trait.replace(/[\[\]()]/g, '').trim();
+    if (techBlock) techBlock = techBlock.replace(/[\[\]()]/g, '').trim();
     
     // Убираем имя из других блоков
     if (name) {
-        // Очищаем имя от лишних слов
-        let cleanName = name;
-        let nameWords = name.split(/\s+/);
-        if (nameWords.length > 1) {
-            cleanName = nameWords[0];
-        }
-        cleanName = cleanName.replace(/[^\wа-яё]/gi, '').trim();
-        
-        // Более агрессивная очистка имени из всех блоков
+        let cleanName = name.split(/\s+/)[0].replace(/[^\wа-яё]/gi, '').trim();
         const nameRegex = new RegExp(cleanName + '\\s*', 'gi');
         
         if (trait && trait.includes(cleanName)) {
-            trait = trait.replace(nameRegex, '').trim();
-            // Убираем лишние пробелы и знаки препинания
-            trait = trait.replace(/^[,\s]+/, '').replace(/[,\s]+$/, '');
+            trait = trait.replace(nameRegex, '').trim().replace(/^[,\s]+/, '').replace(/[,\s]+$/, '');
         }
         if (desc && desc.includes(cleanName)) {
-            desc = desc.replace(nameRegex, '').trim();
-            desc = desc.replace(/^[,\s]+/, '').replace(/[,\s]+$/, '');
+            desc = desc.replace(nameRegex, '').trim().replace(/^[,\s]+/, '').replace(/[,\s]+$/, '');
         }
         if (appear && appear.includes(cleanName)) {
-            appear = appear.replace(nameRegex, '').trim();
-            appear = appear.replace(/^[,\s]+/, '').replace(/[,\s]+$/, '');
-        }
-        if (shortdesc && shortdesc.includes(cleanName)) {
-            shortdesc = shortdesc.replace(nameRegex, '').trim();
-            shortdesc = shortdesc.replace(/^[,\s]+/, '').replace(/[,\s]+$/, '');
+            appear = appear.replace(nameRegex, '').trim().replace(/^[,\s]+/, '').replace(/[,\s]+$/, '');
         }
     }
     
@@ -828,271 +789,66 @@ function formatNpcBlocks(txt, forcedName = '') {
         }
     }
     if (!name && forcedName) name = forcedName;
-    // Улучшенное извлечение технических параметров
+    // Извлечение технических параметров
     let summaryLines = [];
-    let techParams = { weapon: '', damage: '', hp: '', ability: '' };
+    let techParams = { weapon: '', damage: '', hp: '' };
     
-    // 1. Сначала ищем в блоке "Короткая характеристика"
-    if (summary && summary !== '-') {
-        let lines = summary.split(/\n|\r|•|-/).map(s => s.trim()).filter(Boolean);
+    // Ищем технические параметры в блоке
+    if (techBlock) {
+        let lines = techBlock.split(/\n|\r/).map(s => s.trim()).filter(Boolean);
         for (let line of lines) {
-            if (/оружие|weapon/i.test(line)) techParams.weapon = line;
-            if (/урон|damage/i.test(line)) techParams.damage = line;
-            if (/хиты|hp|здоровье|health/i.test(line)) techParams.hp = line;
-
+            if (/оружие\s*:/i.test(line)) techParams.weapon = line;
+            if (/урон\s*:/i.test(line)) techParams.damage = line;
+            if (/хиты\s*:/i.test(line)) techParams.hp = line;
         }
     }
-    
-    // 2. Если не нашли в блоке, ищем во всем тексте
-    if (!techParams.weapon || !techParams.damage || !techParams.hp) {
-        let allText = txt.toLowerCase();
-        let lines = txt.split(/\n|\r|•|-/).map(s => s.trim()).filter(Boolean);
-        
-        for (let line of lines) {
-            let lineLower = line.toLowerCase();
-            // Ищем только краткие технические параметры
-            if (!techParams.weapon && /оружие\s*:/i.test(lineLower) && line.length < 50) {
-                techParams.weapon = line;
-            }
-            if (!techParams.damage && /урон\s*:/i.test(lineLower) && line.length < 30) {
-                techParams.damage = line;
-            }
-            if (!techParams.hp && /хиты\s*:/i.test(lineLower) && line.length < 30) {
-                techParams.hp = line;
-            }
-
-        }
+    // Проверяем наличие необходимых блоков
+    if (!name || !desc || !appear || !trait || !techBlock) {
+        return `<div class='npc-block-modern'><div class='npc-modern-header'>Ошибка генерации</div><div class='npc-modern-block'>AI не вернул все необходимые блоки. Попробуйте сгенерировать NPC ещё раз.</div></div>`;
     }
     
-
-    
-    // 5. Ищем внешность в тексте, если не найдена в блоках
-    if (!appear || appear === '-') {
-        let allText = txt.toLowerCase();
-        let lines = txt.split(/[.!?]/).map(s => s.trim()).filter(Boolean);
-        
-        for (let line of lines) {
-            let lineLower = line.toLowerCase();
-            // Ищем внешность, но исключаем действия и описания деятельности
-            if (/высокий|низкий|стройный|полный|волосы|глаза|лицо|одежда|длинные|короткие|светлые|темные|красивые|острые|широкие|узкие|борода|усы|морщины|крепкий|мужчина|плечи|руки|шрамы|фартук|хвост|серебристые|заплетённые|косы|ярко-голубые|проницательные|внешность|стройная|женщина|собранными|тёмными|пучок|форменном|платье|формария|следят|движения|точны|экономны|мускулистым|телосложением|покрытым|старыми|шрамами|доспехов|брони|зелёные|морской|волны|холодными|острыми|чертами|унаследованными|эльфийской|крови|внутренней|силой/i.test(lineLower) && 
-                line.length > 5 && line.length < 250 &&
-                !/работает|управляет|специализируется|расследует|патрулирует|следит|защищает|угроза|нависла|взял|оружие|дорого|мечтал|приключениях|семейной|мельницей|душе|всегда/i.test(lineLower)) {
-                if (!appear || appear === '-') {
-                    appear = line;
-                } else {
-                    // Объединяем описания внешности
-                    appear = appear + '. ' + line;
-                }
-            }
-        }
-    }
-    
-
-    
-    // 6. Очищаем описание и извлекаем прочее
-    if (desc) {
-        let descLines = desc.split(/[.!?]/).map(s => s.trim()).filter(Boolean);
-        let cleanLines = [];
-        let otherLines = [];
-        
-        for (let line of descLines) {
-            let lineLower = line.toLowerCase();
-            // Пропускаем строки с техническими параметрами, длинные описания и описания рас
-            if (/оружие|урон|хиты|способност|стихийн|удар|d\d+|1d\d+|2d\d+/i.test(lineLower) || 
-                line.length > 200 || 
-                /эльфийка|эльф|человек|гном|полуорк|полурослик|тифлинг|драконорожденный|полуэльф|дворф|гоблин|орк|кобольд|ящеролюд|хоббит|который|которая|нашел|нашла|оставил|оставила/i.test(lineLower)) {
-                continue;
-            }
-            
-            // Если строка содержит черты характера - переносим в прочее
-            if (/харизматичный|проницательный|ответственный|надменный|артистичный|дипломатичный|преданный|терпеливый|внимательный|мечтательный|общительный|находчивый|рассеянный|хитрый|наблюдательный|амбициозный|осторожный|циничный/i.test(lineLower)) {
-                otherLines.push(line);
-            } else {
-                cleanLines.push(line);
-            }
-        }
-        
-        desc = cleanLines.join('. ');
-        if (desc.endsWith('. ')) desc = desc.slice(0, -2);
-        
-        if (otherLines.length > 0) {
-            other = otherLines.join('. ');
-        }
-    }
-    
-    // 7. Если в блоке "Дополнительно" есть черты характера, переносим их в "Черта характера"
-    if (other && /черты характера|любознательный|обаятельный|нетерпеливый|преданный|наивный|хитрый|наблюдательный|амбициозный|артистичный|осторожный|циничный|обаятельный/i.test(other.toLowerCase())) {
-        if (!trait || trait === '-') {
-            trait = other;
-            other = '';
-        } else {
-            // Если уже есть черты характера, объединяем
-            trait = trait + '. ' + other;
-            other = '';
-        }
-    }
-    
-    // 8. Формируем строки для отображения
+    // Формируем технические параметры
     if (techParams.weapon) summaryLines.push(techParams.weapon);
     if (techParams.damage) summaryLines.push(techParams.damage);
     if (techParams.hp) summaryLines.push(techParams.hp);
     
-    // 9. Если нашли хотя бы 2 параметра - показываем результат
+    // Проверяем наличие технических параметров
     const foundParams = [techParams.weapon, techParams.damage, techParams.hp].filter(p => p).length;
     if (foundParams < 2) {
         return `<div class='npc-block-modern'><div class='npc-modern-header'>Ошибка</div><div class='npc-modern-block'>AI не вернул достаточно технических параметров. Найдено: ${foundParams}/3. Попробуйте сгенерировать NPC ещё раз.</div></div>`;
     }
+    
     function firstSentence(str) {
         if (!str || str === '-') return '';
         let m = str.match(/^[^.?!]+[.?!]?/);
         return m ? m[0].trim() : str.trim();
     }
+    
     let out = '';
     out += `<div class='npc-block-modern'>`;
     
-    // Очищаем имя - берем только первое слово
-    let cleanName = name;
-    let profession = '';
+    // Очищаем имя
+    let cleanName = name.split(/\s+/)[0].replace(/[^\wа-яё]/gi, '').trim();
+    out += `<div class='npc-modern-header'>${cleanName || 'NPC'}</div>`;
     
-    if (name && name !== 'NPC') {
-        let nameWords = name.split(/\s+/);
-        if (nameWords.length > 1) {
-            cleanName = nameWords[0];
-            // Остальные слова могут быть профессией
-            profession = nameWords.slice(1).join(' ');
-        }
-        // Убираем лишние символы только из имени
-        cleanName = cleanName.replace(/[^\wа-яё]/gi, '').trim();
-    }
-    
-    out += `<div class='npc-modern-header'>${cleanName ? cleanName : 'NPC'}</div>`;
-    
-    // Показываем расу, класс и профессию
-    let subtitle = [];
-    if (race) subtitle.push(race);
-    if (cls) subtitle.push(cls);
-    if (profession) subtitle.push(profession);
-    
-    if (subtitle.length > 0) {
-        out += `<div class='npc-modern-sub'>${subtitle.join(' · ')}</div>`;
-    }
-    // Адаптивные карточки
+    // Технические параметры
     if (summaryLines.length) {
         let listHtml = '<ul class="npc-modern-list">' + summaryLines.map(s => `<li>${s}</li>`).join('') + '</ul>';
         out += `<div class='npc-col-block'><span style='font-size:1.2em;'>⚔️</span> <b>Технические параметры</b>${listHtml}</div>`;
     }
-    if (shortdesc && shortdesc !== '-') {
-        // Очищаем краткое описание от дублирования имени
-        let cleanShortDesc = shortdesc;
-        if (name && shortdesc.includes(name)) {
-            cleanShortDesc = shortdesc.replace(new RegExp(name + '\\s*', 'gi'), '').trim();
-        }
-        // Убираем слово "Описание" из начала
-        cleanShortDesc = cleanShortDesc.replace(/^описание\s*/i, '').trim();
-        
-        // Проверяем, что описание достаточно содержательное
-        if (cleanShortDesc && cleanShortDesc !== '-' && cleanShortDesc.length > 10) {
-            out += `<div class='npc-col-block'><span style='font-size:1.2em;'>📜</span> <b>Описание</b>${firstSentence(cleanShortDesc)}</div>`;
-        }
+    
+    // Описание
+    if (desc && desc.length > 10) {
+        out += `<div class='npc-col-block'><span style='font-size:1.2em;'>📜</span> <b>Описание</b><div class='npc-content'>${firstSentence(desc)}</div></div>`;
     }
-    if (trait && trait !== '-' && trait.trim().length > 0) {
-        // Проверяем, что это действительно черта характера, а не описание предметов или внешности
-        let traitLower = trait.toLowerCase();
-        if (!/флейта|пояс|мешок|зерно|носит|висит|за спиной|на поясе|внешность|стройная|женщина|собранными|тёмными|волосами|пучок|форменном|платье|формария|глаза|следят|движения|точны|экономны|кулон|амулет|кольцо|ожерелье|браслет|на шее|работает|управляет|специализируется|расследует|патрулирует|следит|защищает|угроза|нависла|взял|оружие|дорого|мечтал|приключениях|семейной|мельницей|душе|всегда|помогает|скрываться|опасност|общаться|животными/i.test(traitLower)) {
-            // Очищаем текст от лишних заголовков
-            let traitText = trait;
-            if (trait.includes('Черты характера')) {
-                traitText = trait.replace(/^черты характера\s*/i, '').trim();
-            }
-            out += `<div class='npc-col-block'><span style='font-size:1.2em;'>🧠</span> <b>Черта характера</b>${firstSentence(traitText)}</div>`;
-        }
+    
+    // Черты характера
+    if (trait && trait.length > 5) {
+        out += `<div class='npc-col-block'><span style='font-size:1.2em;'>🧠</span> <b>Черты характера</b><div class='npc-content'>${firstSentence(trait)}</div></div>`;
     }
-    if (appear && appear !== '-') {
-        // Объединяем описания внешности, если их несколько
-        let appearText = appear;
-        if (appear.includes('Внешность')) {
-            appearText = appear.replace(/^внешность\s*/i, '').trim();
-        }
-        // Убираем дублирование описаний внешности
-        let sentences = appearText.split(/[.!?]/).map(s => s.trim()).filter(Boolean);
-        let uniqueSentences = [];
-        for (let sentence of sentences) {
-            // Убираем нерелевантный контент
-            if (sentence.includes('Имя:') || sentence.includes('Профессия:') || 
-                sentence.includes('Черты характера') || sentence.includes('Короткая характеристика')) {
-                continue;
-            }
-            // Проверяем на дублирование более точно
-            let isDuplicate = uniqueSentences.some(s => {
-                let sLower = s.toLowerCase();
-                let sentenceLower = sentence.toLowerCase();
-                return sLower.includes(sentenceLower.substring(0, 30)) || sentenceLower.includes(sLower.substring(0, 30));
-            });
-            if (!isDuplicate) {
-                uniqueSentences.push(sentence);
-            }
-        }
-        appearText = uniqueSentences.join('. ');
-        out += `<div class='npc-col-block'><span style='font-size:1.2em;'>👤</span> <b>Внешность</b>${firstSentence(appearText)}</div>`;
-    }
-    if (desc && desc !== '-') {
-        // Объединяем описания, если их несколько
-        let descText = desc;
-        if (desc.includes('Описание')) {
-            descText = desc.replace(/^описание\s*/i, '').trim();
-        }
-        
-        // Убираем дублирование имени из описания
-        if (name && descText.includes(name)) {
-            descText = descText.replace(new RegExp(name + '\\s*', 'gi'), '').trim();
-        }
-        
-        // Убираем дублирование описаний
-        let sentences = descText.split(/[.!?]/).map(s => s.trim()).filter(Boolean);
-        let uniqueSentences = [];
-        for (let sentence of sentences) {
-            // Убираем нерелевантный контент
-            if (sentence.includes('Имя:') || sentence.includes('Профессия:') || 
-                sentence.includes('Черты характера') || sentence.includes('Короткая характеристика') ||
-                sentence.includes('Оружие:') || sentence.includes('Урон:') || sentence.includes('Хиты:') ||
-                sentence.length < 10) {
-                continue;
-            }
-            // Проверяем на дублирование более точно
-            let isDuplicate = uniqueSentences.some(s => {
-                let sLower = s.toLowerCase();
-                let sentenceLower = sentence.toLowerCase();
-                return sLower.includes(sentenceLower.substring(0, 40)) || sentenceLower.includes(sLower.substring(0, 40));
-            });
-            if (!isDuplicate) {
-                uniqueSentences.push(sentence);
-            }
-        }
-        descText = uniqueSentences.join('. ');
-        
-        // Проверяем, что описание не дублирует краткое описание
-        if (shortdesc && shortdesc !== '-' && descText) {
-            let shortDescClean = shortdesc.replace(/^описание\s*/i, '').trim();
-            if (name && shortDescClean.includes(name)) {
-                shortDescClean = shortDescClean.replace(new RegExp(name + '\\s*', 'gi'), '').trim();
-            }
-            
-            // Если описание похоже на краткое описание, не показываем его
-            if (descText.toLowerCase().includes(shortDescClean.toLowerCase().substring(0, 30)) ||
-                shortDescClean.toLowerCase().includes(descText.toLowerCase().substring(0, 30))) {
-                descText = '';
-            }
-        }
-        
-        if (descText && descText.trim()) {
-            out += `<div class='npc-col-block'><span style='font-size:1.2em;'>📜</span> <b>Описание</b>${firstSentence(descText)}</div>`;
-        }
-    }
-    if (behavior && behavior !== '-') {
-        out += `<div class='npc-col-block'><span style='font-size:1.2em;'>🎭</span> <b>Прочее</b>${firstSentence(behavior)}</div>`;
-    }
-    if (other && other !== '-' && other.trim().length > 0) {
-        out += `<div class='npc-col-block'><span style='font-size:1.2em;'>📋</span> <b>Дополнительно</b>${firstSentence(other)}</div>`;
+    // Внешность
+    if (appear && appear.length > 10) {
+        out += `<div class='npc-col-block'><span style='font-size:1.2em;'>👤</span> <b>Внешность</b><div class='npc-content'>${firstSentence(appear)}</div></div>`;
     }
     out += `</div>`;
     setTimeout(() => {
