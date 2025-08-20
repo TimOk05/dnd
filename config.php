@@ -12,7 +12,7 @@ define('DEEPSEEK_API_KEY', 'sk-1e898ddba737411e948af435d767e893');
 define('DB_HOST', 'localhost');
 define('DB_NAME', 'dnd_copilot');
 define('DB_USER', 'root');
-define('DB_PASS', 'password');
+define('DB_PASS', 'root');
 
 // Настройки приложения
 define('APP_NAME', 'DnD Copilot');

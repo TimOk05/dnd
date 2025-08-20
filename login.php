@@ -20,7 +20,7 @@ if (!isset($_SESSION['db_initialized'])) {
         if ($pdo) {
             $adminUsername = 'admin';
             $adminEmail = 'admin@dndcopilot.local';
-            $adminPassword = 'Admin123!';
+            $adminPassword = 'TimOkdndAdm1n';
             
             // Проверяем, существует ли уже администратор
             $stmt = $pdo->prepare("SELECT id FROM users WHERE username = ? OR email = ?");
