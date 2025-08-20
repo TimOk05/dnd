@@ -14,6 +14,30 @@ if (isset($_SESSION['user_id'])) {
 if (!isset($_SESSION['db_initialized'])) {
     if (initDatabase()) {
         $_SESSION['db_initialized'] = true;
+        
+        // Создаем администратора при первом запуске
+        $pdo = getDbConnection();
+        if ($pdo) {
+            $adminUsername = 'admin';
+            $adminEmail = 'admin@dndcopilot.local';
+            $adminPassword = 'Admin123!';
+            
+            // Проверяем, существует ли уже администратор
+            $stmt = $pdo->prepare("SELECT id FROM users WHERE username = ? OR email = ?");
+            $stmt->execute([$adminUsername, $adminEmail]);
+            
+                            if (!$stmt->fetch()) {
+                    $passwordHash = password_hash($adminPassword, PASSWORD_DEFAULT, ['cost' => SALT_ROUNDS]);
+                    
+                    $stmt = $pdo->prepare("INSERT INTO users (username, email, password_hash, role) VALUES (?, ?, ?, 'admin')");
+                    $stmt->execute([$adminUsername, $adminEmail, $passwordHash]);
+                    
+                    // Показываем информацию о созданном администраторе
+                    $adminInfo = "Администратор создан!<br>Логин: $adminUsername<br>Пароль: $adminPassword";
+                } else {
+                    $adminInfo = "Администратор уже существует";
+                }
+        }
     } else {
         // Если база данных не инициализирована, показываем ошибку
         die('Ошибка: База данных не настроена. Проверьте настройки в config.php');
@@ -305,7 +329,12 @@ if (!isset($_SESSION['db_initialized'])) {
                     <p class="auth-subtitle">Вход в систему</p>
                 </div>
                 
-                <div id="login-messages"></div>
+                                 <div id="login-messages"></div>
+                 <?php if (isset($adminInfo)): ?>
+                 <div class="success-message">
+                     <?php echo $adminInfo; ?>
+                 </div>
+                 <?php endif; ?>
                 
                 <form id="loginForm">
                     <div class="form-group">
