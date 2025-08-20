@@ -188,7 +188,7 @@ foreach ($_SESSION['notes'] as $i => $note) {
     $lines = array_filter(array_map('trim', explode("\n", $plain)));
     $nameLine = '';
     
-    // Сначала ищем в специальном заголовке
+    // Сначала ищем в специальном заголовке NPC
     if (preg_match('/<div class="npc-name-header">([^<]+)<\/div>/iu', $note, $matches)) {
         $nameLine = trim($matches[1]);
     } else {
@@ -211,15 +211,29 @@ foreach ($_SESSION['notes'] as $i => $note) {
         if (preg_match('/^(Имя|Name|Имя NPC|Имя персонажа)\s*:\s*(.+)$/iu', $nameLine, $matches)) {
             $nameLine = trim($matches[2]);
         }
-        // Убираем "Описание" и тире из имени
+        // Убираем лишние слова из имени
         $nameLine = preg_replace('/^описание\s+/i', '', $nameLine);
         $nameLine = preg_replace('/^\s*—\s*/', '', $nameLine);
+        $nameLine = preg_replace('/^npc\s+/i', '', $nameLine);
+    }
+    
+    // Если это не NPC заметка, ищем первое значимое слово
+    if (!$nameLine) {
+        foreach ($lines as $line) {
+            $line = trim($line);
+            if ($line && !preg_match('/^(описание|внешность|черты|способность|оружие|урон|хиты|класс|раса|уровень|профессия)/iu', $line)) {
+                $nameLine = $line;
+                break;
+            }
+        }
     }
     
     $previewSrc = $nameLine ?: (count($lines) ? $lines[0] : '(нет данных)');
-    // Убираем "Описание" и тире из превью
+    // Убираем лишние слова из превью
     $previewSrc = preg_replace('/^описание\s+/i', '', $previewSrc);
     $previewSrc = preg_replace('/^\s*—\s*/', '', $previewSrc);
+    $previewSrc = preg_replace('/^npc\s+/i', '', $previewSrc);
+    
     // Обрезаем превью до 30 символов или 3 слов
     $words = preg_split('/\s+/', $previewSrc);
     if (count($words) > 3) {
@@ -341,7 +355,26 @@ function fetchNpcFromAI(race, npcClass, prof, level) {
         if (motivation) contextBlock += `\nМотивация: ${motivation}`;
         if (occ) contextBlock += `\nПрофессия: ${occ}`;
         contextBlock += '\nИспользуй эти данные для вдохновения, но придумай цельного NPC.';
-        const systemInstruction = 'Всегда пиши ответы без оформления, без markdown, без кавычек и звёздочек. Разделяй результат NPC на смысловые блоки с заголовками: Описание, Внешность, Черты характера, Короткая характеристика. В блоке Короткая характеристика обязательно выведи отдельными строками: Оружие: [название оружия], Урон: [формат урона, например 1d6], Хиты: [количество хитов], Способность: [основная способность]. \n\nВАЖНО: НЕ используй слово "Описание" в начале блоков. Начинай блоки сразу с содержимого. НЕ дублируй информацию между блоками. Каждый блок должен содержать только релевантную информацию.\n\nВАЖНО: Способность — это конкретный навык персонажа в D&D, например: "Двойная атака", "Исцеление ран", "Скрытность", "Божественная кара", "Ярость", "Вдохновение", "Магическая защита", "Элементальная магия", "Боевой стиль", "Связь с природой", "Боевые искусства", "Скрытные способности", "Магическое исследование", "Общение с животными", "Магическая обработка", "Магическое красноречие". НЕ пиши описания, только название способности. ОБЯЗАТЕЛЬНО указывай способность для каждого класса кроме "Без класса".\n\nЧерты характера - это личностные качества (храбрый, мудрый, вспыльчивый). Описание должно быть кратким и содержать основную информацию о персонаже. Внешность - описание внешнего вида. Придумай подходящую профессию для NPC. Каждый блок начинай с заголовка. Технические параметры обязательны!';
+        // Определяем способность в зависимости от класса
+        let classAbility = '';
+        switch(npcClass) {
+            case 'Воин': classAbility = 'Двойная атака'; break;
+            case 'Паладин': classAbility = 'Божественная кара'; break;
+            case 'Колдун': classAbility = 'Пакт с патроном'; break;
+            case 'Маг': classAbility = 'Магическое исследование'; break;
+            case 'Разбойник': classAbility = 'Скрытная атака'; break;
+            case 'Следопыт': classAbility = 'Связь с природой'; break;
+            case 'Жрец': classAbility = 'Божественное вмешательство'; break;
+            case 'Бард': classAbility = 'Вдохновение'; break;
+            case 'Варвар': classAbility = 'Ярость'; break;
+            case 'Плут': classAbility = 'Скрытные способности'; break;
+            case 'Монах': classAbility = 'Боевые искусства'; break;
+            case 'Чародей': classAbility = 'Элементальная магия'; break;
+            case 'Друид': classAbility = 'Дикий облик'; break;
+            default: classAbility = 'Обычный навык'; break;
+        }
+        
+        const systemInstruction = 'Всегда пиши ответы без оформления, без markdown, без кавычек и звёздочек. Разделяй результат NPC на смысловые блоки с заголовками: Описание, Внешность, Черты характера, Короткая характеристика. В блоке Короткая характеристика обязательно выведи отдельными строками: Оружие: [название оружия], Урон: [формат урона, например 1d6], Хиты: [количество хитов], Способность: [' + classAbility + ']. \n\nВАЖНО: НЕ используй слово "Описание" в начале блоков. Начинай блоки сразу с содержимого. НЕ дублируй информацию между блоками. Каждый блок должен содержать только релевантную информацию.\n\nВАЖНО: Способность должна быть именно "' + classAbility + '" для класса ' + npcClass + '. НЕ пиши описания способности, только название. ОБЯЗАТЕЛЬНО указывай способность для каждого класса кроме "Без класса".\n\nЧерты характера - это личностные качества (храбрый, мудрый, вспыльчивый). Описание должно быть кратким и содержать основную информацию о персонаже. Внешность - описание внешнего вида. Придумай подходящую профессию для NPC. Каждый блок начинай с заголовка. Технические параметры обязательны!';
         const prompt = `Создай NPC для DnD. Раса: ${race}. Класс: ${npcClass}. Уровень: ${level}. Придумай подходящую профессию для этого персонажа.${contextBlock}`;
         fetch('ai.php', {
             method: 'POST',
@@ -939,65 +972,30 @@ function formatNpcBlocks(txt, forcedName = '') {
     // 5.6. Финальный резерв - создаем способность на основе класса
     if (!techParams.ability && cls && cls.toLowerCase() !== 'без класса') {
         console.log('Создаем способность для класса:', cls); // Отладочная информация
-        let classLower = cls.toLowerCase();
-        let abilityMap = {
-            'паладин': 'Божественная кара',
-            'варвар': 'Ярость',
-            'бард': 'Вдохновение',
-            'жрец': 'Божественное исцеление',
-            'друид': 'Превращение',
-            'воин': 'Боевой стиль',
-            'плут': 'Скрытность',
-            'волшебник': 'Магия',
-            'колдун': 'Договор',
-            'следопыт': 'Связь с природой',
-            'монах': 'Боевые искусства',
-            'изобретатель': 'Технические устройства',
-            'чародей': 'Магическая защита',
-            'маг': 'Элементальная магия',
-            'разбойник': 'Скрытные способности'
+        
+        const classAbilities = {
+            'Воин': 'Двойная атака',
+            'Паладин': 'Божественная кара',
+            'Колдун': 'Пакт с патроном',
+            'Маг': 'Магическое исследование',
+            'Разбойник': 'Скрытная атака',
+            'Следопыт': 'Связь с природой',
+            'Жрец': 'Божественное вмешательство',
+            'Бард': 'Вдохновение',
+            'Варвар': 'Ярость',
+            'Плут': 'Скрытные способности',
+            'Монах': 'Боевые искусства',
+            'Чародей': 'Элементальная магия',
+            'Друид': 'Дикий облик'
         };
         
-        for (let className in abilityMap) {
-            if (classLower.includes(className)) {
-                techParams.ability = 'Способность: ' + abilityMap[className];
-                break;
-            }
-        }
-        
-        // Если не нашли в карте, создаем общую способность для класса
-        if (!techParams.ability) {
-            if (classLower.includes('варвар')) {
-                techParams.ability = 'Способность: Ярость';
-            } else if (classLower.includes('паладин')) {
-                techParams.ability = 'Способность: Божественная кара';
-            } else if (classLower.includes('бард')) {
-                techParams.ability = 'Способность: Вдохновение';
-            } else if (classLower.includes('жрец')) {
-                techParams.ability = 'Способность: Божественное исцеление';
-            } else if (classLower.includes('друид')) {
-                techParams.ability = 'Способность: Превращение';
-            } else if (classLower.includes('воин')) {
-                techParams.ability = 'Способность: Боевой стиль';
-            } else if (classLower.includes('плут') || classLower.includes('разбойник')) {
-                techParams.ability = 'Способность: Скрытность';
-            } else if (classLower.includes('волшебник') || classLower.includes('маг') || classLower.includes('чародей')) {
-                techParams.ability = 'Способность: Магия';
-            } else if (classLower.includes('колдун')) {
-                techParams.ability = 'Способность: Договор';
-            } else if (classLower.includes('следопыт')) {
-                techParams.ability = 'Способность: Связь с природой';
-            } else if (classLower.includes('монах')) {
-                techParams.ability = 'Способность: Боевые искусства';
-            } else {
-                // Для любого другого класса
-                techParams.ability = 'Способность: Базовые навыки';
-            }
-        }
-        
-        // Отладочная информация
-        if (techParams.ability) {
+        if (classAbilities[cls]) {
+            techParams.ability = 'Способность: ' + classAbilities[cls];
             console.log('Создана способность:', techParams.ability);
+        } else {
+            // Для неизвестных классов
+            techParams.ability = 'Способность: Базовые навыки';
+            console.log('Создана базовая способность для неизвестного класса:', cls);
         }
     }
     
@@ -1044,13 +1042,37 @@ function formatNpcBlocks(txt, forcedName = '') {
         }
     }
     
-    // 8. Формируем строки для отображения
+    // 8. Проверяем и корректируем способность в зависимости от класса
+    let correctedAbility = techParams.ability;
+    if (cls && cls !== 'Без класса') {
+        const classAbilities = {
+            'Воин': 'Двойная атака',
+            'Паладин': 'Божественная кара',
+            'Колдун': 'Пакт с патроном',
+            'Маг': 'Магическое исследование',
+            'Разбойник': 'Скрытная атака',
+            'Следопыт': 'Связь с природой',
+            'Жрец': 'Божественное вмешательство',
+            'Бард': 'Вдохновение',
+            'Варвар': 'Ярость',
+            'Плут': 'Скрытные способности',
+            'Монах': 'Боевые искусства',
+            'Чародей': 'Элементальная магия',
+            'Друид': 'Дикий облик'
+        };
+        
+        if (classAbilities[cls]) {
+            correctedAbility = classAbilities[cls];
+        }
+    }
+    
+    // 9. Формируем строки для отображения
     if (techParams.weapon) summaryLines.push(techParams.weapon);
     if (techParams.damage) summaryLines.push(techParams.damage);
     if (techParams.hp) summaryLines.push(techParams.hp);
-    if (techParams.ability) summaryLines.push(techParams.ability);
+    if (correctedAbility) summaryLines.push('Способность: ' + correctedAbility);
     
-    // 9. Если нашли хотя бы 2 параметра - показываем результат
+    // 10. Если нашли хотя бы 2 параметра - показываем результат
     const foundParams = [techParams.weapon, techParams.damage, techParams.hp, techParams.ability].filter(p => p).length;
     if (foundParams < 2) {
         return `<div class='npc-block-modern'><div class='npc-modern-header'>Ошибка</div><div class='npc-modern-block'>AI не вернул достаточно технических параметров. Найдено: ${foundParams}/4. Попробуйте сгенерировать NPC ещё раз.</div></div>`;
@@ -1203,6 +1225,23 @@ function saveNote(content) {
     var headerElement = document.querySelector('.npc-modern-header');
     var npcName = headerElement ? headerElement.textContent.trim() : 'NPC';
     
+    // Если имя пустое или "NPC", пытаемся найти имя в содержимом
+    if (!npcName || npcName === 'NPC') {
+        // Ищем имя в тексте содержимого
+        var plainText = content.replace(/<[^>]+>/g, '\n');
+        var lines = plainText.split(/\n/).map(l => l.trim()).filter(Boolean);
+        
+        for (var i = 0; i < lines.length; i++) {
+            var line = lines[i];
+            if (line && line.length > 2 && line.length < 30 && 
+                !/^(описание|внешность|черты|способность|оружие|урон|хиты|класс|раса|уровень|профессия|технические)/i.test(line) &&
+                !line.includes(':') && !line.includes('—')) {
+                npcName = line;
+                break;
+            }
+        }
+    }
+    
     // Добавляем имя в начало заметки для лучшей идентификации
     var noteWithName = '<div class="npc-name-header">' + npcName + '</div>' + content;
     
@@ -1236,9 +1275,37 @@ if (window.allNotes) {
     window.allNotes.forEach((n, i) => {
         let plain = n.replace(/<[^>]+>/g, '\n');
         let lines = plain.split(/\n/).map(l => l.trim()).filter(Boolean);
+        
+        // Ищем имя NPC в специальном заголовке
+        let nameMatch = n.match(/<div class="npc-name-header">([^<]+)<\/div>/i);
+        let headerMatch = n.match(/<div class="npc-modern-header">([^<]+)<\/div>/i);
         let nameLine = lines.find(l => /^(Имя|Name|Имя NPC|Имя персонажа)\s*:/i.test(l));
-        let preview = nameLine || (lines.length ? lines[0] : '(нет данных)');
-        console.log('Заметка', i, 'превью:', preview);
+        
+        let preview = '';
+        if (nameMatch) {
+            preview = nameMatch[1].trim();
+        } else if (headerMatch) {
+            preview = headerMatch[1].trim();
+        } else if (nameLine) {
+            let match = nameLine.match(/^(Имя|Name|Имя NPC|Имя персонажа)\s*:\s*(.+)$/i);
+            preview = match ? match[2].trim() : nameLine;
+        } else {
+            // Ищем первое значимое слово
+            for (let line of lines) {
+                if (line && !/^(описание|внешность|черты|способность|оружие|урон|хиты|класс|раса|уровень|профессия)/i.test(line)) {
+                    preview = line;
+                    break;
+                }
+            }
+            if (!preview && lines.length) {
+                preview = lines[0];
+            }
+        }
+        
+        // Очищаем превью от лишних слов
+        preview = preview.replace(/^описание\s+/i, '').replace(/^\s*—\s*/, '').replace(/^npc\s+/i, '');
+        
+        console.log('Заметка', i, 'превью:', preview || '(нет данных)');
     });
 }
 // --- Чат: отправка сообщения ---
