@@ -12,7 +12,7 @@ define('DEEPSEEK_API_KEY', 'sk-1e898ddba737411e948af435d767e893');
 define('DB_HOST', 'localhost');
 define('DB_NAME', 'dnd_copilot');
 define('DB_USER', 'root');
-define('DB_PASS', '');
+define('DB_PASS', 'password');
 
 // Настройки приложения
 define('APP_NAME', 'DnD Copilot');
@@ -59,8 +59,39 @@ function getDbConnection() {
 
 // Функция для инициализации базы данных
 function initDatabase() {
-    $pdo = getDbConnection();
-    if (!$pdo) return false;
+    try {
+        // Сначала подключаемся к MySQL без указания базы данных
+        $pdo = new PDO(
+            "mysql:host=" . DB_HOST . ";charset=utf8mb4",
+            DB_USER,
+            DB_PASS,
+            [
+                PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
+                PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
+                PDO::ATTR_EMULATE_PREPARES => false
+            ]
+        );
+        
+        // Создаем базу данных, если она не существует
+        $pdo->exec("CREATE DATABASE IF NOT EXISTS " . DB_NAME . " CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci");
+        
+        // Теперь подключаемся к созданной базе данных
+        $pdo = new PDO(
+            "mysql:host=" . DB_HOST . ";dbname=" . DB_NAME . ";charset=utf8mb4",
+            DB_USER,
+            DB_PASS,
+            [
+                PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
+                PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
+                PDO::ATTR_EMULATE_PREPARES => false
+            ]
+        );
+    } catch (PDOException $e) {
+        if (DEBUG_MODE) {
+            error_log("Database initialization failed: " . $e->getMessage());
+        }
+        return false;
+    }
     
     try {
         // Создаем таблицу пользователей

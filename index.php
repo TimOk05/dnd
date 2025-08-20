@@ -16,50 +16,18 @@ try {
     if (!isset($_SESSION['db_initialized'])) {
         if (initDatabase()) {
             $_SESSION['db_initialized'] = true;
-            
-            // Создаем администратора при первом запуске
-            $pdo = getDbConnection();
-            if ($pdo) {
-                $adminUsername = 'admin';
-                $adminEmail = 'admin@dndcopilot.local';
-                $adminPassword = 'Admin123!';
-                
-                // Проверяем, существует ли уже администратор
-                $stmt = $pdo->prepare("SELECT id FROM users WHERE username = ? OR email = ?");
-                $stmt->execute([$adminUsername, $adminEmail]);
-                
-                if (!$stmt->fetch()) {
-                    $passwordHash = password_hash($adminPassword, PASSWORD_DEFAULT, ['cost' => SALT_ROUNDS]);
-                    
-                    $stmt = $pdo->prepare("INSERT INTO users (username, email, password_hash, role) VALUES (?, ?, ?, 'admin')");
-                    $stmt->execute([$adminUsername, $adminEmail, $passwordHash]);
-                    
-                    // Автоматически входим как администратор
-                    $auth = new Auth();
-                    $loginResult = $auth->login($adminUsername, $adminPassword);
-                    
-                    if ($loginResult['success']) {
-                        $_SESSION['auto_login'] = true;
-                    }
-                }
-            }
         } else {
-            // Если база данных не инициализирована, показываем ошибку
-            die('Ошибка: База данных не настроена. Проверьте настройки в config.php');
+            // Если база данных не инициализирована, перенаправляем на страницу входа
+            header('Location: login.php');
+            exit;
         }
     }
     
     // Проверка авторизации
     $auth = new Auth();
     if (!$auth->isAuthenticated()) {
-        // Если это первый запуск и есть автоматический вход
-        if (isset($_SESSION['auto_login'])) {
-            unset($_SESSION['auto_login']);
-            // Пользователь уже авторизован автоматически
-        } else {
-            header('Location: login.php');
-            exit;
-        }
+        header('Location: login.php');
+        exit;
     }
     
     // Получение данных текущего пользователя
