@@ -325,6 +325,12 @@ function fetchNpcFromAI(race, npcClass, prof, level) {
                 document.getElementById('modal-save').style.display = '';
                 document.getElementById('modal-save').onclick = function() { saveNote(document.getElementById('modal-content').innerHTML); closeModal(); };
                 
+                // Удаляем старую кнопку повторной генерации, если она есть
+                let oldRegenerateBtn = document.querySelector('.modal-regenerate');
+                if (oldRegenerateBtn) {
+                    oldRegenerateBtn.remove();
+                }
+                
                 // Добавляем кнопку повторной генерации
                 let regenerateBtn = document.createElement('button');
                 regenerateBtn.className = 'modal-regenerate';
@@ -471,6 +477,10 @@ function formatNpcBlocks(txt, forcedName = '') {
             if (!techParams.ability && /способност\s*:/i.test(lineLower) && line.length < 100) {
                 // Очищаем способность от дублирования технических параметров
                 let cleanAbility = line.replace(/короткая характеристика.*?способность\s*:/i, 'Способность:').trim();
+                // Убираем повторение оружия, урона и хитов
+                cleanAbility = cleanAbility.replace(/оружие\s*:.*?хиты\s*:\s*\d+/i, '').trim();
+                // Убираем лишние пробелы и точки
+                cleanAbility = cleanAbility.replace(/\s+/g, ' ').replace(/^\s+|\s+$/g, '');
                 techParams.ability = cleanAbility;
             }
         }
