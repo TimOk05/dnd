@@ -369,6 +369,12 @@ function formatNpcBlocks(txt, forcedName = '') {
         if (!trait) trait = weakness;
         weakness = '';
     }
+    
+    // Если в слабости внешность - убираем слабость
+    if (weakness && /высокий|низкий|стройный|полный|волосы|глаза|лицо|одежда/i.test(weakness)) {
+        if (!appear) appear = weakness;
+        weakness = '';
+    }
     if (!name && forcedName) name = forcedName;
     // Улучшенное извлечение технических параметров
     let summaryLines = [];
@@ -418,13 +424,31 @@ function formatNpcBlocks(txt, forcedName = '') {
         }
     }
     
-    // 4. Формируем строки для отображения
+    // 4. Очищаем описание от технических параметров
+    if (desc) {
+        let descLines = desc.split(/[.!?]/).map(s => s.trim()).filter(Boolean);
+        let cleanLines = [];
+        
+        for (let line of descLines) {
+            let lineLower = line.toLowerCase();
+            // Пропускаем строки с техническими параметрами
+            if (/оружие|урон|хиты|способност|стихийн|удар|d\d+|1d\d+|2d\d+/i.test(lineLower)) {
+                continue;
+            }
+            cleanLines.push(line);
+        }
+        
+        desc = cleanLines.join('. ');
+        if (desc.endsWith('. ')) desc = desc.slice(0, -2);
+    }
+    
+    // 5. Формируем строки для отображения
     if (techParams.weapon) summaryLines.push(techParams.weapon);
     if (techParams.damage) summaryLines.push(techParams.damage);
     if (techParams.hp) summaryLines.push(techParams.hp);
     if (techParams.ability) summaryLines.push(techParams.ability);
     
-    // 4. Если нашли хотя бы 2 параметра - показываем результат
+    // 6. Если нашли хотя бы 2 параметра - показываем результат
     const foundParams = [techParams.weapon, techParams.damage, techParams.hp, techParams.ability].filter(p => p).length;
     if (foundParams < 2) {
         return `<div class='npc-block-modern'><div class='npc-modern-header'>Ошибка</div><div class='npc-modern-block'>AI не вернул достаточно технических параметров. Найдено: ${foundParams}/4. Попробуйте сгенерировать NPC ещё раз.</div></div>`;
@@ -451,7 +475,7 @@ function formatNpcBlocks(txt, forcedName = '') {
     if (trait && trait !== '-') {
         out += `<div class='npc-col-block'><span style='font-size:1.2em;'>🧠</span> <b>Черта характера</b>${firstSentence(trait)}</div>`;
     }
-    if (weakness && weakness !== '-') {
+    if (weakness && weakness !== '-' && weakness.trim().length > 0) {
         out += `<div class='npc-col-block'><span style='font-size:1.2em;'>⚡</span> <b>Слабость</b>${firstSentence(weakness)}</div>`;
     }
     // Кнопка показать описание
