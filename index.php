@@ -1,22 +1,25 @@
 <?php
+require_once 'config.php';
+require_once 'auth.php';
+
 session_start();
-// --- Секретный код ---
-$SECRET_CODE = 'dndmaster';
-if (!isset($_SESSION['access_granted'])) {
-    if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['secret_code'])) {
-        if (trim($_POST['secret_code']) === $SECRET_CODE) {
-            $_SESSION['access_granted'] = true;
-            header('Location: index.php');
-            exit;
-        } else {
-            $error = 'Неверный код!';
-        }
+
+// Инициализация базы данных при первом запуске
+if (!isset($_SESSION['db_initialized'])) {
+    if (initDatabase()) {
+        $_SESSION['db_initialized'] = true;
     }
-    echo '<!DOCTYPE html><html lang="ru"><head><meta charset="UTF-8"><title>Вход</title><style>body{background:#f8ecd0;font-family:Roboto,sans-serif;display:flex;align-items:center;justify-content:center;height:100vh;}form{background:#fffbe6;border:2px solid #a67c52;border-radius:12px;padding:32px 28px;box-shadow:0 4px 24px #0002;}input{padding:10px 18px;border-radius:8px;border:2px solid #a67c52;font-size:1.1em;}button{padding:10px 22px;border-radius:8px;border:2px solid #7c4a02;background:#a67c52;color:#fffbe6;font-size:1.1em;cursor:pointer;margin-left:8px;}button:hover{background:#7c4a02;color:#ffe0a3;}h2{margin-bottom:18px;}label{font-size:1.1em;}</style></head><body><form method="post"><h2>Вход в DnD Copilot</h2><label>Секретный код:<br><input type="password" name="secret_code" autofocus required></label><button type="submit">Войти</button>';
-    if (isset($error)) echo '<div style="color:#b71c1c;margin-top:12px;">'.$error.'</div>';
-    echo '</form></body></html>';
+}
+
+// Проверка авторизации
+$auth = new Auth();
+if (!$auth->isAuthenticated()) {
+    header('Location: login.php');
     exit;
 }
+
+// Получение данных текущего пользователя
+$currentUser = $auth->getCurrentUser();
 
 if (isset($_GET['curltest'])) {
     $ch = curl_init('https://api.deepseek.com/v1/chat/completions');
@@ -273,6 +276,7 @@ $template = file_get_contents(__DIR__ . '/template.html');
 $template = str_replace('{{fast_buttons}}', $fastBtns, $template);
 $template = str_replace('{{chat_messages}}', $chatMsgs, $template);
 $template = str_replace('{{notes_block}}', $notesBlock, $template);
+$template = str_replace('{{username}}', htmlspecialchars($currentUser['username']), $template);
 echo $template;
 ?>
 <script>
