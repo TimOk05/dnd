@@ -369,6 +369,48 @@ function regenerateNpc() {
 }
 // --- Форматирование результата NPC по смысловым блокам ---
 function formatNpcBlocks(txt, forcedName = '') {
+    // Функция для извлечения только названия способности
+    function extractAbilityName(text) {
+        let lowerText = text.toLowerCase();
+        
+        // Если текст слишком длинный, это скорее всего описание, а не название
+        if (text.length > 30) {
+            return null;
+        }
+        
+        // Ищем короткие названия способностей
+        let abilityPatterns = [
+            /(стихийн\s+удар)/i,
+            /(ярость)/i,
+            /(неистовая\s+ярость)/i,
+            /(маги\w*\s+барда)/i,
+            /(вдохновение)/i,
+            /(манипуляция)/i,
+            /(боевой\s+стиль)/i,
+            /(защита)/i,
+            /(атака)/i,
+            /(оборона)/i,
+            /(предсказание)/i,
+            /(интуиция)/i,
+            /(маги\w*)/i,
+            /(заклинани\w*)/i
+        ];
+        
+        for (let pattern of abilityPatterns) {
+            let match = text.match(pattern);
+            if (match) {
+                return match[1] || match[0];
+            }
+        }
+        
+        // Если не нашли паттерн, но текст короткий и содержит ключевые слова
+        if (text.length < 20 && /маги|стихийн|удар|ярость|вдохновение|защита|атака|предсказание|интуиция/i.test(lowerText)) {
+            return text;
+        }
+        
+        return null;
+    }
+    
     txt = txt.replace(/[\#\*`>]+/g, '');
     const blockTitles = [
         'Имя', 'Раса', 'Класс', 'Краткое описание', 'Черта характера', 'Слабость', 'Короткая характеристика', 'Описание', 'Внешность', 'Особенности поведения'
@@ -535,9 +577,14 @@ function formatNpcBlocks(txt, forcedName = '') {
     if (!techParams.ability && desc) {
         let descLines = desc.split(/[.!?]/).map(s => s.trim()).filter(Boolean);
         for (let line of descLines) {
-            if (/стихийн|удар|способност|маги|заклинани|ярость|неистовая|барда|вдохновение|манипуляция|шантаж|компрометирующей|информации|боевой стиль|защита|атака|оборона/i.test(line.toLowerCase())) {
-                techParams.ability = 'Способность: ' + line;
-                break;
+            // Ищем только короткие фразы, которые могут быть названиями способностей
+            if (/стихийн|удар|способност|маги|заклинани|ярость|неистовая|барда|вдохновение|манипуляция|шантаж|компрометирующей|информации|боевой стиль|защита|атака|оборона/i.test(line.toLowerCase()) && line.length < 50) {
+                // Извлекаем только название способности, а не полное описание
+                let abilityName = extractAbilityName(line);
+                if (abilityName) {
+                    techParams.ability = 'Способность: ' + abilityName;
+                    break;
+                }
             }
         }
     }
@@ -549,9 +596,13 @@ function formatNpcBlocks(txt, forcedName = '') {
         
         for (let line of lines) {
             let lineLower = line.toLowerCase();
-            if (/ярость|неистовая|барда|вдохновение|манипуляция|шантаж|компрометирующей|информации|стихийн|удар|способност|маги|заклинани|боевой стиль|защита|атака|оборона/i.test(lineLower) && line.length > 5 && line.length < 100) {
-                techParams.ability = 'Способность: ' + line;
-                break;
+            if (/ярость|неистовая|барда|вдохновение|манипуляция|шантаж|компрометирующей|информации|стихийн|удар|способност|маги|заклинани|боевой стиль|защита|атака|оборона/i.test(lineLower) && line.length > 5 && line.length < 50) {
+                // Извлекаем только название способности, а не полное описание
+                let abilityName = extractAbilityName(line);
+                if (abilityName) {
+                    techParams.ability = 'Способность: ' + abilityName;
+                    break;
+                }
             }
         }
     }
