@@ -89,6 +89,17 @@ if (isset($_POST['fast_action'])) {
             exit;
         }
     }
+    // --- Сохранение заметки инициативы ---
+    if ($action === 'save_note') {
+        $content = $_POST['content'] ?? '';
+        if ($content) {
+            $_SESSION['notes'][] = $content;
+            echo 'Заметка сохранена';
+        } else {
+            echo 'Ошибка: пустое содержимое';
+        }
+        exit;
+    }
     echo 'Неизвестное действие';
     exit;
 }
@@ -156,6 +167,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['message']) && !isset(
 $fastBtns = '';
 $fastBtns .= '<button class="fast-btn" onclick="openDiceStep1()">🎲 Бросок костей</button>';
 $fastBtns .= '<button class="fast-btn" onclick="openNpcStep1()">🗣️ NPC</button>';
+$fastBtns .= '<button class="fast-btn" onclick="openInitiativeModal()">⚡ Инициатива</button>';
 
 // --- Генерация сообщений чата (пропускаем system) ---
 $chatMsgs = '';
@@ -366,6 +378,213 @@ function regenerateNpc() {
     } else {
         alert('Нет сохраненных параметров для повторной генерации');
     }
+}
+
+// --- Инициатива ---
+let initiativeList = [];
+let currentInitiativeIndex = 0;
+
+function openInitiativeModal() {
+    showModal('<div class="initiative-container">' +
+        '<div class="initiative-list" id="initiative-list"></div>' +
+        '<div class="initiative-controls">' +
+            '<div class="initiative-label">Добавить:</div>' +
+            '<button class="initiative-btn player-btn" onclick="addInitiativeEntry(\'player\')">Игрок</button>' +
+            '<button class="initiative-btn enemy-btn" onclick="addInitiativeEntry(\'enemy\')">Противник</button>' +
+            '<button class="initiative-btn other-btn" onclick="addInitiativeEntry(\'other\')">Ещё</button>' +
+        '</div>' +
+        '<div class="initiative-current" id="initiative-current"></div>' +
+    '</div>');
+    document.getElementById('modal-save').style.display = '';
+    document.getElementById('modal-save').onclick = function() { saveInitiativeNote(); closeModal(); };
+    updateInitiativeDisplay();
+}
+
+function addInitiativeEntry(type) {
+    let title = type === 'player' ? 'Добавить игрока' : 
+                type === 'enemy' ? 'Добавить противника' : 'Добавить участника';
+    let diceButton = type === 'enemy' || type === 'other' ? 
+        '<button class="dice-btn" onclick="rollInitiativeDice()">🎲 d20</button>' : '';
+    
+    showModal('<div class="initiative-entry">' +
+        '<div class="entry-title">' + title + '</div>' +
+        '<input type="text" id="initiative-name" placeholder="Название (до 30 символов)" maxlength="30" class="initiative-input">' +
+        '<input type="number" id="initiative-value" placeholder="Значение инициативы" class="initiative-input">' +
+        diceButton +
+        '<div class="entry-buttons">' +
+            '<button class="save-btn" onclick="saveInitiativeEntry(\'' + type + '\')">Сохранить</button>' +
+            '<button class="cancel-btn" onclick="openInitiativeModal()">Отмена</button>' +
+        '</div>' +
+    '</div>');
+    document.getElementById('modal-save').style.display = 'none';
+}
+
+function rollInitiativeDice() {
+    let result = Math.floor(Math.random() * 20) + 1;
+    document.getElementById('initiative-value').value = result;
+}
+
+function saveInitiativeEntry(type) {
+    let name = document.getElementById('initiative-name').value.trim();
+    let value = parseInt(document.getElementById('initiative-value').value);
+    
+    if (!name || isNaN(value)) {
+        alert('Заполните все поля!');
+        return;
+    }
+    
+    // Проверяем ограничения на название
+    if (!/^[а-яё0-9\s]+$/i.test(name)) {
+        alert('Используйте только кириллицу, цифры и пробелы!');
+        return;
+    }
+    
+    let entry = {
+        id: Date.now(),
+        name: name,
+        value: value,
+        type: type
+    };
+    
+    initiativeList.push(entry);
+    sortInitiativeList();
+    openInitiativeModal();
+}
+
+function sortInitiativeList() {
+    initiativeList.sort((a, b) => {
+        if (b.value !== a.value) {
+            return b.value - a.value; // По убыванию
+        }
+        return a.id - b.id; // При равных значениях - по времени добавления
+    });
+}
+
+function updateInitiativeDisplay() {
+    let listHtml = '';
+    initiativeList.forEach((entry, index) => {
+        let isActive = index === currentInitiativeIndex;
+        let typeClass = entry.type === 'player' ? 'player-entry' : 
+                       entry.type === 'enemy' ? 'enemy-entry' : 'other-entry';
+        let activeClass = isActive ? ' active' : '';
+        
+        listHtml += '<div class="initiative-item ' + typeClass + activeClass + '" onclick="setActiveInitiative(' + index + ')">' +
+            '<div class="initiative-name">' + entry.name + '</div>' +
+            '<div class="initiative-value">' + entry.value + '</div>' +
+            '<button class="edit-btn" onclick="editInitiativeEntry(' + entry.id + ')">✏️</button>' +
+            '<button class="delete-btn" onclick="deleteInitiativeEntry(' + entry.id + ')">🗑️</button>' +
+        '</div>';
+    });
+    
+    document.getElementById('initiative-list').innerHTML = listHtml;
+    
+    // Показываем текущего участника
+    if (initiativeList.length > 0) {
+        let current = initiativeList[currentInitiativeIndex];
+        document.getElementById('initiative-current').innerHTML = 
+            '<div class="current-turn">Ход: <strong>' + current.name + '</strong> (' + current.value + ')</div>' +
+            '<button class="next-btn" onclick="nextInitiative()">Следующий</button>';
+    } else {
+        document.getElementById('initiative-current').innerHTML = '';
+    }
+}
+
+function setActiveInitiative(index) {
+    currentInitiativeIndex = index;
+    updateInitiativeDisplay();
+}
+
+function nextInitiative() {
+    if (initiativeList.length > 0) {
+        currentInitiativeIndex = (currentInitiativeIndex + 1) % initiativeList.length;
+        updateInitiativeDisplay();
+    }
+}
+
+function editInitiativeEntry(id) {
+    let entry = initiativeList.find(e => e.id === id);
+    if (!entry) return;
+    
+    let title = entry.type === 'player' ? 'Редактировать игрока' : 
+                entry.type === 'enemy' ? 'Редактировать противника' : 'Редактировать участника';
+    
+    showModal('<div class="initiative-entry">' +
+        '<div class="entry-title">' + title + '</div>' +
+        '<input type="text" id="initiative-name" value="' + entry.name + '" maxlength="30" class="initiative-input">' +
+        '<input type="number" id="initiative-value" value="' + entry.value + '" class="initiative-input">' +
+        '<div class="entry-buttons">' +
+            '<button class="save-btn" onclick="updateInitiativeEntry(' + entry.id + ')">Сохранить</button>' +
+            '<button class="cancel-btn" onclick="openInitiativeModal()">Отмена</button>' +
+        '</div>' +
+    '</div>');
+    document.getElementById('modal-save').style.display = 'none';
+}
+
+function updateInitiativeEntry(id) {
+    let name = document.getElementById('initiative-name').value.trim();
+    let value = parseInt(document.getElementById('initiative-value').value);
+    
+    if (!name || isNaN(value)) {
+        alert('Заполните все поля!');
+        return;
+    }
+    
+    if (!/^[а-яё0-9\s]+$/i.test(name)) {
+        alert('Используйте только кириллицу, цифры и пробелы!');
+        return;
+    }
+    
+    let entry = initiativeList.find(e => e.id === id);
+    if (entry) {
+        entry.name = name;
+        entry.value = value;
+        sortInitiativeList();
+        openInitiativeModal();
+    }
+}
+
+function deleteInitiativeEntry(id) {
+    if (confirm('Удалить участника?')) {
+        initiativeList = initiativeList.filter(e => e.id !== id);
+        if (currentInitiativeIndex >= initiativeList.length) {
+            currentInitiativeIndex = Math.max(0, initiativeList.length - 1);
+        }
+        updateInitiativeDisplay();
+    }
+}
+
+function saveInitiativeNote() {
+    if (initiativeList.length === 0) {
+        alert('Нет участников для сохранения!');
+        return;
+    }
+    
+    let noteContent = '<div class="initiative-note">' +
+        '<div class="initiative-note-title">Инициатива</div>';
+    
+    initiativeList.forEach((entry, index) => {
+        let typeClass = entry.type === 'player' ? 'player-entry' : 
+                       entry.type === 'enemy' ? 'enemy-entry' : 'other-entry';
+        let isActive = index === currentInitiativeIndex ? ' active' : '';
+        
+        noteContent += '<div class="initiative-item ' + typeClass + isActive + '">' +
+            '<div class="initiative-name">' + entry.name + '</div>' +
+            '<div class="initiative-value">' + entry.value + '</div>' +
+        '</div>';
+    });
+    
+    noteContent += '</div>';
+    
+    fetch('', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/x-www-form-urlencoded'},
+        body: 'fast_action=save_note&content=' + encodeURIComponent(noteContent)
+    })
+    .then(r => r.text())
+    .then(() => {
+        alert('Инициатива сохранена в заметки!');
+        closeModal();
+    });
 }
 // --- Форматирование результата NPC по смысловым блокам ---
 function formatNpcBlocks(txt, forcedName = '') {

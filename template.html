@@ -637,6 +637,272 @@
                 grid-template-columns: 1fr;
             }
         }
+        /* --- Стили для инициативы --- */
+        
+        .initiative-container {
+            max-width: 600px;
+            margin: 0 auto;
+        }
+        
+        .initiative-list {
+            max-height: 400px;
+            overflow-y: auto;
+            margin-bottom: 20px;
+            border: 2px solid #a67c52;
+            border-radius: 10px;
+            padding: 10px;
+            background: #f8ecd0;
+        }
+        
+        .initiative-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 8px 12px;
+            margin-bottom: 8px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s;
+            border: 2px solid transparent;
+        }
+        
+        .initiative-item:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+        
+        .initiative-item.active {
+            border-color: #ffd700;
+            background: #fff8dc;
+            box-shadow: 0 0 10px rgba(255, 215, 0, 0.3);
+        }
+        
+        .player-entry {
+            border-color: #0066cc;
+            background: #e6f3ff;
+        }
+        
+        .enemy-entry {
+            border-color: #cc0000;
+            background: #ffe6e6;
+        }
+        
+        .other-entry {
+            border-color: #ffcc00;
+            background: #fff8e6;
+        }
+        
+        .initiative-name {
+            flex: 1;
+            font-weight: bold;
+            color: #2d1b00;
+        }
+        
+        .initiative-value {
+            font-weight: bold;
+            color: #7c4a02;
+            margin: 0 10px;
+            min-width: 30px;
+            text-align: center;
+        }
+        
+        .edit-btn,
+        .delete-btn {
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 16px;
+            padding: 4px;
+            margin-left: 4px;
+            border-radius: 4px;
+            transition: background 0.2s;
+        }
+        
+        .edit-btn:hover {
+            background: #a67c52;
+            color: white;
+        }
+        
+        .delete-btn:hover {
+            background: #cc0000;
+            color: white;
+        }
+        
+        .initiative-controls {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+        
+        .initiative-label {
+            font-weight: bold;
+            color: #7c4a02;
+            margin-right: 10px;
+        }
+        
+        .initiative-btn {
+            padding: 8px 16px;
+            border: 2px solid;
+            border-radius: 8px;
+            background: white;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.2s;
+        }
+        
+        .player-btn {
+            border-color: #0066cc;
+            color: #0066cc;
+        }
+        
+        .player-btn:hover {
+            background: #0066cc;
+            color: white;
+        }
+        
+        .enemy-btn {
+            border-color: #cc0000;
+            color: #cc0000;
+        }
+        
+        .enemy-btn:hover {
+            background: #cc0000;
+            color: white;
+        }
+        
+        .other-btn {
+            border-color: #ffcc00;
+            color: #b8860b;
+        }
+        
+        .other-btn:hover {
+            background: #ffcc00;
+            color: #2d1b00;
+        }
+        
+        .initiative-current {
+            text-align: center;
+            padding: 15px;
+            background: #f8ecd0;
+            border: 2px solid #a67c52;
+            border-radius: 10px;
+            margin-top: 15px;
+        }
+        
+        .current-turn {
+            font-size: 1.2em;
+            font-weight: bold;
+            color: #7c4a02;
+            margin-bottom: 10px;
+        }
+        
+        .next-btn {
+            background: #2bb07b;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: background 0.2s;
+        }
+        
+        .next-btn:hover {
+            background: #1e7c54;
+        }
+        
+        .initiative-entry {
+            max-width: 400px;
+            margin: 0 auto;
+        }
+        
+        .entry-title {
+            font-size: 1.2em;
+            font-weight: bold;
+            color: #7c4a02;
+            margin-bottom: 15px;
+            text-align: center;
+        }
+        
+        .initiative-input {
+            width: 100%;
+            padding: 8px 12px;
+            margin-bottom: 10px;
+            border: 2px solid #a67c52;
+            border-radius: 6px;
+            font-size: 1em;
+            box-sizing: border-box;
+        }
+        
+        .dice-btn {
+            background: #a67c52;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: bold;
+            margin-bottom: 10px;
+            transition: background 0.2s;
+        }
+        
+        .dice-btn:hover {
+            background: #7c4a02;
+        }
+        
+        .entry-buttons {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+        }
+        
+        .save-btn,
+        .cancel-btn {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: background 0.2s;
+        }
+        
+        .save-btn {
+            background: #2bb07b;
+            color: white;
+        }
+        
+        .save-btn:hover {
+            background: #1e7c54;
+        }
+        
+        .cancel-btn {
+            background: #cc0000;
+            color: white;
+        }
+        
+        .cancel-btn:hover {
+            background: #990000;
+        }
+        /* Стили для заметки инициативы */
+        
+        .initiative-note {
+            background: #f8ecd0;
+            border: 2px solid #a67c52;
+            border-radius: 10px;
+            padding: 15px;
+        }
+        
+        .initiative-note-title {
+            font-size: 1.3em;
+            font-weight: bold;
+            color: #7c4a02;
+            text-align: center;
+            margin-bottom: 15px;
+            border-bottom: 2px solid #a67c52;
+            padding-bottom: 8px;
+        }
     </style>
 </head>
 
