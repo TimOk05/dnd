@@ -486,7 +486,7 @@ function formatNpcBlocks(txt, forcedName = '') {
     }
     
     // Если в черте характера описание внешности - переносим
-    if (trait && /высокий|низкий|стройный|полный|волосы|глаза|лицо|одежда|длинные|короткие|светлые|темные|крепкий|мужчина|плечи|руки|шрамы|фартук|хвост|внешность|стройная|женщина|собранными|тёмными|волосами|пучок|форменном|платье|формария|следят|движения|точны|экономны/i.test(trait)) {
+    if (trait && /высокий|низкий|стройный|полный|волосы|глаза|лицо|одежда|длинные|короткие|светлые|темные|крепкий|мужчина|плечи|руки|шрамы|фартук|хвост|внешность|стройная|женщина|собранными|тёмными|волосами|пучок|форменном|платье|формария|следят|движения|точны|экономны|кулон|амулет|кольцо|ожерелье|браслет|пояс|мешок|зерно|носит|висит|за спиной|на поясе|на шее/i.test(trait)) {
         if (!appear) appear = trait;
         trait = '';
     }
@@ -562,6 +562,14 @@ function formatNpcBlocks(txt, forcedName = '') {
                     if (lastAbilityIndex !== -1) {
                         cleanAbility = cleanAbility.substring(lastAbilityIndex);
                     }
+                    
+                    // Если все еще есть дублирование оружия, убираем его
+                    if (cleanAbility.includes('Оружие:')) {
+                        let weaponIndex = cleanAbility.indexOf('Оружие:');
+                        if (weaponIndex > 0) {
+                            cleanAbility = cleanAbility.substring(0, weaponIndex).trim();
+                        }
+                    }
                 }
                 
                 // Убираем повторение способности только если оно есть
@@ -574,14 +582,19 @@ function formatNpcBlocks(txt, forcedName = '') {
                 
                 // Проверяем, что способность не пустая и не содержит дублирования
                 if (cleanAbility.length > 10) {
-                    // Финальная проверка на дублирование
-                    if (cleanAbility.includes('Оружие:') && cleanAbility.includes('Хиты:')) {
-                        // Если все еще есть дублирование, берем только последнюю часть
-                        let lastAbilityIndex = cleanAbility.lastIndexOf('Способность:');
-                        if (lastAbilityIndex !== -1) {
-                            cleanAbility = cleanAbility.substring(lastAbilityIndex);
-                        }
+                                    // Финальная проверка на дублирование
+                if (cleanAbility.includes('Оружие:') || cleanAbility.includes('Хиты:') || cleanAbility.includes('Урон:')) {
+                    // Если все еще есть дублирование технических параметров, убираем их
+                    let parts = cleanAbility.split(/\s+(?:Оружие|Урон|Хиты):/);
+                    if (parts.length > 1) {
+                        cleanAbility = parts[0].trim();
                     }
+                    
+                    // Если способность стала слишком короткой, ищем альтернативу
+                    if (cleanAbility.length < 5) {
+                        cleanAbility = null;
+                    }
+                }
                     techParams.ability = cleanAbility;
                 }
             }
@@ -732,7 +745,7 @@ function formatNpcBlocks(txt, forcedName = '') {
     if (trait && trait !== '-' && trait.trim().length > 0) {
         // Проверяем, что это действительно черта характера, а не описание предметов или внешности
         let traitLower = trait.toLowerCase();
-        if (!/флейта|пояс|мешок|зерно|носит|висит|за спиной|на поясе|внешность|стройная|женщина|собранными|тёмными|волосами|пучок|форменном|платье|формария|глаза|следят|движения|точны|экономны/i.test(traitLower)) {
+        if (!/флейта|пояс|мешок|зерно|носит|висит|за спиной|на поясе|внешность|стройная|женщина|собранными|тёмными|волосами|пучок|форменном|платье|формария|глаза|следят|движения|точны|экономны|кулон|амулет|кольцо|ожерелье|браслет|на шее/i.test(traitLower)) {
             // Очищаем текст от лишних заголовков
             let traitText = trait;
             if (trait.includes('Черты характера')) {
