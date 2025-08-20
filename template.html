@@ -9,27 +9,84 @@
          :root {
             --block-gap: 10px;
             --block-padding: 8px 12px;
+            /* Светлая тема */
+            --bg-primary: #f8ecd0;
+            --bg-secondary: #fffbe6;
+            --bg-tertiary: #f3e1b6;
+            --bg-quaternary: #e7d3a8;
+            --bg-quinary: #ffe7b3;
+            --bg-senary: #f8ecd0;
+            --text-primary: #2d1b00;
+            --text-secondary: #3d2a0a;
+            --text-tertiary: #7c4a02;
+            --text-quaternary: #4e260e;
+            --text-quinary: #1b4e2d;
+            --text-senary: #7a6c4a;
+            --border-primary: #a67c52;
+            --border-secondary: #7c4a02;
+            --border-tertiary: #e6d3a8;
+            --accent-primary: #a67c52;
+            --accent-secondary: #7c4a02;
+            --accent-success: #2bb07b;
+            --accent-info: #4a90e2;
+            --accent-warning: #ffd700;
+            --accent-danger: #b71c1c;
+            --shadow-primary: #0002;
+            --shadow-secondary: #0006;
+            --shadow-tertiary: #0001;
+            --bg-image: url('https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=1500&q=80');
+        }
+        /* Тёмная тема */
+        
+        [data-theme="dark"] {
+            --bg-primary: #0f0f23;
+            --bg-secondary: #1a1a2e;
+            --bg-tertiary: #16213e;
+            --bg-quaternary: #0f3460;
+            --bg-quinary: #533483;
+            --bg-senary: #7209b7;
+            --text-primary: #e8e8e8;
+            --text-secondary: #d1d1d1;
+            --text-tertiary: #b8a9c9;
+            --text-quaternary: #c7b3d3;
+            --text-quinary: #a8d5ba;
+            --text-senary: #b8c5d1;
+            --border-primary: #7209b7;
+            --border-secondary: #560bad;
+            --border-tertiary: #480ca8;
+            --accent-primary: #7209b7;
+            --accent-secondary: #560bad;
+            --accent-success: #06ffa5;
+            --accent-info: #4cc9f0;
+            --accent-warning: #f72585;
+            --accent-danger: #ff006e;
+            --shadow-primary: #0004;
+            --shadow-secondary: #0008;
+            --shadow-tertiary: #0002;
+            --bg-image: url('https://images.unsplash.com/photo-1506905925346-21bda4d32df4?auto=format&fit=crop&w=1500&q=80');
         }
         
         body {
-            background: url('https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=1500&q=80') no-repeat center center fixed;
+            background: var(--bg-image) no-repeat center center fixed;
             background-size: cover;
             min-height: 100vh;
             margin: 0;
             font-family: 'Roboto', 'IM Fell English SC', serif;
-            color: #2d1b00;
+            color: var(--text-primary);
             font-size: 1.05em;
+            transition: all 0.3s ease;
         }
         
         .parchment {
-            background: #f8ecd0 url('https://www.transparenttextures.com/patterns/old-mathematics.png');
-            border: 8px solid #a67c52;
+            background: var(--bg-primary) url('https://www.transparenttextures.com/patterns/old-mathematics.png');
+            border: 8px solid var(--border-primary);
             border-radius: 24px;
-            box-shadow: 0 8px 32px #0006, 0 0 0 12px #d2b48c44;
+            box-shadow: 0 8px 32px var(--shadow-secondary), 0 0 0 12px rgba(210, 180, 140, 0.3);
             max-width: 760px;
             margin: 36px auto;
             padding: 32px 24px 18px 24px;
             position: relative;
+            transition: all 0.3s ease;
         }
         
         .parchment:before,
@@ -58,9 +115,10 @@
             font-size: 2.2em;
             text-align: center;
             margin-bottom: 0.2em;
-            color: #7c4a02;
+            color: var(--text-tertiary);
             letter-spacing: 2px;
-            text-shadow: 0 2px 0 #fff8, 0 0 8px #a67c52aa;
+            text-shadow: 0 2px 0 rgba(255, 255, 255, 0.5), 0 0 8px rgba(166, 124, 82, 0.7);
+            transition: all 0.3s ease;
         }
         
         .fast-bar {
@@ -72,21 +130,23 @@
             display: inline-block;
             margin: 0 6px 10px 0;
             padding: 8px 18px;
-            background: #a67c52;
-            color: #fffbe6;
-            border: 2px solid #7c4a02;
+            background: var(--accent-primary);
+            color: var(--bg-secondary);
+            border: 2px solid var(--accent-secondary);
             border-radius: 10px;
             font-size: 1em;
             font-family: inherit;
             cursor: pointer;
-            box-shadow: 0 2px 8px #0002;
-            transition: background 0.2s, color 0.2s;
+            box-shadow: 0 2px 8px var(--shadow-primary);
+            transition: all 0.3s ease;
             text-decoration: none;
         }
         
         .fast-btn:hover {
-            background: #7c4a02;
-            color: #ffe0a3;
+            background: var(--accent-secondary);
+            color: var(--bg-quinary);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px var(--shadow-secondary);
         }
         
         .mini-menu-title {
@@ -109,13 +169,14 @@
             min-height: 180px;
             margin-bottom: 14px;
             padding: 12px 8px;
-            background: #fffbe6cc;
+            background: var(--bg-secondary);
             border-radius: 10px;
-            border: 1.5px solid #a67c52;
-            box-shadow: 0 1px 4px #0001;
+            border: 1.5px solid var(--border-primary);
+            box-shadow: 0 1px 4px var(--shadow-tertiary);
             max-height: 260px;
             overflow-y: auto;
             font-size: 1em;
+            transition: all 0.3s ease;
         }
         
         .msg {
@@ -125,12 +186,12 @@
         
         .user {
             text-align: right;
-            color: #4e260e;
+            color: var(--text-quaternary);
         }
         
         .assistant {
             text-align: left;
-            color: #1b4e2d;
+            color: var(--text-quinary);
         }
         
         .msg b {
@@ -149,20 +210,21 @@
             flex: 1;
             padding: 8px 12px;
             border-radius: 7px;
-            border: 2px solid #a67c52;
+            border: 2px solid var(--border-primary);
             font-size: 1em;
-            background: #fffbe6;
+            background: var(--bg-secondary);
             font-family: inherit;
-            color: #3d2a0a;
+            color: var(--text-secondary);
             outline: none;
-            box-shadow: 0 1px 4px #0001;
-            transition: border 0.2s;
+            box-shadow: 0 1px 4px var(--shadow-tertiary);
+            transition: all 0.3s ease;
         }
         
         input[type=text]:focus,
         input[type=number]:focus {
-            border: 2px solid #7c4a02;
-            background: #f3e1b6;
+            border: 2px solid var(--accent-secondary);
+            background: var(--bg-tertiary);
+            box-shadow: 0 2px 8px var(--shadow-primary);
         }
         
         .npc-level-wrap {
@@ -172,56 +234,76 @@
         button[type=submit] {
             padding: 8px 18px;
             border-radius: 7px;
-            border: 2px solid #7c4a02;
-            background: #a67c52;
-            color: #fffbe6;
+            border: 2px solid var(--accent-secondary);
+            background: var(--accent-primary);
+            color: var(--bg-secondary);
             font-size: 1em;
             font-family: inherit;
             cursor: pointer;
-            transition: background 0.2s, color 0.2s;
+            transition: all 0.3s ease;
         }
         
         button[type=submit]:hover {
-            background: #7c4a02;
-            color: #ffe0a3;
+            background: var(--accent-secondary);
+            color: var(--bg-quinary);
+            transform: translateY(-1px);
+            box-shadow: 0 3px 8px var(--shadow-primary);
         }
         
         .reset-link {
             float: right;
-            color: #b71c1c;
+            color: var(--accent-danger);
             text-decoration: underline;
             font-size: 0.98em;
             margin-top: 2px;
+            transition: all 0.3s ease;
+        }
+        
+        .reset-link:hover {
+            color: var(--accent-warning);
         }
         
         .notes-block {
-            background: #fffbe6cc;
-            border: 1.5px solid #a67c52;
+            background: var(--bg-secondary);
+            border: 1.5px solid var(--border-primary);
             border-radius: 10px;
             margin: 14px 0 0 0;
             padding: 10px 12px;
             min-height: 30px;
             font-size: 1em;
+            transition: all 0.3s ease;
         }
         
         .note-item {
-            background: #f3e1b6;
-            border: 1px solid #a67c52;
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border-primary);
             border-radius: 7px;
             margin-bottom: var(--block-gap);
             padding: var(--block-padding);
             position: relative;
+            transition: all 0.3s ease;
+        }
+        
+        .note-item:hover {
+            background: var(--bg-quaternary);
+            transform: translateX(2px);
         }
         
         .note-remove {
             position: absolute;
             right: 8px;
             top: 8px;
-            color: #b71c1c;
+            color: var(--accent-danger);
             background: none;
             border: none;
             font-size: 1.1em;
             cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .note-remove:hover {
+            color: var(--accent-warning);
+            transform: scale(1.2);
         }
         /* Modal styles */
         
@@ -243,10 +325,10 @@
         }
         
         .modal {
-            background: #f8ecd0;
-            border: 4px solid #a67c52;
+            background: var(--bg-primary);
+            border: 4px solid var(--border-primary);
             border-radius: 16px;
-            box-shadow: 0 4px 24px #0006;
+            box-shadow: 0 4px 24px var(--shadow-secondary);
             padding: 38px 32px 22px 32px;
             max-width: 750px;
             min-width: 320px;
@@ -256,6 +338,7 @@
             height: 540px;
             display: flex;
             flex-direction: column;
+            transition: all 0.3s ease;
         }
         
         .modal .modal-close {
@@ -265,27 +348,35 @@
             background: none;
             border: none;
             font-size: 1.2em;
-            color: #b71c1c;
+            color: var(--accent-danger);
             cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .modal .modal-close:hover {
+            color: var(--accent-warning);
+            transform: scale(1.2);
         }
         
         .modal .modal-save {
             margin-top: 18px;
             padding: 12px 28px;
-            background: #2bb07b;
-            color: #fffbe6;
+            background: var(--accent-success);
+            color: var(--bg-secondary);
             border: none;
             border-radius: 10px;
             font-size: 1.08em;
             font-family: inherit;
             cursor: pointer;
-            box-shadow: 0 2px 8px #0002;
-            transition: background 0.2s, color 0.2s;
+            box-shadow: 0 2px 8px var(--shadow-primary);
+            transition: all 0.3s ease;
         }
         
         .modal .modal-save:hover {
-            background: #1e7c54;
-            color: #ffe0a3;
+            background: var(--accent-info);
+            color: var(--bg-secondary);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px var(--shadow-secondary);
         }
         
         .modal-regenerate {
@@ -315,47 +406,51 @@
         /* --- Стили для сегментов результата --- */
         
         .result-segment {
-            background: #f3e1b6;
+            background: var(--bg-tertiary);
             border-radius: 8px;
             margin-top: var(--block-gap);
             padding: var(--block-padding);
             text-align: left;
             font-size: 0.98em;
             border: none;
+            transition: all 0.3s ease;
         }
         
         .result-segment-alt {
-            background: #e7d3a8;
+            background: var(--bg-quaternary);
             border-radius: 8px;
             margin-top: var(--block-gap);
             padding: var(--block-padding);
             text-align: left;
             font-size: 0.98em;
             border: none;
+            transition: all 0.3s ease;
         }
         
         .npc-summary {
-            background: #fffbe6;
-            border: 2px solid #a67c52;
+            background: var(--bg-secondary);
+            border: 2px solid var(--border-primary);
             border-radius: 10px;
             margin-top: var(--block-gap);
             padding: var(--block-padding);
             font-weight: bold;
-            color: #3d2a0a;
+            color: var(--text-secondary);
             font-size: 1em;
-            box-shadow: 0 2px 8px #0001;
+            box-shadow: 0 2px 8px var(--shadow-tertiary);
+            transition: all 0.3s ease;
         }
         
         .npc-summary-special {
-            background: #d0f7e0;
-            border: 2.5px solid #2bb07b;
+            background: var(--accent-success);
+            border: 2.5px solid var(--accent-info);
             border-radius: 12px;
             margin-top: 18px;
             padding: 12px 16px;
             font-weight: bold;
-            color: #205c3b;
+            color: var(--bg-secondary);
             font-size: 1.08em;
-            box-shadow: 0 2px 8px #0001;
+            box-shadow: 0 2px 8px var(--shadow-tertiary);
+            transition: all 0.3s ease;
         }
         
         .traits-block {
@@ -1038,17 +1133,124 @@
         .initiative-note-title {
             font-size: 1.3em;
             font-weight: bold;
-            color: #7c4a02;
+            color: var(--text-tertiary);
             text-align: center;
             margin-bottom: 15px;
-            border-bottom: 2px solid #a67c52;
+            border-bottom: 2px solid var(--border-primary);
             padding-bottom: 8px;
+        }
+        /* Переключатель темы */
+        
+        .theme-toggle {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            z-index: 100;
+        }
+        
+        .theme-btn {
+            background: var(--accent-primary);
+            color: var(--bg-secondary);
+            border: 2px solid var(--accent-secondary);
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            cursor: pointer;
+            font-size: 1.2em;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 8px var(--shadow-primary);
+        }
+        
+        .theme-btn:hover {
+            background: var(--accent-secondary);
+            transform: scale(1.1);
+            box-shadow: 0 4px 12px var(--shadow-secondary);
+        }
+        /* Улучшенные мобильные стили */
+        
+        @media (max-width: 768px) {
+            .parchment {
+                margin: 10px;
+                padding: 20px 15px;
+                border-radius: 16px;
+            }
+            h1 {
+                font-size: 1.8em;
+                margin-bottom: 15px;
+            }
+            .fast-bar {
+                margin-bottom: 20px;
+            }
+            .fast-btn {
+                margin: 4px;
+                padding: 10px 16px;
+                font-size: 0.95em;
+            }
+            .chat-box {
+                min-height: 200px;
+                max-height: 300px;
+                padding: 15px;
+            }
+            .notes-block {
+                margin-top: 20px;
+                padding: 15px;
+            }
+            .theme-toggle {
+                top: 15px;
+                right: 15px;
+            }
+            .theme-btn {
+                width: 45px;
+                height: 45px;
+                font-size: 1.1em;
+            }
+            .modal {
+                margin: 10px;
+                height: 80vh;
+                max-height: 600px;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .parchment {
+                margin: 5px;
+                padding: 15px 10px;
+            }
+            h1 {
+                font-size: 1.5em;
+            }
+            .fast-btn {
+                padding: 8px 12px;
+                font-size: 0.9em;
+                margin: 2px;
+            }
+            .chat-box {
+                padding: 10px;
+                font-size: 0.95em;
+            }
+            input[type=text],
+            input[type=number] {
+                font-size: 0.95em;
+                padding: 10px;
+            }
+            button[type=submit] {
+                padding: 10px 16px;
+                font-size: 0.95em;
+            }
         }
     </style>
 </head>
 
 <body>
     <div class="parchment">
+        <div class="theme-toggle">
+            <button id="theme-toggle" class="theme-btn" title="Переключить тему">
+                <span class="theme-icon">🌙</span>
+            </button>
+        </div>
         <h1>DnD AI Чат</h1>
         <div class="fast-bar">
             {{fast_buttons}}
@@ -1077,6 +1279,31 @@
     </div>
     <script>
         // JS для модального окна и заметок будет добавлен через PHP
+
+        // Переключатель темы
+        document.addEventListener('DOMContentLoaded', function() {
+            const themeToggle = document.getElementById('theme-toggle');
+            const themeIcon = themeToggle.querySelector('.theme-icon');
+            const body = document.body;
+
+            // Загружаем сохраненную тему
+            const savedTheme = localStorage.getItem('theme') || 'light';
+            body.setAttribute('data-theme', savedTheme);
+            updateThemeIcon(savedTheme);
+
+            themeToggle.addEventListener('click', function() {
+                const currentTheme = body.getAttribute('data-theme');
+                const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+
+                body.setAttribute('data-theme', newTheme);
+                localStorage.setItem('theme', newTheme);
+                updateThemeIcon(newTheme);
+            });
+
+            function updateThemeIcon(theme) {
+                themeIcon.textContent = theme === 'dark' ? '☀️' : '🌙';
+            }
+        });
     </script>
 </body>
 
