@@ -771,60 +771,33 @@
         /* --- Стили для инициативы --- */
         
         .initiative-container {
-            max-width: 800px;
+            max-width: 750px;
             margin: 0 auto;
-            background: linear-gradient(135deg, var(--bg-secondary), var(--bg-primary));
-            border-radius: 16px;
-            padding: 25px;
-            box-shadow: 0 8px 32px var(--shadow-color), inset 0 1px 0 rgba(255, 255, 255, 0.1);
-            border: 2px solid var(--border-color);
-            position: relative;
-            overflow: hidden;
-        }
-        
-        .initiative-container::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="grain" width="100" height="100" patternUnits="userSpaceOnUse"><circle cx="25" cy="25" r="1" fill="rgba(255,255,255,0.02)"/><circle cx="75" cy="75" r="1" fill="rgba(255,255,255,0.02)"/><circle cx="50" cy="10" r="0.5" fill="rgba(255,255,255,0.01)"/><circle cx="10" cy="60" r="0.5" fill="rgba(255,255,255,0.01)"/><circle cx="90" cy="40" r="0.5" fill="rgba(255,255,255,0.01)"/></pattern></defs><rect width="100" height="100" fill="url(%23grain)"/></svg>');
-            pointer-events: none;
-            opacity: 0.3;
+            background: var(--bg-secondary);
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 4px 20px var(--shadow-color);
+            border: 1px solid var(--border-color);
         }
         
         .initiative-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 20px;
-            padding: 18px 22px;
-            background: linear-gradient(135deg, var(--bg-primary), var(--bg-secondary));
-            border-radius: 12px;
-            border: 2px solid var(--border-color);
-            box-shadow: 0 4px 16px var(--shadow-color), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+            margin-bottom: 18px;
+            padding: 15px 20px;
+            background: var(--bg-primary);
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+            box-shadow: 0 2px 8px var(--shadow-color);
             transition: all 0.3s ease;
-            position: relative;
-        }
-        
-        .initiative-header::before {
-            content: '⚔️';
-            position: absolute;
-            left: -10px;
-            top: 50%;
-            transform: translateY(-50%);
-            font-size: 1.5em;
-            opacity: 0.7;
         }
         
         .initiative-header h3 {
             margin: 0;
             color: var(--text-color);
-            font-size: 1.4em;
-            font-weight: 700;
-            text-shadow: 0 2px 4px var(--shadow-color);
-            letter-spacing: 0.5px;
+            font-size: 1.3em;
+            font-weight: 600;
         }
         
         .initiative-stats {
@@ -836,37 +809,19 @@
         }
         
         .stat-item {
-            background: linear-gradient(135deg, var(--bg-tertiary), var(--bg-primary));
-            padding: 10px 18px;
-            border-radius: 12px;
+            background: var(--bg-tertiary);
+            padding: 8px 16px;
+            border-radius: 8px;
             border: 1px solid var(--border-color);
-            box-shadow: 0 3px 10px var(--shadow-color), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+            box-shadow: 0 2px 6px var(--shadow-color);
             transition: all 0.3s ease;
             font-size: 0.95em;
-            font-weight: 600;
-            position: relative;
-            overflow: hidden;
-        }
-        
-        .stat-item::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: -100%;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
-            transition: left 0.5s;
-        }
-        
-        .stat-item:hover::before {
-            left: 100%;
+            font-weight: 500;
         }
         
         .stat-item:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 16px var(--shadow-color);
-            border-color: var(--accent-color);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px var(--shadow-color);
         }
         
         .initiative-current-turn {
@@ -876,34 +831,12 @@
         .current-turn-display {
             display: flex;
             align-items: center;
-            background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
-            border: 3px solid var(--accent-color);
-            border-radius: 12px;
-            padding: 18px;
-            box-shadow: 0 6px 20px var(--shadow-color), 0 0 20px rgba(114, 9, 183, 0.3);
+            background: var(--bg-primary);
+            border: 2px solid var(--accent-color);
+            border-radius: 10px;
+            padding: 15px;
+            box-shadow: 0 4px 12px var(--shadow-color);
             transition: all 0.3s ease;
-            position: relative;
-            overflow: hidden;
-        }
-        
-        .current-turn-display::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: linear-gradient(45deg, transparent 30%, rgba(255, 255, 255, 0.15) 50%, transparent 70%);
-            animation: shine 3s infinite;
-        }
-        
-        @keyframes shine {
-            0% {
-                transform: translateX(-100%);
-            }
-            100% {
-                transform: translateX(100%);
-            }
         }
         
         .current-turn-icon {
@@ -939,8 +872,8 @@
             color: var(--bg-secondary);
             border: none;
             border-radius: 6px;
-            padding: 8px 12px;
-            font-size: 1em;
+            padding: 6px 10px;
+            font-size: 0.9em;
             font-weight: 500;
             cursor: pointer;
             transition: all 0.3s ease;
@@ -1013,15 +946,8 @@
         
         .initiative-item.active {
             border-color: var(--accent-color);
-            background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
-            box-shadow: 0 4px 16px var(--shadow-color), 0 0 20px rgba(114, 9, 183, 0.3);
-            transform: scale(1.02);
-        }
-        
-        .initiative-item.active .initiative-name,
-        .initiative-item.active .initiative-value {
-            color: var(--bg-secondary);
-            font-weight: 700;
+            background: var(--bg-tertiary);
+            box-shadow: 0 3px 10px var(--shadow-color);
         }
         
         .initiative-item-content {
@@ -1137,66 +1063,61 @@
         .player-btn {
             border-color: var(--accent-success);
             color: var(--accent-success);
-            background: rgba(6, 255, 165, 0.1);
+            background: var(--bg-secondary);
         }
         
         .player-btn:hover {
             background: var(--accent-success);
             color: var(--bg-secondary);
             border-color: var(--accent-success);
-            box-shadow: 0 0 15px rgba(6, 255, 165, 0.4);
         }
         
         .enemy-btn {
             border-color: var(--accent-danger);
             color: var(--accent-danger);
-            background: rgba(255, 0, 110, 0.1);
+            background: var(--bg-secondary);
         }
         
         .enemy-btn:hover {
             background: var(--accent-danger);
             color: var(--bg-secondary);
             border-color: var(--accent-danger);
-            box-shadow: 0 0 15px rgba(255, 0, 110, 0.4);
         }
         
         .other-btn {
             border-color: var(--accent-warning);
             color: var(--accent-warning);
-            background: rgba(247, 37, 133, 0.1);
+            background: var(--bg-secondary);
         }
         
         .other-btn:hover {
             background: var(--accent-warning);
             color: var(--bg-secondary);
             border-color: var(--accent-warning);
-            box-shadow: 0 0 15px rgba(247, 37, 133, 0.4);
         }
         
         .clear-btn {
             border-color: var(--accent-danger);
             color: var(--accent-danger);
-            background: rgba(255, 0, 110, 0.1);
+            background: var(--bg-secondary);
         }
         
         .clear-btn:hover {
             background: var(--accent-danger);
             color: var(--bg-secondary);
             border-color: var(--accent-danger);
-            box-shadow: 0 0 15px rgba(255, 0, 110, 0.4);
         }
         
         .round-btn {
             border-color: var(--accent-success);
             color: var(--accent-success);
-            background: rgba(6, 255, 165, 0.1);
+            background: var(--bg-secondary);
         }
         
         .round-btn:hover {
             background: var(--accent-success);
             color: var(--bg-secondary);
             border-color: var(--accent-success);
-            box-shadow: 0 0 15px rgba(6, 255, 165, 0.4);
         }
         
         .initiative-current {
@@ -1275,25 +1196,24 @@
         }
         
         .dice-btn {
-            background: linear-gradient(135deg, var(--accent-color), var(--accent-secondary));
+            background: var(--accent-color);
             color: var(--bg-secondary);
             border: 2px solid var(--accent-color);
-            padding: 12px 24px;
-            border-radius: 12px;
+            padding: 10px 20px;
+            border-radius: 8px;
             cursor: pointer;
-            font-weight: 700;
+            font-weight: 600;
             margin-bottom: 15px;
             transition: all 0.3s ease;
-            box-shadow: 0 4px 16px var(--shadow-color), 0 0 20px rgba(114, 9, 183, 0.3);
-            font-size: 1.1em;
-            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+            box-shadow: 0 3px 10px var(--shadow-color);
+            font-size: 1em;
         }
         
         .dice-btn:hover {
-            background: linear-gradient(135deg, var(--accent-secondary), var(--accent-color));
+            background: var(--accent-secondary);
             border-color: var(--accent-secondary);
-            transform: translateY(-3px) scale(1.05);
-            box-shadow: 0 8px 24px var(--shadow-color), 0 0 30px rgba(114, 9, 183, 0.5);
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px var(--shadow-color);
         }
         
         .entry-buttons {
@@ -1314,31 +1234,31 @@
         }
         
         .save-btn {
-            background: linear-gradient(135deg, var(--accent-success), #00d4aa);
+            background: var(--accent-success);
             color: var(--bg-secondary);
             border-color: var(--accent-success);
-            box-shadow: 0 4px 12px rgba(6, 255, 165, 0.3);
+            box-shadow: 0 3px 8px var(--shadow-color);
         }
         
         .save-btn:hover {
-            background: linear-gradient(135deg, #00d4aa, var(--accent-success));
+            background: var(--accent-success);
             color: var(--bg-secondary);
-            transform: translateY(-3px);
-            box-shadow: 0 6px 20px rgba(6, 255, 165, 0.4);
+            transform: translateY(-2px);
+            box-shadow: 0 5px 12px var(--shadow-color);
         }
         
         .cancel-btn {
-            background: linear-gradient(135deg, var(--accent-danger), #e6005c);
+            background: var(--accent-danger);
             color: var(--bg-secondary);
             border-color: var(--accent-danger);
-            box-shadow: 0 4px 12px rgba(255, 0, 110, 0.3);
+            box-shadow: 0 3px 8px var(--shadow-color);
         }
         
         .cancel-btn:hover {
-            background: linear-gradient(135deg, #e6005c, var(--accent-danger));
+            background: var(--accent-danger);
             color: var(--bg-secondary);
-            transform: translateY(-3px);
-            box-shadow: 0 6px 20px rgba(255, 0, 110, 0.4);
+            transform: translateY(-2px);
+            box-shadow: 0 5px 12px var(--shadow-color);
         }
         /* Стили для заметки инициативы */
         
