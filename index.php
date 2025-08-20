@@ -597,12 +597,7 @@ function prevInitiative() {
     }
 }
 
-function nextInitiative() {
-    if (initiativeList.length > 0) {
-        currentInitiativeIndex = (currentInitiativeIndex + 1) % initiativeList.length;
-        updateInitiativeDisplay();
-    }
-}
+
 
 function clearInitiative() {
     if (confirm('Очистить всех участников инициативы?')) {
@@ -617,6 +612,28 @@ function nextRound() {
     currentRound++;
     currentInitiativeIndex = 0;
     updateInitiativeDisplay();
+}
+
+function nextInitiative() {
+    if (initiativeList.length > 0) {
+        currentInitiativeIndex = (currentInitiativeIndex + 1) % initiativeList.length;
+        // Если прошли полный круг, увеличиваем раунд
+        if (currentInitiativeIndex === 0) {
+            currentRound++;
+        }
+        updateInitiativeDisplay();
+    }
+}
+
+function prevInitiative() {
+    if (initiativeList.length > 0) {
+        currentInitiativeIndex = (currentInitiativeIndex - 1 + initiativeList.length) % initiativeList.length;
+        // Если пошли назад и достигли конца, уменьшаем раунд
+        if (currentInitiativeIndex === initiativeList.length - 1 && currentRound > 1) {
+            currentRound--;
+        }
+        updateInitiativeDisplay();
+    }
 }
 
 function editInitiativeEntry(id) {
