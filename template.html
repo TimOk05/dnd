@@ -454,7 +454,7 @@
         }
         
         .traits-block {
-            background: #e7d3a8;
+            background: var(--bg-quaternary);
             border-radius: 8px;
             margin-top: 0;
             margin-bottom: var(--block-gap);
@@ -463,6 +463,7 @@
             font-size: 1.04em;
             border: none;
             white-space: pre-line;
+            transition: all 0.3s ease;
         }
         
         .trait-line {
@@ -484,8 +485,8 @@
         }
         
         .npc-header {
-            background: #ffe7b3;
-            color: #7c4a02;
+            background: var(--bg-quinary);
+            color: var(--text-tertiary);
             font-size: 1.18em;
             font-weight: bold;
             padding: 10px 14px;
@@ -493,28 +494,31 @@
             margin-bottom: 10px;
             text-align: center;
             letter-spacing: 0.5px;
+            transition: all 0.3s ease;
         }
         
         .npc-desc {
-            color: #7a6c4a;
+            color: var(--text-senary);
             font-size: 0.98em;
             margin-bottom: 8px;
-            background: #f8ecd0;
+            background: var(--bg-primary);
             border-radius: 7px;
             padding: 7px 12px;
+            transition: all 0.3s ease;
         }
         /* --- Новый современный стиль NPC --- */
         
         .npc-block-modern {
-            background: #fffbe6;
+            background: var(--bg-secondary);
             border-radius: 16px;
-            box-shadow: 0 2px 12px #0001;
-            border: 1.5px solid #e6d3a8;
+            box-shadow: 0 2px 12px var(--shadow-tertiary);
+            border: 1.5px solid var(--border-tertiary);
             margin: 18px 0;
             padding: 22px 16px 14px 16px;
             max-width: 700px;
             margin-left: auto;
             margin-right: auto;
+            transition: all 0.3s ease;
         }
         
         .npc-grid-2x2 {
@@ -526,7 +530,7 @@
         }
         
         .npc-col-block {
-            background: #f8ecd0;
+            background: var(--bg-primary);
             border-radius: 8px;
             padding: 12px 14px;
             font-size: 0.97em;
@@ -535,11 +539,13 @@
             flex-direction: column;
             justify-content: flex-start;
             box-sizing: border-box;
-            box-shadow: 0 1px 4px #0001;
+            box-shadow: 0 1px 4px var(--shadow-tertiary);
+            transition: all 0.3s ease;
+            margin-bottom: 10px;
         }
         
         .npc-col-block b {
-            color: #7c4a02;
+            color: var(--text-tertiary);
             font-weight: bold;
             margin-bottom: 4px;
             font-size: 1em;
@@ -548,41 +554,45 @@
         .npc-modern-header {
             font-size: 1.15em;
             font-family: 'UnifrakturCook', cursive;
-            color: #7c4a02;
+            color: var(--text-tertiary);
             margin-bottom: 4px;
             text-align: center;
             letter-spacing: 0.5px;
             text-shadow: none;
+            transition: all 0.3s ease;
         }
         
         .npc-name-header {
             font-size: 1.2em;
             font-family: 'UnifrakturCook', cursive;
-            color: #7c4a02;
+            color: var(--text-tertiary);
             font-weight: bold;
             text-align: center;
             margin-bottom: 8px;
             padding: 4px 0;
-            border-bottom: 2px solid #a67c52;
+            border-bottom: 2px solid var(--border-primary);
+            transition: all 0.3s ease;
         }
         
         .npc-modern-sub {
-            color: #a67c52;
+            color: var(--accent-primary);
             font-size: 0.98em;
             margin-bottom: 10px;
             text-align: center;
+            transition: all 0.3s ease;
         }
         
         .npc-modern-block {
-            background: #f8ecd0;
+            background: var(--bg-primary);
             border-radius: 8px;
             margin-bottom: 10px;
             padding: 8px 10px;
             font-size: 0.98em;
+            transition: all 0.3s ease;
         }
         
         .npc-modern-block b {
-            color: #7c4a02;
+            color: var(--text-tertiary);
             font-weight: bold;
             display: block;
             margin-bottom: 4px;
@@ -592,7 +602,7 @@
             list-style: disc inside;
             margin: 0 0 0 14px;
             padding: 0;
-            color: #2d1b00;
+            color: var(--text-primary);
             font-size: 0.97em;
         }
         
@@ -603,15 +613,16 @@
         }
         
         .npc-modern-summary {
-            background: #f3e1b6;
-            border: 1.5px solid #e6d3a8;
+            background: var(--bg-tertiary);
+            border: 1.5px solid var(--border-tertiary);
             border-radius: 8px;
             font-weight: bold;
-            color: #7c4a02;
+            color: var(--text-tertiary);
             font-size: 1em;
             padding: 10px 8px;
             margin-top: 12px;
             text-align: center;
+            transition: all 0.3s ease;
         }
         
         @media (max-width: 700px) {
@@ -656,12 +667,12 @@
             top: 30px;
             left: 50%;
             transform: translateX(-50%);
-            background: #2bb07b;
-            color: #fffbe6;
+            background: var(--accent-success);
+            color: var(--bg-secondary);
             padding: 14px 32px;
             border-radius: 12px;
             font-size: 1.1em;
-            box-shadow: 0 2px 12px #0003;
+            box-shadow: 0 2px 12px var(--shadow-secondary);
             z-index: 2000;
             opacity: 0;
             pointer-events: none;
@@ -681,7 +692,7 @@
         }
         
         .npc-col-block {
-            background: #f8ecd0;
+            background: var(--bg-primary);
             border-radius: 8px;
             padding: 10px 12px;
             font-size: 0.97em;
@@ -690,10 +701,11 @@
             flex-direction: column;
             justify-content: flex-start;
             box-sizing: border-box;
+            transition: all 0.3s ease;
         }
         
         .npc-col-block b {
-            color: #7c4a02;
+            color: var(--text-tertiary);
             font-weight: bold;
             margin-bottom: 4px;
         }
@@ -701,20 +713,22 @@
         .npc-desc-toggle-btn {
             margin: 0 auto 12px auto;
             display: block;
-            background: #2bb07b;
-            color: #fffbe6;
+            background: var(--accent-success);
+            color: var(--bg-secondary);
             border: none;
             border-radius: 10px;
             font-size: 1em;
             padding: 10px 24px;
             cursor: pointer;
-            box-shadow: 0 2px 8px #0002;
-            transition: background 0.2s, color 0.2s;
+            box-shadow: 0 2px 8px var(--shadow-primary);
+            transition: all 0.3s ease;
         }
         
         .npc-desc-toggle-btn:hover {
-            background: #1e7c54;
-            color: #ffe0a3;
+            background: var(--accent-info);
+            color: var(--bg-secondary);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px var(--shadow-secondary);
         }
         
         @media (max-width: 900px) {
@@ -745,27 +759,29 @@
             align-items: center;
             margin-bottom: 20px;
             padding-bottom: 10px;
-            border-bottom: 2px solid #a67c52;
+            border-bottom: 2px solid var(--border-primary);
+            transition: all 0.3s ease;
         }
         
         .initiative-header h3 {
             margin: 0;
-            color: #7c4a02;
+            color: var(--text-tertiary);
             font-size: 1.4em;
         }
         
         .initiative-stats {
             display: flex;
             gap: 20px;
-            color: #7c4a02;
+            color: var(--text-tertiary);
             font-weight: bold;
         }
         
         .stat-item {
-            background: #f8ecd0;
+            background: var(--bg-primary);
             padding: 5px 12px;
             border-radius: 8px;
-            border: 1px solid #a67c52;
+            border: 1px solid var(--border-primary);
+            transition: all 0.3s ease;
         }
         
         .initiative-current-turn {
@@ -775,11 +791,12 @@
         .current-turn-display {
             display: flex;
             align-items: center;
-            background: linear-gradient(135deg, #fff8dc, #f8ecd0);
-            border: 3px solid #ffd700;
+            background: linear-gradient(135deg, var(--bg-quinary), var(--bg-primary));
+            border: 3px solid var(--accent-warning);
             border-radius: 15px;
             padding: 15px;
-            box-shadow: 0 4px 15px rgba(255, 215, 0, 0.3);
+            box-shadow: 0 4px 15px rgba(247, 37, 133, 0.3);
+            transition: all 0.3s ease;
         }
         
         .current-turn-icon {
@@ -794,12 +811,12 @@
         .current-turn-name {
             font-size: 1.3em;
             font-weight: bold;
-            color: #2d1b00;
+            color: var(--text-primary);
             margin-bottom: 5px;
         }
         
         .current-turn-value {
-            color: #7c4a02;
+            color: var(--text-tertiary);
             font-weight: bold;
         }
         
@@ -809,39 +826,42 @@
         }
         
         .turn-btn {
-            background: #a67c52;
-            color: white;
+            background: var(--accent-primary);
+            color: var(--bg-secondary);
             border: none;
             border-radius: 8px;
             padding: 8px 12px;
             font-size: 1.1em;
             cursor: pointer;
-            transition: all 0.2s;
+            transition: all 0.3s ease;
         }
         
         .turn-btn:hover {
-            background: #7c4a02;
+            background: var(--accent-secondary);
             transform: scale(1.05);
+            box-shadow: 0 4px 12px var(--shadow-secondary);
         }
         
         .no-initiative {
             text-align: center;
-            color: #7c4a02;
+            color: var(--text-tertiary);
             font-style: italic;
             padding: 20px;
-            background: #f8ecd0;
+            background: var(--bg-primary);
             border-radius: 10px;
-            border: 2px dashed #a67c52;
+            border: 2px dashed var(--border-primary);
+            transition: all 0.3s ease;
         }
         
         .initiative-list {
             max-height: 350px;
             overflow-y: auto;
             margin-bottom: 20px;
-            border: 2px solid #a67c52;
+            border: 2px solid var(--border-primary);
             border-radius: 10px;
             padding: 10px;
-            background: #f8ecd0;
+            background: var(--bg-primary);
+            transition: all 0.3s ease;
         }
         
         .initiative-item {
@@ -852,20 +872,20 @@
             margin-bottom: 8px;
             border-radius: 10px;
             cursor: pointer;
-            transition: all 0.3s;
+            transition: all 0.3s ease;
             border: 2px solid transparent;
-            background: white;
+            background: var(--bg-secondary);
         }
         
         .initiative-item:hover {
             transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            box-shadow: 0 4px 12px var(--shadow-secondary);
         }
         
         .initiative-item.active {
-            border-color: #ffd700;
-            background: #fff8dc;
-            box-shadow: 0 0 15px rgba(255, 215, 0, 0.4);
+            border-color: var(--accent-warning);
+            background: var(--bg-quinary);
+            box-shadow: 0 0 15px rgba(247, 37, 133, 0.4);
             transform: scale(1.02);
         }
         
@@ -888,12 +908,12 @@
         
         .initiative-name {
             font-weight: bold;
-            color: #2d1b00;
+            color: var(--text-primary);
             font-size: 1.1em;
         }
         
         .initiative-value {
-            color: #7c4a02;
+            color: var(--text-tertiary);
             font-weight: bold;
             font-size: 0.9em;
         }
@@ -979,74 +999,77 @@
         }
         
         .enemy-btn {
-            border-color: #cc0000;
-            color: #cc0000;
+            border-color: var(--accent-danger);
+            color: var(--accent-danger);
         }
         
         .enemy-btn:hover {
-            background: #cc0000;
-            color: white;
+            background: var(--accent-danger);
+            color: var(--bg-secondary);
         }
         
         .other-btn {
-            border-color: #ffcc00;
-            color: #b8860b;
+            border-color: var(--accent-warning);
+            color: var(--accent-warning);
         }
         
         .other-btn:hover {
-            background: #ffcc00;
-            color: #2d1b00;
+            background: var(--accent-warning);
+            color: var(--text-primary);
         }
         
         .clear-btn {
-            border-color: #cc0000;
-            color: #cc0000;
+            border-color: var(--accent-danger);
+            color: var(--accent-danger);
         }
         
         .clear-btn:hover {
-            background: #cc0000;
-            color: white;
+            background: var(--accent-danger);
+            color: var(--bg-secondary);
         }
         
         .round-btn {
-            border-color: #2bb07b;
-            color: #2bb07b;
+            border-color: var(--accent-success);
+            color: var(--accent-success);
         }
         
         .round-btn:hover {
-            background: #2bb07b;
-            color: white;
+            background: var(--accent-success);
+            color: var(--bg-secondary);
         }
         
         .initiative-current {
             text-align: center;
             padding: 15px;
-            background: #f8ecd0;
-            border: 2px solid #a67c52;
+            background: var(--bg-primary);
+            border: 2px solid var(--border-primary);
             border-radius: 10px;
             margin-top: 15px;
+            transition: all 0.3s ease;
         }
         
         .current-turn {
             font-size: 1.2em;
             font-weight: bold;
-            color: #7c4a02;
+            color: var(--text-tertiary);
             margin-bottom: 10px;
         }
         
         .next-btn {
-            background: #2bb07b;
-            color: white;
+            background: var(--accent-success);
+            color: var(--bg-secondary);
             border: none;
             padding: 8px 16px;
             border-radius: 8px;
             cursor: pointer;
             font-weight: bold;
-            transition: background 0.2s;
+            transition: all 0.3s ease;
         }
         
         .next-btn:hover {
-            background: #1e7c54;
+            background: var(--accent-info);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px var(--shadow-secondary);
         }
         
         .initiative-entry {
@@ -1057,7 +1080,7 @@
         .entry-title {
             font-size: 1.2em;
             font-weight: bold;
-            color: #7c4a02;
+            color: var(--text-tertiary);
             margin-bottom: 15px;
             text-align: center;
         }
@@ -1066,26 +1089,37 @@
             width: 100%;
             padding: 8px 12px;
             margin-bottom: 10px;
-            border: 2px solid #a67c52;
+            border: 2px solid var(--border-primary);
             border-radius: 6px;
             font-size: 1em;
             box-sizing: border-box;
+            background: var(--bg-secondary);
+            color: var(--text-secondary);
+            transition: all 0.3s ease;
+        }
+        
+        .initiative-input:focus {
+            border-color: var(--accent-secondary);
+            background: var(--bg-tertiary);
+            box-shadow: 0 2px 8px var(--shadow-primary);
         }
         
         .dice-btn {
-            background: #a67c52;
-            color: white;
+            background: var(--accent-primary);
+            color: var(--bg-secondary);
             border: none;
             padding: 8px 16px;
             border-radius: 6px;
             cursor: pointer;
             font-weight: bold;
             margin-bottom: 10px;
-            transition: background 0.2s;
+            transition: all 0.3s ease;
         }
         
         .dice-btn:hover {
-            background: #7c4a02;
+            background: var(--accent-secondary);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px var(--shadow-secondary);
         }
         
         .entry-buttons {
@@ -1105,29 +1139,34 @@
         }
         
         .save-btn {
-            background: #2bb07b;
-            color: white;
+            background: var(--accent-success);
+            color: var(--bg-secondary);
         }
         
         .save-btn:hover {
-            background: #1e7c54;
+            background: var(--accent-info);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px var(--shadow-secondary);
         }
         
         .cancel-btn {
-            background: #cc0000;
-            color: white;
+            background: var(--accent-danger);
+            color: var(--bg-secondary);
         }
         
         .cancel-btn:hover {
-            background: #990000;
+            background: var(--accent-warning);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px var(--shadow-secondary);
         }
         /* Стили для заметки инициативы */
         
         .initiative-note {
-            background: #f8ecd0;
-            border: 2px solid #a67c52;
+            background: var(--bg-primary);
+            border: 2px solid var(--border-primary);
             border-radius: 10px;
             padding: 15px;
+            transition: all 0.3s ease;
         }
         
         .initiative-note-title {
