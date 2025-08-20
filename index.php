@@ -240,6 +240,7 @@ const npcRaces = ['Человек','Эльф','Гном','Полуорк','По�
 const npcClasses = ['Без класса','Воин','Паладин','Колдун','Маг','Разбойник','Следопыт','Жрец','Бард','Варвар','Плут','Монах','Чародей','Друид'];
 // Убираем массив профессий - AI сам выберет
 let npcRace = '', npcClass = '', npcProf = '', npcLevel = 1;
+let lastGeneratedParams = {}; // Для хранения параметров последней генерации
 function openNpcStep1() {
     showModal('<b class="mini-menu-title">Выберите расу NPC:</b><div class="mini-menu-btns">' + npcRaces.map(r => `<button onclick=\'openNpcStep2("${r}")\' class=\'fast-btn\'>${r}</button>`).join(' ') + '</div>');
     document.getElementById('modal-save').style.display = 'none';
@@ -323,6 +324,13 @@ function fetchNpcFromAI(race, npcClass, prof, level) {
                 document.getElementById('modal-content').innerHTML = formatNpcBlocks(data.result, name);
                 document.getElementById('modal-save').style.display = '';
                 document.getElementById('modal-save').onclick = function() { saveNote(document.getElementById('modal-content').innerHTML); closeModal(); };
+                
+                // Добавляем кнопку повторной генерации
+                let regenerateBtn = document.createElement('button');
+                regenerateBtn.className = 'modal-regenerate';
+                regenerateBtn.textContent = '🔄 Повторить генерацию';
+                regenerateBtn.onclick = regenerateNpc;
+                document.getElementById('modal').appendChild(regenerateBtn);
             } else {
                 document.getElementById('modal-content').innerHTML = '<div class="result-segment">[Ошибка AI: ' + (data.error || 'нет ответа') + ']</div>';
                 document.getElementById('modal-save').style.display = 'none';
@@ -336,8 +344,22 @@ function fetchNpcFromAI(race, npcClass, prof, level) {
 }
 function generateNpcWithLevel() {
     npcLevel = document.getElementById('npc-level').value;
+    // Сохраняем параметры для повторной генерации
+    lastGeneratedParams = {
+        race: npcRace,
+        class: npcClass,
+        level: npcLevel
+    };
     // AI сам выберет профессию
     fetchNpcFromAI(npcRace, npcClass, '', npcLevel);
+}
+
+function regenerateNpc() {
+    if (lastGeneratedParams.race && lastGeneratedParams.class && lastGeneratedParams.level) {
+        fetchNpcFromAI(lastGeneratedParams.race, lastGeneratedParams.class, '', lastGeneratedParams.level);
+    } else {
+        alert('Нет сохраненных параметров для повторной генерации');
+    }
 }
 // --- Форматирование результата NPC по смысловым блокам ---
 function formatNpcBlocks(txt, forcedName = '') {
@@ -546,13 +568,17 @@ function formatNpcBlocks(txt, forcedName = '') {
     if (shortdesc && shortdesc !== '-') {
         out += `<div class='npc-col-block'><span style='font-size:1.2em;'>📜</span> <b>Описание</b>${firstSentence(shortdesc)}</div>`;
     }
-    if (trait && trait !== '-') {
-        // Очищаем текст от лишних заголовков
-        let traitText = trait;
-        if (trait.includes('Черты характера')) {
-            traitText = trait.replace(/^черты характера\s*/i, '').trim();
+    if (trait && trait !== '-' && trait.trim().length > 0) {
+        // Проверяем, что это действительно черта характера, а не описание предметов
+        let traitLower = trait.toLowerCase();
+        if (!/флейта|пояс|мешок|зерно|носит|висит|за спиной|на поясе/i.test(traitLower)) {
+            // Очищаем текст от лишних заголовков
+            let traitText = trait;
+            if (trait.includes('Черты характера')) {
+                traitText = trait.replace(/^черты характера\s*/i, '').trim();
+            }
+            out += `<div class='npc-col-block'><span style='font-size:1.2em;'>🧠</span> <b>Черта характера</b>${firstSentence(traitText)}</div>`;
         }
-        out += `<div class='npc-col-block'><span style='font-size:1.2em;'>🧠</span> <b>Черта характера</b>${firstSentence(traitText)}</div>`;
     }
     if (appear && appear !== '-') {
         // Объединяем описания внешности, если их несколько
@@ -609,6 +635,11 @@ function showModal(content) {
 }
 function closeModal() {
     document.getElementById('modal-bg').classList.remove('active');
+    // Удаляем кнопку повторной генерации при закрытии
+    let regenerateBtn = document.querySelector('.modal-regenerate');
+    if (regenerateBtn) {
+        regenerateBtn.remove();
+    }
 }
 document.getElementById('modal-close').onclick = closeModal;
 document.getElementById('modal-bg').onclick = function(e) { if (e.target === this) closeModal(); };
