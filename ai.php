@@ -4,11 +4,16 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     echo json_encode(['error' => 'POST only']);
     exit;
 }
+
 $api_key = 'sk-1e898ddba737411e948af435d767e893';
 $api_url = 'https://api.deepseek.com/v1/chat/completions';
 $prompt = isset($_POST['prompt']) ? trim($_POST['prompt']) : '';
 $system = isset($_POST['system']) ? trim($_POST['system']) : '';
 $type = isset($_POST['type']) ? $_POST['type'] : 'chat';
+
+// Увеличиваем timeout для генерации NPC
+$timeout = ($type === 'npc') ? 60 : 30;
+
 // --- Фильтрация только для пользовательских сообщений (чата) ---
 if ($type === 'chat') {
     $maxLen = 500;
@@ -28,48 +33,69 @@ if ($type === 'chat') {
         exit;
     }
 }
+
 if (!$prompt) {
     echo json_encode(['error' => 'No prompt']);
     exit;
 }
+
+// Оптимизируем промпт для NPC
+if ($type === 'npc') {
+    // Упрощаем системный промпт для более быстрой генерации
+    $system = "Создай NPC для D&D. Формат:\n\nИмя и Профессия\n[имя и профессия]\n\nОписание\n[3-4 предложения о персонаже]\n\nВнешность\n[2-3 предложения о внешности]\n\nЧерты характера\n[1-2 предложения о личности]\n\nТехнические параметры\nОружие: [оружие]\nУрон: [урон]\nХиты: [хиты]";
+    
+    // Уменьшаем max_tokens для более быстрого ответа
+    $max_tokens = 800;
+    $temperature = 0.8;
+} else {
+    $max_tokens = 1000;
+    $temperature = 0.7;
+}
+
 $data = array(
     'model' => 'deepseek-chat',
     'messages' => array(
         array('role' => 'system', 'content' => $system),
         array('role' => 'user', 'content' => $prompt)
     ),
-    'max_tokens' => 1000,
-    'temperature' => 0.7
+    'max_tokens' => $max_tokens,
+    'temperature' => $temperature
 );
-$options = array(
-    'http' => array(
-        'header' => "Content-Type: application/json\r\n" .
-                    "Authorization: Bearer " . $api_key . "\r\n",
-        'method' => 'POST',
-        'content' => json_encode($data),
-        'ignore_errors' => true
-    )
-);
-$context = stream_context_create($options);
-$response = file_get_contents($api_url, false, $context);
-if ($response === false) {
-    $error = error_get_last();
-    echo json_encode(['error' => 'Request failed: ' . ($error['message'] ?? 'unknown')]);
+
+// Используем cURL для лучшего контроля timeout
+$ch = curl_init();
+curl_setopt($ch, CURLOPT_URL, $api_url);
+curl_setopt($ch, CURLOPT_POST, true);
+curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($data));
+curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+curl_setopt($ch, CURLOPT_TIMEOUT, $timeout);
+curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 10);
+curl_setopt($ch, CURLOPT_HTTPHEADER, array(
+    'Content-Type: application/json',
+    'Authorization: Bearer ' . $api_key
+));
+curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, true);
+
+$response = curl_exec($ch);
+$httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+$curlError = curl_error($ch);
+curl_close($ch);
+
+if ($curlError) {
+    echo json_encode(['error' => 'Connection error: ' . $curlError]);
     exit;
 }
-if (!isset($http_response_header) || empty($http_response_header)) {
-    echo json_encode(['error' => 'No HTTP response headers received']);
+
+if ($httpCode !== 200) {
+    echo json_encode(['error' => "HTTP Error $httpCode: " . $response]);
     exit;
 }
-list($version, $status, $msg) = explode(' ', $http_response_header[0], 3);
-if ($status != 200) {
-    echo json_encode(['error' => "HTTP Error $status: $msg"]);
-    exit;
-}
+
 $result = json_decode($response, true);
 if (json_last_error() !== JSON_ERROR_NONE) {
     echo json_encode(['error' => 'Invalid JSON response: ' . json_last_error_msg()]);
     exit;
 }
+
 $aiMessage = $result['choices'][0]['message']['content'] ?? '';
 echo json_encode(['result' => $aiMessage], JSON_UNESCAPED_UNICODE);

@@ -315,7 +315,7 @@ function openNpcStep2(race) {
 }
 function openNpcStepLevel(cls) {
     npcClass = cls;
-    showModal('<b class="mini-menu-title">Укажите уровень NPC (1-20):</b><div class="npc-level-wrap"><input type=number id=npc-level value=1 min=1 max=20 style=\'width:60px\'></div><button class=\'fast-btn\' onclick=\'generateNpcWithLevel()\'>Создать NPC</button>');
+    showModal('<b class="mini-menu-title">Укажите уровень NPC (1-20):</b><div class="npc-level-wrap"><input type=number id=npc-level value=1 min=1 max=20 style=\'width:60px\'></div><div class="mini-menu-btns"><button class=\'fast-btn\' onclick=\'generateNpcWithLevel()\'>🤖 Создать NPC (AI)</button><button class=\'fast-btn\' onclick=\'generateQuickNpc(npcRace, npcClass, document.getElementById("npc-level").value)\'>🎲 Быстрая генерация</button></div>');
     document.getElementById('modal-save').style.display = 'none';
     // Автофокус на поле уровня
     setTimeout(() => document.getElementById('npc-level').focus(), 100);
@@ -326,7 +326,16 @@ fetch('pdf/d100_unique_traders.json')
   .then(r => r.json())
   .then(data => { window.uniqueTraders = data; });
 function fetchNpcFromAI(race, npcClass, prof, level) {
-    showModal('Генерация NPC...');
+    showModal('🎲 Генерация NPC...<br><small>Это может занять до 30 секунд</small>');
+    
+    // Добавляем индикатор прогресса
+    let progressDots = 0;
+    const progressInterval = setInterval(() => {
+        progressDots = (progressDots + 1) % 4;
+        const dots = '.'.repeat(progressDots);
+        document.getElementById('modal-content').innerHTML = `🎲 Генерация NPC${dots}<br><small>Это может занять до 30 секунд</small>`;
+    }, 500);
+    
     fetch('pdf/d100_unique_traders.json')
       .then(r => r.json())
       .then(json => {
@@ -383,6 +392,8 @@ function fetchNpcFromAI(race, npcClass, prof, level) {
         })
         .then(r => r.json())
         .then(data => {
+            clearInterval(progressInterval); // Останавливаем индикатор прогресса
+            
             if (data && data.result) {
                 // Отладочная информация
                 console.log('AI Response:', data.result);
@@ -403,16 +414,111 @@ function fetchNpcFromAI(race, npcClass, prof, level) {
                 regenerateBtn.onclick = regenerateNpc;
                 document.getElementById('modal').appendChild(regenerateBtn);
             } else {
-                document.getElementById('modal-content').innerHTML = '<div class="result-segment">[Ошибка AI: ' + (data.error || 'нет ответа') + ']</div>';
+                document.getElementById('modal-content').innerHTML = '<div class="result-segment error">❌ Ошибка генерации: ' + (data.error || 'нет ответа от AI') + '<br><small>Попробуйте ещё раз или проверьте соединение</small></div>';
                 document.getElementById('modal-save').style.display = 'none';
             }
         })
         .catch((e) => {
-            document.getElementById('modal-content').innerHTML = '<div class="result-segment">[Ошибка соединения с сервером]</div>';
+            clearInterval(progressInterval); // Останавливаем индикатор прогресса
+            console.error('NPC Generation Error:', e);
+            document.getElementById('modal-content').innerHTML = '<div class="result-segment error">❌ Ошибка соединения с сервером<br><small>Проверьте интернет-соединение и попробуйте ещё раз</small><br><button class="fast-btn" onclick="generateQuickNpc(\'' + race + '\', \'' + npcClass + '\', ' + level + ')">🎲 Быстрая генерация (без AI)</button></div>';
             document.getElementById('modal-save').style.display = 'none';
         });
       });
 }
+
+// Fallback функция для быстрой генерации NPC без AI
+function generateQuickNpc(race, npcClass, level) {
+    const names = {
+        'человек': ['Александр', 'Елена', 'Михаил', 'Анна', 'Дмитрий', 'Мария'],
+        'эльф': ['Лиран', 'Аэлиус', 'Талас', 'Сильвана', 'Элронд', 'Галадриэль'],
+        'гном': ['Торин', 'Гимли', 'Балин', 'Дорин', 'Нори', 'Бифур'],
+        'полуорк': ['Гром', 'Ургаш', 'Краг', 'Шака', 'Мог', 'Гар'],
+        'полурослик': ['Бильбо', 'Фродо', 'Сэм', 'Пиппин', 'Мерри', 'Том']
+    };
+    
+    const professions = {
+        'воин': ['Страж', 'Наёмник', 'Охранник', 'Солдат', 'Ветеран'],
+        'маг': ['Мудрец', 'Исследователь', 'Алхимик', 'Чародей', 'Учёный'],
+        'жрец': ['Проповедник', 'Целитель', 'Монах', 'Священник', 'Отшельник'],
+        'разбойник': ['Торговец', 'Шпион', 'Контрабандист', 'Охотник', 'Следопыт'],
+        'паладин': ['Рыцарь', 'Защитник', 'Стражник', 'Воитель', 'Хранитель']
+    };
+    
+    const descriptions = [
+        'Опытный и мудрый персонаж с богатым прошлым. Имеет чёткие цели и принципы.',
+        'Молодой и амбициозный, стремится доказать свою ценность в мире.',
+        'Загадочная личность с тёмным прошлым, но добрым сердцем.',
+        'Весёлый и дружелюбный, всегда готов помочь другим.',
+        'Серьёзный и расчётливый, действует только после тщательного планирования.'
+    ];
+    
+    const appearances = [
+        'Среднего роста, крепкого телосложения. Носит практичную одежду.',
+        'Высокий и стройный, с внимательным взглядом. Одевается скромно.',
+        'Крепкий и сильный, с заметными шрамами. Предпочитает броню.',
+        'Невысокий, но ловкий. Быстрые движения и острый взгляд.',
+        'Статный и импозантный, с благородной осанкой. Качественная одежда.'
+    ];
+    
+    const traits = [
+        'Честный и прямолинейный, всегда держит слово.',
+        'Хитрый и находчивый, умеет находить выход из любой ситуации.',
+        'Добрый и сострадательный, помогает всем нуждающимся.',
+        'Осторожный и подозрительный, не доверяет незнакомцам.',
+        'Амбициозный и целеустремлённый, готов на многое ради цели.'
+    ];
+    
+    const weapons = {
+        'воин': ['Меч', 'Топор', 'Копьё', 'Молот', 'Булава'],
+        'маг': ['Посох', 'Кинжал', 'Жезл', 'Книга заклинаний'],
+        'жрец': ['Булава', 'Молот', 'Щит', 'Священный символ'],
+        'разбойник': ['Кинжал', 'Лук', 'Короткий меч', 'Арбалет'],
+        'паладин': ['Длинный меч', 'Щит', 'Булава', 'Копьё']
+    };
+    
+    // Выбираем случайные элементы
+    const raceKey = race.toLowerCase();
+    const classKey = npcClass.toLowerCase();
+    const namePool = names[raceKey] || names['человек'];
+    const name = namePool[Math.floor(Math.random() * namePool.length)];
+    const profPool = professions[classKey] || professions['воин'];
+    const profession = profPool[Math.floor(Math.random() * profPool.length)];
+    const weaponPool = weapons[classKey] || weapons['воин'];
+    const weapon = weaponPool[Math.floor(Math.random() * weaponPool.length)];
+    
+    const description = descriptions[Math.floor(Math.random() * descriptions.length)];
+    const appearance = appearances[Math.floor(Math.random() * appearances.length)];
+    const trait = traits[Math.floor(Math.random() * traits.length)];
+    
+    // Рассчитываем параметры
+    const baseHp = 8;
+    const hp = baseHp + (level - 1) * 4;
+    const damage = level <= 3 ? '1d6' : level <= 6 ? '1d8' : level <= 10 ? '1d10' : '2d6';
+    
+    // Формируем результат
+    const result = `Имя и Профессия
+${name} ${profession}
+
+Описание
+${description}
+
+Внешность
+${appearance}
+
+Черты характера
+${trait}
+
+Технические параметры
+Оружие: ${weapon}
+Урон: ${damage} рубящий
+Хиты: ${hp}`;
+    
+    document.getElementById('modal-content').innerHTML = formatNpcBlocks(result, name);
+    document.getElementById('modal-save').style.display = '';
+    document.getElementById('modal-save').onclick = function() { saveNote(document.getElementById('modal-content').innerHTML); closeModal(); };
+}
+
 function generateNpcWithLevel() {
     npcLevel = document.getElementById('npc-level').value;
     // Сохраняем параметры для повторной генерации
