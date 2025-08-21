@@ -9,7 +9,7 @@ document.addEventListener('DOMContentLoaded', function() {
     if (isMobile || isTouch) {
         initMobileFeatures();
     }
-    
+
     // Регистрация Service Worker для PWA
     if ('serviceWorker' in navigator) {
         window.addEventListener('load', function() {
@@ -22,7 +22,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 });
         });
     }
-    
+
     // Запрос разрешения на уведомления
     if ('Notification' in window && Notification.permission === 'default') {
         Notification.requestPermission();
@@ -32,24 +32,27 @@ document.addEventListener('DOMContentLoaded', function() {
 function initMobileFeatures() {
     // Добавляем класс для мобильных устройств
     document.body.classList.add('mobile-device');
-    
+
     // Инициализируем жесты
     initSwipeGestures();
-    
+
     // Инициализируем мобильную навигацию
     initMobileNavigation();
-    
+
     // Инициализируем мобильные модальные окна
     initMobileModals();
-    
+
     // Инициализируем мобильные формы
     initMobileForms();
-    
+
     // Инициализируем мобильные кнопки
     initMobileButtons();
-    
+
     // Инициализируем мобильный чат
     initMobileChat();
+
+    // Инициализируем управление админ-ссылкой
+    initAdminLinkManagement();
 }
 
 // ===== ЖЕСТЫ =====
@@ -57,20 +60,20 @@ function initMobileFeatures() {
 function initSwipeGestures() {
     let startX, startY, endX, endY;
     const minSwipeDistance = 50;
-    
+
     // Обработка касаний
     document.addEventListener('touchstart', function(e) {
         startX = e.touches[0].clientX;
         startY = e.touches[0].clientY;
     });
-    
+
     document.addEventListener('touchend', function(e) {
         endX = e.changedTouches[0].clientX;
         endY = e.changedTouches[0].clientY;
-        
+
         const deltaX = endX - startX;
         const deltaY = endY - startY;
-        
+
         // Определяем направление свайпа
         if (Math.abs(deltaX) > Math.abs(deltaY) && Math.abs(deltaX) > minSwipeDistance) {
             if (deltaX > 0) {
@@ -117,7 +120,7 @@ function handleSwipeUp() {
 function initMobileNavigation() {
     // Создаем мобильную навигационную панель
     createMobileNav();
-    
+
     // Добавляем обработчики для мобильных кнопок
     addMobileNavHandlers();
 }
@@ -138,9 +141,10 @@ function createMobileNav() {
             <a href="#" class="mobile-nav-item" data-action="notes">📝 Заметки</a>
             <a href="#" class="mobile-nav-item" data-action="stats">📊 Статистика</a>
             <a href="#" class="mobile-nav-item" data-action="theme">🌙 Тема</a>
+            <a href="#" class="mobile-nav-item admin-only" data-action="admin" style="display: none;">🔧 Админ панель</a>
         </div>
     `;
-    
+
     document.body.appendChild(nav);
 }
 
@@ -148,14 +152,14 @@ function addMobileNavHandlers() {
     const toggle = document.querySelector('.mobile-nav-toggle');
     const menu = document.querySelector('.mobile-nav-menu');
     const items = document.querySelectorAll('.mobile-nav-item');
-    
+
     if (toggle) {
         toggle.addEventListener('click', function() {
             menu.classList.toggle('active');
             toggle.classList.toggle('active');
         });
     }
-    
+
     items.forEach(item => {
         item.addEventListener('click', function(e) {
             e.preventDefault();
@@ -168,7 +172,7 @@ function addMobileNavHandlers() {
 }
 
 function handleMobileNavAction(action) {
-    switch(action) {
+    switch (action) {
         case 'dice':
             openDiceModal();
             break;
@@ -187,6 +191,9 @@ function handleMobileNavAction(action) {
         case 'theme':
             toggleTheme();
             break;
+        case 'admin':
+            window.location.href = 'admin.php';
+            break;
     }
 }
 
@@ -195,28 +202,28 @@ function handleMobileNavAction(action) {
 function initMobileModals() {
     // Улучшаем модальные окна для мобильных
     const modals = document.querySelectorAll('.modal');
-    
+
     modals.forEach(modal => {
         // Добавляем возможность закрытия свайпом
         let startY = 0;
         let currentY = 0;
-        
+
         modal.addEventListener('touchstart', function(e) {
             startY = e.touches[0].clientY;
         });
-        
+
         modal.addEventListener('touchmove', function(e) {
             currentY = e.touches[0].clientY;
             const deltaY = currentY - startY;
-            
+
             if (deltaY > 0) {
                 modal.style.transform = `translateY(${deltaY}px)`;
             }
         });
-        
+
         modal.addEventListener('touchend', function(e) {
             const deltaY = currentY - startY;
-            
+
             if (deltaY > 100) {
                 // Закрыть модальное окно
                 closeModal();
@@ -232,7 +239,7 @@ function initMobileModals() {
 
 function initMobileForms() {
     const inputs = document.querySelectorAll('input[type="text"], input[type="number"]');
-    
+
     inputs.forEach(input => {
         // Добавляем автофокус на мобильных
         if (input.id === 'messageInput') {
@@ -240,12 +247,12 @@ function initMobileForms() {
                 input.focus();
             }, 500);
         }
-        
+
         // Улучшаем UX для мобильных форм
         input.addEventListener('focus', function() {
             this.parentElement.classList.add('focused');
         });
-        
+
         input.addEventListener('blur', function() {
             this.parentElement.classList.remove('focused');
         });
@@ -256,7 +263,7 @@ function initMobileForms() {
 
 function initMobileButtons() {
     const buttons = document.querySelectorAll('.fast-btn, button[type="submit"], .modal .modal-save, .modal-regenerate');
-    
+
     buttons.forEach(button => {
         // Добавляем haptic feedback на поддерживаемых устройствах
         button.addEventListener('click', function() {
@@ -264,7 +271,7 @@ function initMobileButtons() {
                 navigator.vibrate(50);
             }
         });
-        
+
         // Улучшаем touch targets
         button.style.minHeight = '44px';
         button.style.touchAction = 'manipulation';
@@ -276,18 +283,18 @@ function initMobileButtons() {
 function initMobileChat() {
     const chatBox = document.querySelector('.chat-box');
     const messageInput = document.getElementById('messageInput');
-    
+
     if (chatBox && messageInput) {
         // Автоматическая прокрутка к новым сообщениям
         const observer = new MutationObserver(function() {
             chatBox.scrollTop = chatBox.scrollHeight;
         });
-        
+
         observer.observe(chatBox, {
             childList: true,
             subtree: true
         });
-        
+
         // Улучшенная отправка сообщений
         messageInput.addEventListener('keypress', function(e) {
             if (e.key === 'Enter' && !e.shiftKey) {
@@ -296,6 +303,79 @@ function initMobileChat() {
             }
         });
     }
+}
+
+// ===== УПРАВЛЕНИЕ АДМИН-ССЫЛКОЙ =====
+
+function initAdminLinkManagement() {
+    const adminLink = document.querySelector('.admin-link');
+    const adminMenuItem = document.querySelector('.mobile-nav-item[data-action="admin"]');
+
+    if (!adminLink) return;
+
+    // Скрываем админ-ссылку по умолчанию на мобильных
+    adminLink.classList.add('hidden');
+
+    // Показываем админ-пункт в мобильном меню, если пользователь админ
+    if (adminMenuItem) {
+        adminMenuItem.style.display = 'block';
+    }
+
+    // Показываем админ-ссылку при долгом нажатии на заголовок
+    const title = document.querySelector('h1');
+    if (title) {
+        let longPressTimer;
+
+        title.addEventListener('touchstart', function(e) {
+            longPressTimer = setTimeout(() => {
+                adminLink.classList.remove('hidden');
+                adminLink.classList.add('show');
+
+                // Показываем подсказку
+                showAdminHint();
+
+                // Скрываем через 5 секунд
+                setTimeout(() => {
+                    adminLink.classList.remove('show');
+                    adminLink.classList.add('hidden');
+                }, 5000);
+            }, 1000); // 1 секунда для долгого нажатия
+        });
+
+        title.addEventListener('touchend', function(e) {
+            clearTimeout(longPressTimer);
+        });
+
+        title.addEventListener('touchmove', function(e) {
+            clearTimeout(longPressTimer);
+        });
+    }
+
+    // Добавляем возможность скрыть админ-ссылку при нажатии на неё
+    adminLink.addEventListener('click', function(e) {
+        // Добавляем небольшую задержку перед скрытием
+        setTimeout(() => {
+            adminLink.classList.remove('show');
+            adminLink.classList.add('hidden');
+        }, 1000);
+    });
+}
+
+function showAdminHint() {
+    // Показываем подсказку о том, как получить доступ к админ-панели
+    const hint = document.createElement('div');
+    hint.className = 'admin-hint';
+    hint.innerHTML = `
+        <div class="admin-hint-content">
+            <p>🔧 Админ-панель доступна в мобильном меню</p>
+            <p>Или долгое нажатие на заголовок</p>
+        </div>
+    `;
+    document.body.appendChild(hint);
+
+    setTimeout(() => {
+        hint.remove();
+    }, 3000);
 }
 
 // ===== ВСПОМОГАТЕЛЬНЫЕ ФУНКЦИИ =====
@@ -320,7 +400,7 @@ function showRefreshIndicator() {
     indicator.className = 'refresh-indicator';
     indicator.textContent = 'Потяните для обновления';
     document.body.appendChild(indicator);
-    
+
     setTimeout(() => {
         indicator.remove();
     }, 2000);
@@ -491,6 +571,20 @@ const mobileStyles = `
 
 .mobile-device .admin-link {
     top: 70px;
+    opacity: 0.5;
+    transform: scale(0.9);
+    transition: all 0.3s ease;
+}
+
+.mobile-device .admin-link.show {
+    opacity: 1;
+    transform: scale(1);
+}
+
+.mobile-device .admin-link.hidden {
+    opacity: 0;
+    transform: scale(0.8);
+    pointer-events: none;
 }
 
 /* Улучшения для touch-устройств */
@@ -516,6 +610,42 @@ const mobileStyles = `
 
 .mobile-device .modal.closing {
     transform: translateY(100%);
+}
+
+/* Подсказка админа */
+.admin-hint {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: var(--bg-secondary);
+    border: 2px solid var(--accent-primary);
+    border-radius: 12px;
+    padding: 20px;
+    z-index: 10000;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+    animation: slideIn 0.3s ease-out;
+}
+
+.admin-hint-content {
+    text-align: center;
+    color: var(--text-primary);
+}
+
+.admin-hint-content p {
+    margin: 8px 0;
+    font-size: 1em;
+}
+
+@keyframes slideIn {
+    from {
+        transform: translate(-50%, -50%) scale(0.8);
+        opacity: 0;
+    }
+    to {
+        transform: translate(-50%, -50%) scale(1);
+        opacity: 1;
+    }
 }
 </style>
 `;
