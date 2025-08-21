@@ -3,7 +3,14 @@
 
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="theme-color" content="#7209b7">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="DnD Chat">
     <title>DnD AI Чат</title>
+    <link rel="manifest" href="manifest.json">
+    <link rel="apple-touch-icon" href="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTkyIiBoZWlnaHQ9IjE5MiIgdmlld0JveD0iMCAwIDE5MiAxOTIiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSIxOTIiIGhlaWdodD0iMTkyIiByeD0iMjQiIGZpbGw9IiM3MjA5YjciLz4KPHN2ZyB4PSI0OCIgeT0iNDgiIHdpZHRoPSI5NiIgaGVpZ2h0PSI5NiIgdmlld0JveD0iMCAwIDI0IDI0IiBmaWxsPSJ3aGl0ZSI+CjxwYXRoIGQ9Ik0xMiAyQzYuNDggMiAyIDYuNDggMiAxMnM0LjQ4IDEwIDEwIDEwIDEwLTQuNDggMTAtMTBTMTcuNTIgMiAxMiAyeiIvPgo8cGF0aCBkPSJNMTIgNkM4LjY5IDYgNiA4LjY5IDYgMTJzMi42OSA2IDYgNiA2LTIuNjkgNi02LTIuNjktNi02LTZ6Ii8+CjxwYXRoIGQ9Ik0xMiAxMEMxMC4zNCAxMCA5IDExLjM0IDkgMTNzMS4zNCAzIDMgMyAzLTEuMzQgMy0zLTEuMzQtMy0zLTN6Ii8+Cjwvc3ZnPgo8L3N2Zz4K">
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&family=UnifrakturCook:wght@700&family=IM+Fell+English+SC&display=swap" rel="stylesheet">
     <style>
          :root {
@@ -54,16 +61,39 @@
             --border-primary: #7209b7;
             --border-secondary: #560bad;
             --border-tertiary: #480ca8;
-            --accent-primary: #7209b7;
-            --accent-secondary: #560bad;
-            --accent-success: #06ffa5;
-            --accent-info: #4cc9f0;
-            --accent-warning: #f72585;
-            --accent-danger: #ff006e;
+            --accent-primary: #8b5cf6;
+            --accent-secondary: #7c3aed;
+            --accent-success: #10b981;
+            --accent-info: #3b82f6;
+            --accent-warning: #f59e0b;
+            --accent-danger: #ef4444;
             --shadow-primary: #0004;
             --shadow-secondary: #0008;
             --shadow-tertiary: #0002;
             --bg-image: url('https://images.unsplash.com/photo-1506905925346-21bda4d32df4?auto=format&fit=crop&w=1500&q=80');
+        }
+        /* Дополнительные стили для тёмной темы */
+        
+        [data-theme="dark"] .fast-btn,
+        [data-theme="dark"] button[type=submit],
+        [data-theme="dark"] .modal .modal-save,
+        [data-theme="dark"] .modal-regenerate,
+        [data-theme="dark"] .logout-btn,
+        [data-theme="dark"] .stats-link,
+        [data-theme="dark"] .admin-link {
+            color: #ffffff !important;
+            font-weight: 700 !important;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.9) !important;
+        }
+        
+        [data-theme="dark"] .fast-btn:hover,
+        [data-theme="dark"] button[type=submit]:hover,
+        [data-theme="dark"] .modal .modal-save:hover,
+        [data-theme="dark"] .modal-regenerate:hover,
+        [data-theme="dark"] .logout-btn:hover,
+        [data-theme="dark"] .stats-link:hover,
+        [data-theme="dark"] .admin-link:hover {
+            text-shadow: 2px 2px 6px rgba(0, 0, 0, 1) !important;
         }
         
         body {
@@ -156,7 +186,7 @@
             margin: 0 6px 10px 0;
             padding: 8px 18px;
             background: var(--accent-primary);
-            color: var(--bg-secondary);
+            color: #ffffff;
             border: 2px solid var(--accent-secondary);
             border-radius: 10px;
             font-size: 1em;
@@ -165,14 +195,16 @@
             box-shadow: 0 2px 8px var(--shadow-primary);
             transition: all 0.3s ease;
             text-decoration: none;
+            font-weight: 600;
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.8);
         }
         
         .fast-btn:hover {
             background: var(--accent-secondary);
-            color: var(--bg-secondary);
+            color: #ffffff;
             transform: translateY(-2px);
             box-shadow: 0 4px 12px var(--shadow-secondary);
-            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
+            text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.9);
         }
         
         .mini-menu-title {
@@ -262,19 +294,21 @@
             border-radius: 7px;
             border: 2px solid var(--accent-secondary);
             background: var(--accent-primary);
-            color: var(--bg-secondary);
+            color: #ffffff;
             font-size: 1em;
             font-family: inherit;
             cursor: pointer;
             transition: all 0.3s ease;
+            font-weight: 600;
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.8);
         }
         
         button[type=submit]:hover {
             background: var(--accent-secondary);
-            color: var(--bg-secondary);
+            color: #ffffff;
             transform: translateY(-1px);
             box-shadow: 0 3px 8px var(--shadow-primary);
-            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
+            text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.9);
         }
         
         .reset-link {
@@ -397,7 +431,7 @@
             margin-top: 18px;
             padding: 12px 28px;
             background: var(--accent-success);
-            color: var(--bg-secondary);
+            color: #ffffff;
             border: none;
             border-radius: 10px;
             font-size: 1.08em;
@@ -405,21 +439,23 @@
             cursor: pointer;
             box-shadow: 0 2px 8px var(--shadow-primary);
             transition: all 0.3s ease;
+            font-weight: 600;
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.8);
         }
         
         .modal .modal-save:hover {
             background: var(--accent-info);
-            color: var(--bg-secondary);
+            color: #ffffff;
             transform: translateY(-2px);
             box-shadow: 0 4px 12px var(--shadow-secondary);
-            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
+            text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.9);
         }
         
         .modal-regenerate {
             margin-top: 10px;
             padding: 8px 16px;
             background: #4a90e2;
-            color: #fffbe6;
+            color: #ffffff;
             border: none;
             border-radius: 8px;
             font-size: 0.9em;
@@ -427,12 +463,14 @@
             cursor: pointer;
             box-shadow: 0 2px 8px #0002;
             transition: background 0.2s, color 0.2s;
+            font-weight: 600;
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.8);
         }
         
         .modal-regenerate:hover {
             background: #357abd;
-            color: #fffbe6;
-            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
+            color: #ffffff;
+            text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.9);
         }
         
         .modal #modal-content {
@@ -1392,7 +1430,7 @@
         
         .logout-btn {
             background: var(--accent-danger);
-            color: var(--bg-secondary);
+            color: #ffffff;
             border: 2px solid var(--accent-danger);
             border-radius: 8px;
             padding: 6px 12px;
@@ -1402,6 +1440,8 @@
             transition: all 0.3s ease;
             box-shadow: 0 2px 8px var(--shadow-primary);
             white-space: nowrap;
+            font-weight: 600;
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.8);
         }
         
         .logout-btn:hover {
@@ -1409,7 +1449,7 @@
             color: var(--accent-danger);
             transform: translateY(-1px);
             box-shadow: 0 4px 12px var(--shadow-secondary);
-            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+            text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.9);
         }
         
         .admin-link {
@@ -1417,7 +1457,7 @@
             top: 10px;
             right: 10px;
             background: var(--accent-warning);
-            color: var(--bg-secondary);
+            color: #ffffff;
             border: 2px solid var(--accent-warning);
             border-radius: 8px;
             padding: 8px 12px;
@@ -1429,6 +1469,8 @@
             text-decoration: none;
             display: inline-block;
             z-index: 1000;
+            font-weight: 600;
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.8);
         }
         
         .admin-link:hover {
@@ -1436,12 +1478,12 @@
             color: var(--accent-warning);
             transform: translateY(-1px);
             box-shadow: 0 4px 12px var(--shadow-secondary);
-            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+            text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.9);
         }
         
         .stats-link {
             background: var(--accent-info);
-            color: var(--bg-secondary);
+            color: #ffffff;
             border: 2px solid var(--accent-info);
             border-radius: 8px;
             padding: 6px 10px;
@@ -1453,6 +1495,8 @@
             text-decoration: none;
             display: inline-block;
             white-space: nowrap;
+            font-weight: 600;
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.8);
         }
         
         .stats-link:hover {
@@ -1460,112 +1504,442 @@
             color: var(--accent-info);
             transform: translateY(-1px);
             box-shadow: 0 4px 12px var(--shadow-secondary);
-            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+            text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.9);
         }
-        /* Улучшенные мобильные стили */
+        /* ===== МОБИЛЬНАЯ ВЕРСИЯ ===== */
+        /* Планшеты и большие телефоны */
         
         @media (max-width: 768px) {
-            .parchment {
-                margin: 10px;
-                padding: 20px 15px;
-                border-radius: 16px;
+            body {
+                font-size: 1em;
+                margin: 0;
+                padding: 0;
             }
+            .parchment {
+                margin: 8px;
+                padding: 16px 12px;
+                border-radius: 12px;
+                border-width: 4px;
+                box-shadow: 0 4px 16px var(--shadow-secondary);
+            }
+            /* Улучшенная навигация */
             .user-info {
                 position: relative;
                 top: auto;
                 left: auto;
-                margin-bottom: 15px;
-                justify-content: center;
+                margin-bottom: 12px;
+                justify-content: space-between;
                 flex-wrap: wrap;
-                gap: 8px;
+                gap: 6px;
                 max-width: 100%;
-                background: rgba(255, 255, 255, 0.15);
+                background: rgba(255, 255, 255, 0.1);
+                backdrop-filter: blur(10px);
+                padding: 8px 12px;
+                border-radius: 8px;
             }
             .welcome-text {
-                font-size: 1em;
+                font-size: 0.9em;
                 order: -1;
                 width: 100%;
                 text-align: center;
+                margin-bottom: 4px;
             }
             .logout-btn,
             .stats-link {
-                padding: 6px 12px;
-                font-size: 0.8em;
+                padding: 8px 12px;
+                font-size: 0.85em;
+                min-height: 36px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
             }
             .admin-link {
                 position: fixed;
-                top: 5px;
-                right: 5px;
-                padding: 6px 10px;
-                font-size: 0.9em;
+                top: 8px;
+                right: 8px;
+                padding: 8px 10px;
+                font-size: 1em;
                 z-index: 1000;
+                min-height: 40px;
+                min-width: 40px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
             }
             h1 {
-                font-size: 1.8em;
-                margin-bottom: 15px;
+                font-size: 1.6em;
+                margin: 8px 0 12px 0;
+                letter-spacing: 1px;
             }
+            /* Улучшенные быстрые кнопки */
             .fast-bar {
-                margin-bottom: 20px;
+                margin-bottom: 16px;
+                display: grid;
+                grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+                gap: 8px;
             }
             .fast-btn {
-                margin: 4px;
-                padding: 10px 16px;
-                font-size: 0.95em;
+                margin: 0;
+                padding: 12px 8px;
+                font-size: 0.9em;
+                min-height: 44px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                text-align: center;
+                border-radius: 8px;
             }
             .hotkeys-hint {
                 display: none;
-                /* Скрываем на мобильных */
             }
+            /* Улучшенный чат */
             .chat-box {
-                min-height: 200px;
-                max-height: 300px;
-                padding: 15px;
+                min-height: 180px;
+                max-height: 250px;
+                padding: 12px;
+                font-size: 0.95em;
+                border-radius: 8px;
             }
+            .msg {
+                margin-bottom: 8px;
+                padding: 6px 8px;
+                border-radius: 6px;
+            }
+            /* Улучшенная форма */
+            form {
+                gap: 6px;
+                margin-top: 12px;
+            }
+            input[type=text],
+            input[type=number] {
+                font-size: 1em;
+                padding: 12px;
+                border-radius: 8px;
+                min-height: 44px;
+            }
+            button[type=submit] {
+                padding: 12px 16px;
+                font-size: 1em;
+                min-height: 44px;
+                min-width: 80px;
+            }
+            .reset-link {
+                font-size: 0.85em;
+                margin-top: 4px;
+                text-align: center;
+                display: block;
+            }
+            /* Улучшенные заметки */
             .notes-block {
-                margin-top: 20px;
-                padding: 15px;
+                margin-top: 16px;
+                padding: 12px;
+                border-radius: 8px;
             }
+            .note-item {
+                margin-bottom: 8px;
+                padding: 8px 10px;
+                border-radius: 6px;
+            }
+            .note-remove {
+                right: 6px;
+                top: 6px;
+                font-size: 1em;
+                min-width: 24px;
+                min-height: 24px;
+            }
+            /* Улучшенный переключатель темы */
             .theme-toggle {
-                top: 15px;
-                right: 15px;
+                top: 12px;
+                right: 12px;
             }
             .theme-btn {
-                width: 45px;
-                height: 45px;
-                font-size: 1.1em;
+                width: 40px;
+                height: 40px;
+                font-size: 1em;
+                border-radius: 50%;
             }
+            /* Улучшенные модальные окна */
             .modal {
-                margin: 10px;
-                height: 80vh;
-                max-height: 600px;
+                margin: 8px;
+                height: 85vh;
+                max-height: none;
+                border-radius: 12px;
+                padding: 16px;
+            }
+            .modal .modal-save {
+                margin-top: 12px;
+                padding: 12px 20px;
+                font-size: 1em;
+                min-height: 44px;
+            }
+            .modal-regenerate {
+                margin-top: 8px;
+                padding: 10px 14px;
+                font-size: 0.9em;
+                min-height: 40px;
+            }
+            /* Улучшенные сегменты результата */
+            .result-segment,
+            .result-segment-alt {
+                margin-top: 8px;
+                padding: 10px;
+                border-radius: 6px;
+                font-size: 0.95em;
+            }
+            .npc-summary {
+                margin-top: 8px;
+                padding: 10px;
+                border-radius: 8px;
+                font-size: 0.95em;
             }
         }
+        /* Мобильные телефоны */
         
         @media (max-width: 480px) {
+            body {
+                font-size: 0.95em;
+            }
             .parchment {
-                margin: 5px;
-                padding: 15px 10px;
+                margin: 4px;
+                padding: 12px 8px;
+                border-radius: 8px;
+                border-width: 3px;
             }
             h1 {
-                font-size: 1.5em;
+                font-size: 1.4em;
+                margin: 6px 0 10px 0;
+            }
+            .user-info {
+                padding: 6px 8px;
+                gap: 4px;
+            }
+            .welcome-text {
+                font-size: 0.85em;
+                margin-bottom: 2px;
+            }
+            .logout-btn,
+            .stats-link {
+                padding: 6px 8px;
+                font-size: 0.8em;
+                min-height: 32px;
+            }
+            .admin-link {
+                top: 6px;
+                right: 6px;
+                padding: 6px 8px;
+                font-size: 0.9em;
+                min-height: 36px;
+                min-width: 36px;
+            }
+            /* Компактные быстрые кнопки */
+            .fast-bar {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 6px;
+                margin-bottom: 12px;
             }
             .fast-btn {
-                padding: 8px 12px;
-                font-size: 0.9em;
-                margin: 2px;
+                padding: 10px 6px;
+                font-size: 0.85em;
+                min-height: 40px;
+                border-radius: 6px;
             }
+            /* Компактный чат */
             .chat-box {
-                padding: 10px;
-                font-size: 0.95em;
+                min-height: 160px;
+                max-height: 200px;
+                padding: 8px;
+                font-size: 0.9em;
+            }
+            .msg {
+                margin-bottom: 6px;
+                padding: 4px 6px;
+            }
+            /* Компактная форма */
+            form {
+                gap: 4px;
+                margin-top: 8px;
             }
             input[type=text],
             input[type=number] {
                 font-size: 0.95em;
                 padding: 10px;
+                min-height: 40px;
             }
             button[type=submit] {
+                padding: 10px 12px;
+                font-size: 0.95em;
+                min-height: 40px;
+                min-width: 70px;
+            }
+            .reset-link {
+                font-size: 0.8em;
+                margin-top: 2px;
+            }
+            /* Компактные заметки */
+            .notes-block {
+                margin-top: 12px;
+                padding: 8px;
+            }
+            .note-item {
+                margin-bottom: 6px;
+                padding: 6px 8px;
+            }
+            .note-remove {
+                right: 4px;
+                top: 4px;
+                font-size: 0.9em;
+                min-width: 20px;
+                min-height: 20px;
+            }
+            /* Компактный переключатель темы */
+            .theme-toggle {
+                top: 8px;
+                right: 8px;
+            }
+            .theme-btn {
+                width: 36px;
+                height: 36px;
+                font-size: 0.9em;
+            }
+            /* Компактные модальные окна */
+            .modal {
+                margin: 4px;
+                height: 90vh;
+                padding: 12px;
+                border-radius: 8px;
+            }
+            .modal .modal-save {
+                margin-top: 8px;
                 padding: 10px 16px;
                 font-size: 0.95em;
+                min-height: 40px;
+            }
+            .modal-regenerate {
+                margin-top: 6px;
+                padding: 8px 12px;
+                font-size: 0.85em;
+                min-height: 36px;
+            }
+            /* Компактные сегменты */
+            .result-segment,
+            .result-segment-alt {
+                margin-top: 6px;
+                padding: 8px;
+                font-size: 0.9em;
+            }
+            .npc-summary {
+                margin-top: 6px;
+                padding: 8px;
+                font-size: 0.9em;
+            }
+        }
+        /* Очень маленькие экраны */
+        
+        @media (max-width: 360px) {
+            .parchment {
+                margin: 2px;
+                padding: 8px 6px;
+            }
+            h1 {
+                font-size: 1.2em;
+                margin: 4px 0 8px 0;
+            }
+            .fast-bar {
+                grid-template-columns: 1fr;
+                gap: 4px;
+            }
+            .fast-btn {
+                padding: 8px 4px;
+                font-size: 0.8em;
+                min-height: 36px;
+            }
+            .chat-box {
+                min-height: 140px;
+                max-height: 180px;
+                padding: 6px;
+                font-size: 0.85em;
+            }
+            input[type=text],
+            input[type=number] {
+                font-size: 0.9em;
+                padding: 8px;
+                min-height: 36px;
+            }
+            button[type=submit] {
+                padding: 8px 10px;
+                font-size: 0.9em;
+                min-height: 36px;
+                min-width: 60px;
+            }
+        }
+        /* Ландшафтная ориентация на мобильных */
+        
+        @media (max-width: 768px) and (orientation: landscape) {
+            .parchment {
+                margin: 4px;
+                padding: 8px 6px;
+            }
+            h1 {
+                font-size: 1.2em;
+                margin: 4px 0 6px 0;
+            }
+            .fast-bar {
+                grid-template-columns: repeat(4, 1fr);
+                gap: 4px;
+                margin-bottom: 8px;
+            }
+            .fast-btn {
+                padding: 6px 4px;
+                font-size: 0.8em;
+                min-height: 32px;
+            }
+            .chat-box {
+                min-height: 120px;
+                max-height: 150px;
+                padding: 6px;
+            }
+            .notes-block {
+                margin-top: 8px;
+                padding: 6px;
+            }
+            .modal {
+                height: 90vh;
+                padding: 8px;
+            }
+        }
+        /* Улучшения для touch-устройств */
+        
+        @media (hover: none) and (pointer: coarse) {
+            .fast-btn,
+            button[type=submit],
+            .modal .modal-save,
+            .modal-regenerate,
+            .logout-btn,
+            .stats-link,
+            .admin-link,
+            .theme-btn {
+                min-height: 44px;
+                touch-action: manipulation;
+            }
+            .fast-btn:hover,
+            button[type=submit]:hover,
+            .modal .modal-save:hover,
+            .modal-regenerate:hover,
+            .logout-btn:hover,
+            .stats-link:hover,
+            .admin-link:hover,
+            .theme-btn:hover {
+                transform: none;
+            }
+            .fast-btn:active,
+            button[type=submit]:active,
+            .modal .modal-save:active,
+            .modal-regenerate:active,
+            .logout-btn:active,
+            .stats-link:active,
+            .admin-link:active,
+            .theme-btn:active {
+                transform: scale(0.95);
             }
         }
     </style>
@@ -1616,6 +1990,7 @@
             <button class="modal-save" id="modal-save">Сохранить в заметки</button>
         </div>
     </div>
+    <script src="mobile.js"></script>
     <script>
         // JS для модального окна и заметок будет добавлен через PHP
 
