@@ -336,10 +336,21 @@ function fetchNpcFromAI(race, npcClass, prof, level) {
         document.getElementById('modal-content').innerHTML = `🎲 Генерация NPC${dots}<br><small>Это может занять до 30 секунд</small>`;
     }, 500);
     
-    fetch('pdf/d100_unique_traders.json')
-      .then(r => r.json())
-      .then(json => {
-        // 1. Имя по расе или случайное
+    fetch('pdf/d100_unique_traders.json', {
+        method: 'GET',
+        headers: {
+            'Cache-Control': 'no-cache'
+        }
+    })
+      .then(r => {
+          if (!r.ok) {
+              throw new Error('HTTP ' + r.status + ': ' + r.statusText);
+          }
+          return r.json();
+      })
+              .then(json => {
+          console.log('JSON loaded successfully:', json);
+          // 1. Имя по расе или случайное
         let name = '';
         // Используем предустановленные имена для каждой расы
         const raceNames = {
@@ -425,7 +436,13 @@ function fetchNpcFromAI(race, npcClass, prof, level) {
         .catch((e) => {
             clearInterval(progressInterval); // Останавливаем индикатор прогресса
             console.error('NPC Generation Error:', e);
-            document.getElementById('modal-content').innerHTML = '<div class="result-segment error">❌ Ошибка соединения с сервером<br><small>Проверьте интернет-соединение и попробуйте ещё раз</small></div>';
+            document.getElementById('modal-content').innerHTML = '<div class="result-segment error">❌ Ошибка загрузки данных<br><small>Ошибка: ' + e.message + '</small><br><small>Проверьте соединение и попробуйте ещё раз</small></div>';
+            document.getElementById('modal-save').style.display = 'none';
+        })
+        .catch((e) => {
+            clearInterval(progressInterval);
+            console.error('JSON loading error:', e);
+            document.getElementById('modal-content').innerHTML = '<div class="result-segment error">❌ Ошибка загрузки данных NPC<br><small>Ошибка: ' + e.message + '</small></div>';
             document.getElementById('modal-save').style.display = 'none';
         });
       });
