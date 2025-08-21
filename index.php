@@ -305,8 +305,12 @@ const npcClasses = ['Без класса','Воин','Паладин','Колд�
 let npcRace = '', npcClass = '', npcProf = '', npcLevel = 1;
 let lastGeneratedParams = {}; // Для хранения параметров последней генерации
 function openNpcStep1() {
-    showModal('<b class="mini-menu-title">Выберите расу NPC:</b><div class="mini-menu-btns">' + npcRaces.map(r => `<button onclick=\'openNpcStep2("${r}")\' class=\'fast-btn\'>${r}</button>`).join(' ') + '</div>');
-    document.getElementById('modal-save').style.display = 'none';
+    if (document.body.classList.contains('mobile-device')) {
+        openSimpleNpcModal();
+    } else {
+        showModal('<b class="mini-menu-title">Выберите расу NPC:</b><div class="mini-menu-btns">' + npcRaces.map(r => `<button onclick=\'openNpcStep2("${r}")\' class=\'fast-btn\'>${r}</button>`).join(' ') + '</div>');
+        document.getElementById('modal-save').style.display = 'none';
+    }
 }
 function openNpcStep2(race) {
     npcRace = race;
@@ -476,31 +480,35 @@ let currentInitiativeIndex = 0;
 let currentRound = 1;
 
 function openInitiativeModal() {
-    showModal('<div class="initiative-container">' +
-        '<div class="initiative-header">' +
-            '<h3>⚡ Инициатива</h3>' +
-            '<div class="initiative-stats">' +
-                '<span class="stat-item">Участников: <strong id="initiative-count">0</strong></span>' +
-                '<span class="stat-item">Раунд: <strong id="initiative-round">1</strong></span>' +
+    if (document.body.classList.contains('mobile-device')) {
+        openSimpleInitiativeModal();
+    } else {
+        showModal('<div class="initiative-container">' +
+            '<div class="initiative-header">' +
+                '<h3>⚡ Инициатива</h3>' +
+                '<div class="initiative-stats">' +
+                    '<span class="stat-item">Участников: <strong id="initiative-count">0</strong></span>' +
+                    '<span class="stat-item">Раунд: <strong id="initiative-round">1</strong></span>' +
+                '</div>' +
             '</div>' +
-        '</div>' +
-        '<div class="initiative-current-turn" id="initiative-current-turn"></div>' +
-        '<div class="initiative-list" id="initiative-list"></div>' +
-        '<div class="initiative-controls">' +
-            '<div class="control-group">' +
-                '<button class="initiative-btn player-btn" onclick="addInitiativeEntry(\'player\')">👤 Игрок</button>' +
-                '<button class="initiative-btn enemy-btn" onclick="addInitiativeEntry(\'enemy\')">👹 Противник</button>' +
-                '<button class="initiative-btn other-btn" onclick="addInitiativeEntry(\'other\')">⚡ Ещё</button>' +
+            '<div class="initiative-current-turn" id="initiative-current-turn"></div>' +
+            '<div class="initiative-list" id="initiative-list"></div>' +
+            '<div class="initiative-controls">' +
+                '<div class="control-group">' +
+                    '<button class="initiative-btn player-btn" onclick="addInitiativeEntry(\'player\')">👤 Игрок</button>' +
+                    '<button class="initiative-btn enemy-btn" onclick="addInitiativeEntry(\'enemy\')">👹 Противник</button>' +
+                    '<button class="initiative-btn other-btn" onclick="addInitiativeEntry(\'other\')">⚡ Ещё</button>' +
+                '</div>' +
+                '<div class="control-group">' +
+                    '<button class="initiative-btn round-btn" onclick="nextRound()">🔄 Новый раунд</button>' +
+                    '<button class="initiative-btn clear-btn" onclick="clearInitiative()">🗑️ Очистить</button>' +
+                '</div>' +
             '</div>' +
-            '<div class="control-group">' +
-                '<button class="initiative-btn round-btn" onclick="nextRound()">🔄 Новый раунд</button>' +
-                '<button class="initiative-btn clear-btn" onclick="clearInitiative()">🗑️ Очистить</button>' +
-            '</div>' +
-        '</div>' +
-    '</div>');
-    document.getElementById('modal-save').style.display = '';
-    document.getElementById('modal-save').onclick = function() { saveInitiativeNote(); closeModal(); };
-    updateInitiativeDisplay();
+        '</div>');
+        document.getElementById('modal-save').style.display = '';
+        document.getElementById('modal-save').onclick = function() { saveInitiativeNote(); closeModal(); };
+        updateInitiativeDisplay();
+    }
 }
 
 function addInitiativeEntry(type) {

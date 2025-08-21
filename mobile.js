@@ -1,4 +1,4 @@
-// ===== МОБИЛЬНЫЕ ФУНКЦИИ =====
+// ===== ПРОСТОЙ МОБИЛЬНЫЙ ИНТЕРФЕЙС =====
 
 // Определяем мобильное устройство
 const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
@@ -7,274 +7,100 @@ const isTouch = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
 // Инициализация мобильных функций
 document.addEventListener('DOMContentLoaded', function() {
     if (isMobile || isTouch) {
-        initMobileFeatures();
-    }
-
-    // Регистрация Service Worker для PWA
-    if ('serviceWorker' in navigator) {
-        window.addEventListener('load', function() {
-            navigator.serviceWorker.register('/dnd/sw.js')
-                .then(function(registration) {
-                    console.log('SW registered: ', registration);
-                })
-                .catch(function(registrationError) {
-                    console.log('SW registration failed: ', registrationError);
-                });
-        });
-    }
-
-    // Запрос разрешения на уведомления
-    if ('Notification' in window && Notification.permission === 'default') {
-        Notification.requestPermission();
+        initSimpleMobile();
     }
 });
 
-function initMobileFeatures() {
+function initSimpleMobile() {
     // Добавляем класс для мобильных устройств
     document.body.classList.add('mobile-device');
 
-    // Инициализируем жесты
-    initSwipeGestures();
+    // Простое исправление лайаута
+    fixSimpleLayout();
 
-    // Инициализируем мобильную навигацию
-    initMobileNavigation();
-
-    // Инициализируем мобильные модальные окна
-    initMobileModals();
+    // Инициализируем пролистывание
+    initSmoothScrolling();
 
     // Инициализируем мобильные формы
     initMobileForms();
-
-    // Инициализируем мобильные кнопки
-    initMobileButtons();
-
-    // Инициализируем мобильный чат
-    initMobileChat();
-
-    // Инициализируем управление админ-ссылкой
-    initAdminLinkManagement();
-    
-    // Исправляем позиционирование элементов
-    fixMobileLayout();
 }
 
-// ===== ИСПРАВЛЕНИЕ МОБИЛЬНОГО ЛАЙАУТА =====
+// ===== ПРОСТОЕ ИСПРАВЛЕНИЕ ЛАЙАУТА =====
 
-function fixMobileLayout() {
-    // Перемещаем переключатель темы в безопасное место
+function fixSimpleLayout() {
+    // Переключатель темы - простое позиционирование
     const themeToggle = document.querySelector('.theme-toggle');
     if (themeToggle) {
         themeToggle.style.position = 'fixed';
-        themeToggle.style.top = '80px';
-        themeToggle.style.right = '15px';
+        themeToggle.style.top = '20px';
+        themeToggle.style.right = '20px';
         themeToggle.style.zIndex = '1000';
     }
-    
-    // Улучшаем позиционирование админ-ссылки
+
+    // Админ-ссылка - рядом с переключателем темы
     const adminLink = document.querySelector('.admin-link');
     if (adminLink) {
         adminLink.style.position = 'fixed';
-        adminLink.style.top = '80px';
-        adminLink.style.right = '75px';
+        adminLink.style.top = '20px';
+        adminLink.style.right = '80px';
         adminLink.style.zIndex = '1000';
     }
-    
-    // Улучшаем пользовательскую информацию
+
+    // Пользовательская информация - вверху
     const userInfo = document.querySelector('.user-info');
     if (userInfo) {
         userInfo.style.position = 'fixed';
-        userInfo.style.top = '15px';
-        userInfo.style.left = '15px';
-        userInfo.style.right = '15px';
+        userInfo.style.top = '20px';
+        userInfo.style.left = '20px';
+        userInfo.style.right = '160px';
         userInfo.style.zIndex = '1000';
-        userInfo.style.maxWidth = 'none';
-        userInfo.style.justifyContent = 'space-between';
+        userInfo.style.background = 'rgba(255, 255, 255, 0.9)';
+        userInfo.style.padding = '10px';
+        userInfo.style.borderRadius = '8px';
     }
-    
-    // Добавляем отступ для основного контента
+
+    // Основной контент - отступ сверху
     const parchment = document.querySelector('.parchment');
     if (parchment) {
-        parchment.style.marginTop = '120px';
+        parchment.style.marginTop = '80px';
         parchment.style.paddingTop = '20px';
     }
 }
 
-// ===== ЖЕСТЫ =====
+// ===== ПЛАВНОЕ ПРОЛИСТЫВАНИЕ =====
 
-function initSwipeGestures() {
-    let startX, startY, endX, endY;
-    const minSwipeDistance = 50;
-
-    // Обработка касаний
-    document.addEventListener('touchstart', function(e) {
-        startX = e.touches[0].clientX;
-        startY = e.touches[0].clientY;
-    });
-
-    document.addEventListener('touchend', function(e) {
-        endX = e.changedTouches[0].clientX;
-        endY = e.changedTouches[0].clientY;
-
-        const deltaX = endX - startX;
-        const deltaY = endY - startY;
-
-        // Определяем направление свайпа
-        if (Math.abs(deltaX) > Math.abs(deltaY) && Math.abs(deltaX) > minSwipeDistance) {
-            if (deltaX > 0) {
-                // Свайп вправо - показать боковую панель
-                handleSwipeRight();
-            } else {
-                // Свайп влево - скрыть боковую панель
-                handleSwipeLeft();
-            }
-        } else if (Math.abs(deltaY) > Math.abs(deltaX) && Math.abs(deltaY) > minSwipeDistance) {
-            if (deltaY > 0) {
-                // Свайп вниз - обновить страницу
-                handleSwipeDown();
-            } else {
-                // Свайп вверх - показать быстрые действия
-                handleSwipeUp();
-            }
-        }
-    });
-}
-
-function handleSwipeRight() {
-    // Показать боковую панель с быстрыми действиями
-    showQuickActions();
-}
-
-function handleSwipeLeft() {
-    // Скрыть боковую панель
-    hideQuickActions();
-}
-
-function handleSwipeDown() {
-    // Показать индикатор обновления
-    showRefreshIndicator();
-}
-
-function handleSwipeUp() {
-    // Показать быстрые действия
-    showQuickActions();
-}
-
-// ===== МОБИЛЬНАЯ НАВИГАЦИЯ =====
-
-function initMobileNavigation() {
-    // Создаем мобильную навигационную панель
-    createMobileNav();
-
-    // Добавляем обработчики для мобильных кнопок
-    addMobileNavHandlers();
-}
-
-function createMobileNav() {
-    const nav = document.createElement('div');
-    nav.className = 'mobile-nav';
-    nav.innerHTML = `
-        <div class="mobile-nav-toggle">
-            <span></span>
-            <span></span>
-            <span></span>
-        </div>
-        <div class="mobile-nav-menu">
-            <a href="#" class="mobile-nav-item" data-action="dice">🎲 Кости</a>
-            <a href="#" class="mobile-nav-item" data-action="npc">🤖 NPC</a>
-            <a href="#" class="mobile-nav-item" data-action="initiative">⚔️ Инициатива</a>
-            <a href="#" class="mobile-nav-item" data-action="notes">📝 Заметки</a>
-            <a href="#" class="mobile-nav-item" data-action="stats">📊 Статистика</a>
-            <a href="#" class="mobile-nav-item" data-action="theme">🌙 Тема</a>
-            <a href="#" class="mobile-nav-item admin-only" data-action="admin" style="display: none;">🔧 Админ панель</a>
-        </div>
-    `;
-
-    document.body.appendChild(nav);
-}
-
-function addMobileNavHandlers() {
-    const toggle = document.querySelector('.mobile-nav-toggle');
-    const menu = document.querySelector('.mobile-nav-menu');
-    const items = document.querySelectorAll('.mobile-nav-item');
-
-    if (toggle) {
-        toggle.addEventListener('click', function() {
-            menu.classList.toggle('active');
-            toggle.classList.toggle('active');
-        });
-    }
-
-    items.forEach(item => {
-        item.addEventListener('click', function(e) {
+function initSmoothScrolling() {
+    // Добавляем плавное пролистывание для всех ссылок
+    const links = document.querySelectorAll('a[href^="#"]');
+    links.forEach(link => {
+        link.addEventListener('click', function(e) {
             e.preventDefault();
-            const action = this.dataset.action;
-            handleMobileNavAction(action);
-            menu.classList.remove('active');
-            toggle.classList.remove('active');
+            const target = document.querySelector(this.getAttribute('href'));
+            if (target) {
+                target.scrollIntoView({
+                    behavior: 'smooth',
+                    block: 'start'
+                });
+            }
         });
     });
-}
 
-function handleMobileNavAction(action) {
-    switch (action) {
-        case 'dice':
-            openDiceModal();
-            break;
-        case 'npc':
-            openNpcModal();
-            break;
-        case 'initiative':
-            openInitiativeModal();
-            break;
-        case 'notes':
-            focusNotes();
-            break;
-        case 'stats':
-            window.location.href = 'stats.php';
-            break;
-        case 'theme':
-            toggleTheme();
-            break;
-        case 'admin':
-            window.location.href = 'admin.php';
-            break;
-    }
-}
-
-// ===== МОБИЛЬНЫЕ МОДАЛЬНЫЕ ОКНА =====
-
-function initMobileModals() {
-    // Улучшаем модальные окна для мобильных
-    const modals = document.querySelectorAll('.modal');
-
-    modals.forEach(modal => {
-        // Добавляем возможность закрытия свайпом
-        let startY = 0;
-        let currentY = 0;
-
-        modal.addEventListener('touchstart', function(e) {
-            startY = e.touches[0].clientY;
-        });
-
-        modal.addEventListener('touchmove', function(e) {
-            currentY = e.touches[0].clientY;
-            const deltaY = currentY - startY;
-
-            if (deltaY > 0) {
-                modal.style.transform = `translateY(${deltaY}px)`;
-            }
-        });
-
-        modal.addEventListener('touchend', function(e) {
-            const deltaY = currentY - startY;
-
-            if (deltaY > 100) {
-                // Закрыть модальное окно
-                closeModal();
-            } else {
-                // Вернуть на место
-                modal.style.transform = '';
-            }
+    // Плавное пролистывание для кнопок навигации
+    const navButtons = document.querySelectorAll('.fast-btn');
+    navButtons.forEach(button => {
+        button.addEventListener('click', function() {
+            // Плавно прокручиваем к результату после действия
+            setTimeout(() => {
+                const resultElement = document.querySelector('.chat-box') ||
+                    document.querySelector('.notes-block') ||
+                    document.querySelector('.modal');
+                if (resultElement) {
+                    resultElement.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'nearest'
+                    });
+                }
+            }, 500);
         });
     });
 }
@@ -282,636 +108,348 @@ function initMobileModals() {
 // ===== МОБИЛЬНЫЕ ФОРМЫ =====
 
 function initMobileForms() {
-    const inputs = document.querySelectorAll('input[type="text"], input[type="number"]');
-
+    // Улучшаем поля ввода
+    const inputs = document.querySelectorAll('input[type="text"], input[type="number"], select');
     inputs.forEach(input => {
-        // Добавляем автофокус на мобильных
-        if (input.id === 'messageInput') {
-            setTimeout(() => {
-                input.focus();
-            }, 500);
-        }
-
-        // Улучшаем UX для мобильных форм
-        input.addEventListener('focus', function() {
-            this.parentElement.classList.add('focused');
-        });
-
-        input.addEventListener('blur', function() {
-            this.parentElement.classList.remove('focused');
-        });
+        input.style.fontSize = '16px'; // Предотвращает зум на iOS
+        input.style.padding = '12px';
+        input.style.minHeight = '44px';
+        input.style.borderRadius = '8px';
+        input.style.border = '2px solid var(--border-primary)';
     });
-}
 
-// ===== МОБИЛЬНЫЕ КНОПКИ =====
-
-function initMobileButtons() {
-    const buttons = document.querySelectorAll('.fast-btn, button[type="submit"], .modal .modal-save, .modal-regenerate');
-
+    // Улучшаем кнопки
+    const buttons = document.querySelectorAll('.fast-btn, button[type="submit"]');
     buttons.forEach(button => {
-        // Добавляем haptic feedback на поддерживаемых устройствах
-        button.addEventListener('click', function() {
-            if (navigator.vibrate) {
-                navigator.vibrate(50);
-            }
-        });
-
-        // Улучшаем touch targets
         button.style.minHeight = '44px';
-        button.style.touchAction = 'manipulation';
+        button.style.padding = '12px 20px';
+        button.style.fontSize = '16px';
+        button.style.borderRadius = '8px';
     });
 }
 
-// ===== МОБИЛЬНЫЙ ЧАТ =====
+// ===== ПРОСТЫЕ МОДАЛЬНЫЕ ОКНА =====
 
-function initMobileChat() {
-    const chatBox = document.querySelector('.chat-box');
-    const messageInput = document.getElementById('messageInput');
-
-    if (chatBox && messageInput) {
-        // Автоматическая прокрутка к новым сообщениям
-        const observer = new MutationObserver(function() {
-            chatBox.scrollTop = chatBox.scrollHeight;
-        });
-
-        observer.observe(chatBox, {
-            childList: true,
-            subtree: true
-        });
-
-        // Улучшенная отправка сообщений
-        messageInput.addEventListener('keypress', function(e) {
-            if (e.key === 'Enter' && !e.shiftKey) {
-                e.preventDefault();
-                submitMessage();
-            }
-        });
-    }
-}
-
-// ===== УПРАВЛЕНИЕ АДМИН-ССЫЛКОЙ =====
-
-function initAdminLinkManagement() {
-    const adminLink = document.querySelector('.admin-link');
-    const adminMenuItem = document.querySelector('.mobile-nav-item[data-action="admin"]');
-
-    if (!adminLink) return;
-
-    // Скрываем админ-ссылку по умолчанию на мобильных
-    adminLink.classList.add('hidden');
-
-    // Показываем админ-пункт в мобильном меню, если пользователь админ
-    if (adminMenuItem) {
-        adminMenuItem.style.display = 'block';
-    }
-
-    // Показываем админ-ссылку при долгом нажатии на заголовок
-    const title = document.querySelector('h1');
-    if (title) {
-        let longPressTimer;
-
-        title.addEventListener('touchstart', function(e) {
-            longPressTimer = setTimeout(() => {
-                adminLink.classList.remove('hidden');
-                adminLink.classList.add('show');
-
-                // Показываем подсказку
-                showAdminHint();
-
-                // Скрываем через 5 секунд
-                setTimeout(() => {
-                    adminLink.classList.remove('show');
-                    adminLink.classList.add('hidden');
-                }, 5000);
-            }, 1000); // 1 секунда для долгого нажатия
-        });
-
-        title.addEventListener('touchend', function(e) {
-            clearTimeout(longPressTimer);
-        });
-
-        title.addEventListener('touchmove', function(e) {
-            clearTimeout(longPressTimer);
-        });
-    }
-
-    // Добавляем возможность скрыть админ-ссылку при нажатии на неё
-    adminLink.addEventListener('click', function(e) {
-        // Добавляем небольшую задержку перед скрытием
-        setTimeout(() => {
-            adminLink.classList.remove('show');
-            adminLink.classList.add('hidden');
-        }, 1000);
-    });
-}
-
-function showAdminHint() {
-    // Показываем подсказку о том, как получить доступ к админ-панели
-    const hint = document.createElement('div');
-    hint.className = 'admin-hint';
-    hint.innerHTML = `
-        <div class="admin-hint-content">
-            <p>🔧 Админ-панель доступна в мобильном меню</p>
-            <p>Или долгое нажатие на заголовок</p>
+function openSimpleDiceModal() {
+    const content = `
+        <div style="text-align: center; padding: 20px;">
+            <h3 style="margin-bottom: 20px;">🎲 Бросок костей</h3>
+            <div style="margin-bottom: 15px;">
+                <input type="text" id="dice-input" value="1d20" 
+                       style="width: 100px; text-align: center; font-size: 18px; padding: 10px;">
+            </div>
+            <div style="margin-bottom: 20px;">
+                <input type="text" id="dice-label" placeholder="Комментарий" 
+                       style="width: 200px; padding: 10px;">
+            </div>
+            <button class="fast-btn" onclick="rollDice()" 
+                    style="width: 100%; padding: 15px; font-size: 18px;">
+                🎲 Бросить
+            </button>
         </div>
     `;
-    document.body.appendChild(hint);
-
-    setTimeout(() => {
-        hint.remove();
-    }, 3000);
-}
-
-// ===== ВСПОМОГАТЕЛЬНЫЕ ФУНКЦИИ =====
-
-function showQuickActions() {
-    const quickActions = document.querySelector('.mobile-nav-menu');
-    if (quickActions) {
-        quickActions.classList.add('active');
-    }
-}
-
-function hideQuickActions() {
-    const quickActions = document.querySelector('.mobile-nav-menu');
-    if (quickActions) {
-        quickActions.classList.remove('active');
-    }
-}
-
-function showRefreshIndicator() {
-    // Показываем индикатор обновления
-    const indicator = document.createElement('div');
-    indicator.className = 'refresh-indicator';
-    indicator.textContent = 'Потяните для обновления';
-    document.body.appendChild(indicator);
-
-    setTimeout(() => {
-        indicator.remove();
-    }, 2000);
-}
-
-function openDiceModal() {
-    // Открываем модальное окно для броска костей
-    showModal('<b class="mini-menu-title">Бросок костей:</b><div class="dice-input-wrap"><input type=text id=dice-input value="1d20" placeholder="1d20" style="width:80px;text-align:center"></div><div class="dice-label-wrap"><input type=text id=dice-label placeholder="Комментарий (необязательно)" style="width:200px"></div><button class="fast-btn" onclick="rollDice()">🎲 Бросить</button>');
+    showModal(content);
     setTimeout(() => document.getElementById('dice-input').focus(), 100);
 }
 
-function openNpcModal() {
-    // Открываем модальное окно для генерации NPC с улучшенным мобильным интерфейсом
-    const modalContent = `
-        <div class="mobile-npc-modal">
-            <b class="mini-menu-title">Генерация NPC:</b>
-            <div class="mobile-npc-form">
-                <div class="mobile-form-group">
-                    <label>Раса:</label>
-                    <select id="npc-race" class="mobile-select">
-                        <option value="человек">Человек</option>
-                        <option value="эльф">Эльф</option>
-                        <option value="гном">Гном</option>
-                        <option value="полуорк">Полуорк</option>
-                        <option value="полурослик">Полурослик</option>
-                        <option value="тифлинг">Тифлинг</option>
-                        <option value="драконорожденный">Драконорожденный</option>
-                        <option value="полуэльф">Полуэльф</option>
-                        <option value="дворф">Дворф</option>
-                        <option value="гоблин">Гоблин</option>
-                        <option value="орк">Орк</option>
-                        <option value="кобольд">Кобольд</option>
-                        <option value="ящеролюд">Ящеролюд</option>
-                        <option value="хоббит">Хоббит</option>
-                    </select>
-                </div>
-                <div class="mobile-form-group">
-                    <label>Класс:</label>
-                    <select id="npc-class" class="mobile-select">
-                        <option value="воин">Воин</option>
-                        <option value="маг">Маг</option>
-                        <option value="жрец">Жрец</option>
-                        <option value="плут">Плут</option>
-                        <option value="паладин">Паладин</option>
-                        <option value="следопыт">Следопыт</option>
-                        <option value="варвар">Варвар</option>
-                        <option value="бард">Бард</option>
-                        <option value="друид">Друид</option>
-                        <option value="монах">Монах</option>
-                        <option value="колдун">Колдун</option>
-                        <option value="чародей">Чародей</option>
-                        <option value="изобретатель">Изобретатель</option>
-                        <option value="кровный охотник">Кровный охотник</option>
-                        <option value="мистик">Мистик</option>
-                        <option value="психоник">Психоник</option>
-                        <option value="артифисер">Артифисер</option>
-                    </select>
-                </div>
-                <div class="mobile-form-group">
-                    <label>Уровень:</label>
-                    <input type="number" id="npc-level" value="1" min="1" max="20" class="mobile-input">
-                </div>
-                <button class="fast-btn mobile-npc-btn" onclick="generateNpcMobile()">🤖 Создать NPC</button>
+function openSimpleNpcModal() {
+    const content = `
+        <div style="padding: 20px;">
+            <h3 style="text-align: center; margin-bottom: 20px;">🤖 Создать NPC</h3>
+            
+            <div style="margin-bottom: 15px;">
+                <label style="display: block; margin-bottom: 5px; font-weight: bold;">Раса:</label>
+                <select id="npc-race" style="width: 100%; padding: 12px; font-size: 16px;">
+                    <option value="человек">Человек</option>
+                    <option value="эльф">Эльф</option>
+                    <option value="гном">Гном</option>
+                    <option value="полуорк">Полуорк</option>
+                    <option value="полурослик">Полурослик</option>
+                    <option value="тифлинг">Тифлинг</option>
+                    <option value="драконорожденный">Драконорожденный</option>
+                    <option value="полуэльф">Полуэльф</option>
+                    <option value="дворф">Дворф</option>
+                    <option value="гоблин">Гоблин</option>
+                    <option value="орк">Орк</option>
+                    <option value="кобольд">Кобольд</option>
+                    <option value="ящеролюд">Ящеролюд</option>
+                    <option value="хоббит">Хоббит</option>
+                </select>
             </div>
+            
+            <div style="margin-bottom: 15px;">
+                <label style="display: block; margin-bottom: 5px; font-weight: bold;">Класс:</label>
+                <select id="npc-class" style="width: 100%; padding: 12px; font-size: 16px;">
+                    <option value="воин">Воин</option>
+                    <option value="маг">Маг</option>
+                    <option value="жрец">Жрец</option>
+                    <option value="плут">Плут</option>
+                    <option value="паладин">Паладин</option>
+                    <option value="следопыт">Следопыт</option>
+                    <option value="варвар">Варвар</option>
+                    <option value="бард">Бард</option>
+                    <option value="друид">Друид</option>
+                    <option value="монах">Монах</option>
+                    <option value="колдун">Колдун</option>
+                    <option value="чародей">Чародей</option>
+                    <option value="изобретатель">Изобретатель</option>
+                    <option value="кровный охотник">Кровный охотник</option>
+                    <option value="мистик">Мистик</option>
+                    <option value="психоник">Психоник</option>
+                    <option value="артифисер">Артифисер</option>
+                </select>
+            </div>
+            
+            <div style="margin-bottom: 20px;">
+                <label style="display: block; margin-bottom: 5px; font-weight: bold;">Уровень:</label>
+                <input type="number" id="npc-level" value="1" min="1" max="20" 
+                       style="width: 100%; padding: 12px; font-size: 16px;">
+            </div>
+            
+            <button class="fast-btn" onclick="generateSimpleNpc()" 
+                    style="width: 100%; padding: 15px; font-size: 18px;">
+                🤖 Создать NPC
+            </button>
         </div>
     `;
-    showModal(modalContent);
+    showModal(content);
 }
 
-function openInitiativeModal() {
-    // Открываем модальное окно для инициативы
-    showModal('<b class="mini-menu-title">Добавить участника инициативы:</b><div class="initiative-input-wrap"><input type=text id=initiative-name placeholder="Имя персонажа" style="width:150px"></div><div class="initiative-value-wrap"><input type=number id=initiative-value placeholder="Инициатива" style="width:80px;text-align:center"></div><button class="fast-btn" onclick="addInitiative()">⚔️ Добавить</button>');
+function openSimpleInitiativeModal() {
+    const content = `
+        <div style="text-align: center; padding: 20px;">
+            <h3 style="margin-bottom: 20px;">⚔️ Добавить в инициативу</h3>
+            <div style="margin-bottom: 15px;">
+                <input type="text" id="initiative-name" placeholder="Имя персонажа" 
+                       style="width: 200px; padding: 10px; font-size: 16px;">
+            </div>
+            <div style="margin-bottom: 20px;">
+                <input type="number" id="initiative-value" placeholder="Инициатива" 
+                       style="width: 100px; padding: 10px; font-size: 16px;">
+            </div>
+            <button class="fast-btn" onclick="addInitiative()" 
+                    style="width: 100%; padding: 15px; font-size: 18px;">
+                ⚔️ Добавить
+            </button>
+        </div>
+    `;
+    showModal(content);
     setTimeout(() => document.getElementById('initiative-name').focus(), 100);
 }
 
-function focusNotes() {
-    // Фокусируемся на заметках
-    const notesBlock = document.querySelector('.notes-block');
-    if (notesBlock) {
-        notesBlock.scrollIntoView({ behavior: 'smooth' });
-        notesBlock.style.animation = 'pulse 0.5s ease-in-out';
-        setTimeout(() => {
-            notesBlock.style.animation = '';
-        }, 500);
-    }
-}
+// ===== ПРОСТЫЕ ФУНКЦИИ =====
 
-function submitMessage() {
-    const form = document.getElementById('chatForm');
-    if (form) {
-        form.submit();
-    }
-}
-
-// Функция для генерации NPC на мобильных устройствах
-function generateNpcMobile() {
+function generateSimpleNpc() {
     const race = document.getElementById('npc-race').value;
     const npcClass = document.getElementById('npc-class').value;
     const level = document.getElementById('npc-level').value;
-    
+
     if (!race || !npcClass || !level) {
         alert('Заполните все поля');
         return;
     }
-    
-    // Закрываем модальное окно и открываем генерацию
+
     closeModal();
     setTimeout(() => {
-        openNpcStep2(race);
-        // Устанавливаем выбранные значения
+        // Используем существующие функции
         window.npcRace = race;
         window.npcClass = npcClass;
         window.npcLevel = parseInt(level);
-        // Переходим к генерации
-        setTimeout(() => {
-            generateNpcWithLevel();
-        }, 100);
+        generateNpcWithLevel();
     }, 300);
 }
 
-// ===== CSS АНИМАЦИИ =====
+// ===== ПРОСТЫЕ CSS СТИЛИ =====
 
-const mobileStyles = `
+const simpleMobileStyles = `
 <style>
-/* Мобильная навигация */
-.mobile-nav {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 60px;
-    background: var(--bg-primary);
-    border-bottom: 2px solid var(--border-primary);
-    z-index: 1001;
-    display: none;
-}
-
-.mobile-device .mobile-nav {
-    display: block;
-}
-
-.mobile-nav-toggle {
-    position: absolute;
-    top: 15px;
-    left: 15px;
-    width: 30px;
-    height: 30px;
-    cursor: pointer;
-    z-index: 1002;
-}
-
-.mobile-nav-toggle span {
-    display: block;
-    width: 100%;
-    height: 3px;
-    background: var(--text-primary);
-    margin: 6px 0;
-    transition: 0.3s;
-}
-
-.mobile-nav-toggle.active span:nth-child(1) {
-    transform: rotate(-45deg) translate(-9px, 6px);
-}
-
-.mobile-nav-toggle.active span:nth-child(2) {
-    opacity: 0;
-}
-
-.mobile-nav-toggle.active span:nth-child(3) {
-    transform: rotate(45deg) translate(-8px, -8px);
-}
-
-.mobile-nav-menu {
-    position: fixed;
-    top: 60px;
-    left: -100%;
-    width: 250px;
-    height: calc(100vh - 60px);
-    background: var(--bg-secondary);
-    border-right: 2px solid var(--border-primary);
-    transition: 0.3s;
-    z-index: 1000;
-    padding: 20px;
-}
-
-.mobile-nav-menu.active {
-    left: 0;
-}
-
-.mobile-nav-item {
-    display: block;
-    padding: 15px;
-    margin: 5px 0;
-    background: var(--bg-tertiary);
-    border: 1px solid var(--border-primary);
-    border-radius: 8px;
-    text-decoration: none;
-    color: var(--text-primary);
-    font-size: 1.1em;
-    transition: 0.3s;
-}
-
-.mobile-nav-item:hover {
-    background: var(--bg-quaternary);
-    transform: translateX(5px);
-}
-
-/* Индикатор обновления */
-.refresh-indicator {
-    position: fixed;
-    top: 20px;
-    left: 50%;
-    transform: translateX(-50%);
-    background: var(--accent-info);
-    color: white;
-    padding: 10px 20px;
-    border-radius: 20px;
-    z-index: 1000;
-    animation: slideDown 0.3s ease-out;
-}
-
-@keyframes slideDown {
-    from {
-        transform: translateX(-50%) translateY(-100%);
-        opacity: 0;
-    }
-    to {
-        transform: translateX(-50%) translateY(0);
-        opacity: 1;
-    }
-}
-
-@keyframes pulse {
-    0% { transform: scale(1); }
-    50% { transform: scale(1.05); }
-    100% { transform: scale(1); }
-}
-
-/* Мобильные улучшения для основного контента */
+/* Простые мобильные стили */
 .mobile-device .parchment {
-    margin-top: 120px;
-    padding-top: 20px;
+    margin: 80px 10px 20px 10px;
+    padding: 15px;
+    border-radius: 12px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
 }
 
-/* Исправленное позиционирование переключателя темы */
-.mobile-device .theme-toggle {
-    position: fixed !important;
-    top: 80px !important;
-    right: 15px !important;
-    z-index: 1000 !important;
-}
-
-/* Исправленное позиционирование админ-ссылки */
-.mobile-device .admin-link {
-    position: fixed !important;
-    top: 80px !important;
-    right: 75px !important;
-    z-index: 1000 !important;
-    opacity: 0.5;
-    transform: scale(0.9);
+/* Улучшенные кнопки */
+.mobile-device .fast-btn {
+    margin: 5px 0;
+    padding: 15px 20px;
+    font-size: 16px;
+    border-radius: 10px;
+    border: none;
+    background: linear-gradient(135deg, #8B4513, #A0522D);
+    color: white;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
     transition: all 0.3s ease;
 }
 
-.mobile-device .admin-link.show {
-    opacity: 1;
-    transform: scale(1);
+.mobile-device .fast-btn:active {
+    transform: scale(0.98);
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.3);
 }
 
-.mobile-device .admin-link.hidden {
-    opacity: 0;
-    transform: scale(0.8);
-    pointer-events: none;
-}
-
-/* Улучшенная пользовательская информация */
-.mobile-device .user-info {
-    position: fixed !important;
-    top: 15px !important;
-    left: 15px !important;
-    right: 15px !important;
-    z-index: 1000 !important;
-    max-width: none !important;
-    justify-content: space-between !important;
-    background: rgba(255, 255, 255, 0.1);
-    padding: 8px 12px;
-    border-radius: 8px;
-    backdrop-filter: blur(5px);
-}
-
-/* Улучшения для touch-устройств */
-.mobile-device .fast-btn:active,
-.mobile-device button[type=submit]:active,
-.mobile-device .modal .modal-save:active,
-.mobile-device .modal-regenerate:active {
-    transform: scale(0.95);
-    transition: transform 0.1s;
-}
-
-/* Фокус на формах */
-.mobile-device form.focused {
-    border: 2px solid var(--accent-primary);
-    border-radius: 8px;
-    padding: 5px;
-}
-
-/* Улучшенные модальные окна для мобильных */
-.mobile-device .modal {
-    transition: transform 0.3s ease;
-    max-height: 90vh;
-    overflow-y: auto;
-}
-
-.mobile-device .modal.closing {
-    transform: translateY(100%);
-}
-
-/* Подсказка админа */
-.admin-hint {
-    position: fixed;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    background: var(--bg-secondary);
-    border: 2px solid var(--accent-primary);
-    border-radius: 12px;
-    padding: 20px;
-    z-index: 10000;
-    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
-    animation: slideIn 0.3s ease-out;
-}
-
-.admin-hint-content {
-    text-align: center;
-    color: var(--text-primary);
-}
-
-.admin-hint-content p {
-    margin: 8px 0;
-    font-size: 1em;
-}
-
-@keyframes slideIn {
-    from {
-        transform: translate(-50%, -50%) scale(0.8);
-        opacity: 0;
-    }
-    to {
-        transform: translate(-50%, -50%) scale(1);
-        opacity: 1;
-    }
-}
-
-/* Мобильные формы для NPC */
-.mobile-npc-modal {
-    padding: 20px;
-}
-
-.mobile-npc-form {
-    display: flex;
-    flex-direction: column;
-    gap: 15px;
-}
-
-.mobile-form-group {
-    display: flex;
-    flex-direction: column;
-    gap: 5px;
-}
-
-.mobile-form-group label {
-    font-weight: bold;
-    color: var(--text-primary);
-    font-size: 0.9em;
-}
-
-.mobile-select,
-.mobile-input {
-    padding: 12px;
-    border: 2px solid var(--border-primary);
-    border-radius: 8px;
-    background: var(--bg-tertiary);
-    color: var(--text-primary);
-    font-size: 1em;
+/* Улучшенные поля ввода */
+.mobile-device input[type="text"],
+.mobile-device input[type="number"],
+.mobile-device select {
     width: 100%;
-    box-sizing: border-box;
+    padding: 12px;
+    font-size: 16px;
+    border: 2px solid #ddd;
+    border-radius: 8px;
+    background: white;
+    margin: 5px 0;
 }
 
-.mobile-select:focus,
-.mobile-input:focus {
+.mobile-device input:focus,
+.mobile-device select:focus {
     outline: none;
-    border-color: var(--accent-primary);
-    box-shadow: 0 0 5px rgba(0, 124, 186, 0.3);
+    border-color: #8B4513;
+    box-shadow: 0 0 5px rgba(139, 69, 19, 0.3);
 }
 
-.mobile-npc-btn {
-    margin-top: 10px;
-    padding: 15px;
-    font-size: 1.1em;
-    font-weight: bold;
-}
-
-/* Улучшения для мобильных кнопок */
-.mobile-device .fast-btn {
-    min-height: 44px;
-    padding: 12px 20px;
-    font-size: 1em;
-    touch-action: manipulation;
-}
-
-/* Улучшения для мобильного чата */
+/* Улучшенный чат */
 .mobile-device .chat-box {
-    max-height: 50vh;
+    max-height: 60vh;
     overflow-y: auto;
+    padding: 15px;
+    background: rgba(255, 255, 255, 0.9);
+    border-radius: 10px;
+    border: 1px solid #ddd;
+    margin: 10px 0;
 }
 
-.mobile-device .chat-box::-webkit-scrollbar {
-    width: 6px;
-}
-
-.mobile-device .chat-box::-webkit-scrollbar-track {
-    background: var(--bg-tertiary);
-}
-
-.mobile-device .chat-box::-webkit-scrollbar-thumb {
-    background: var(--accent-primary);
-    border-radius: 3px;
-}
-
-/* Улучшения для заметок на мобильных */
+/* Улучшенные заметки */
 .mobile-device .notes-block {
     margin-top: 20px;
     padding: 15px;
-    background: var(--bg-tertiary);
-    border-radius: 8px;
-    border: 1px solid var(--border-primary);
+    background: rgba(255, 255, 255, 0.9);
+    border-radius: 10px;
+    border: 1px solid #ddd;
 }
 
-/* Адаптивные размеры для мобильных */
-@media (max-width: 480px) {
-    .mobile-device .parchment {
-        margin: 120px 10px 20px 10px;
-        padding: 15px;
-    }
-    
-    .mobile-device .fast-bar {
-        flex-direction: column;
-        gap: 10px;
-    }
-    
-    .mobile-device .fast-btn {
-        width: 100%;
-        margin: 2px 0;
-    }
-    
-    .mobile-device .user-info {
-        flex-direction: column;
-        gap: 8px;
-        align-items: flex-start;
-    }
-    
-    .mobile-device .welcome-text {
-        max-width: none;
-        white-space: normal;
-    }
+/* Улучшенные модальные окна */
+.mobile-device .modal {
+    width: 95vw;
+    max-width: 400px;
+    height: auto;
+    max-height: 90vh;
+    margin: 5vh auto;
+    border-radius: 15px;
+    overflow-y: auto;
+    background: white;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+}
+
+.mobile-device .modal-content {
+    padding: 20px;
+}
+
+/* Улучшенная форма чата */
+.mobile-device form {
+    display: flex;
+    gap: 10px;
+    margin: 15px 0;
+    align-items: center;
+}
+
+.mobile-device form input[type="text"] {
+    flex: 1;
+    margin: 0;
+}
+
+.mobile-device form button {
+    padding: 12px 20px;
+    font-size: 16px;
+    border-radius: 8px;
+    border: none;
+    background: #8B4513;
+    color: white;
+    white-space: nowrap;
+}
+
+/* Улучшенные ссылки */
+.mobile-device .reset-link {
+    color: #8B4513;
+    text-decoration: none;
+    font-size: 14px;
+    margin-left: 10px;
+}
+
+.mobile-device .reset-link:hover {
+    text-decoration: underline;
+}
+
+/* Плавная прокрутка */
+.mobile-device * {
+    scroll-behavior: smooth;
+}
+
+/* Улучшенные заголовки */
+.mobile-device h1 {
+    text-align: center;
+    margin: 20px 0;
+    color: #8B4513;
+    font-size: 24px;
+    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.1);
+}
+
+/* Адаптивная сетка кнопок */
+.mobile-device .fast-bar {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 10px;
+    margin: 15px 0;
+}
+
+/* Улучшенные подсказки */
+.mobile-device .hotkeys-hint {
+    text-align: center;
+    margin: 10px 0;
+    font-size: 12px;
+    color: #666;
+    opacity: 0.8;
+}
+
+/* Темная тема для мобильных */
+.mobile-device[data-theme="dark"] .parchment {
+    background: #2a2a2a;
+    color: #fff;
+}
+
+.mobile-device[data-theme="dark"] input,
+.mobile-device[data-theme="dark"] select {
+    background: #3a3a3a;
+    color: #fff;
+    border-color: #555;
+}
+
+.mobile-device[data-theme="dark"] .chat-box,
+.mobile-device[data-theme="dark"] .notes-block {
+    background: rgba(58, 58, 58, 0.9);
+    border-color: #555;
+}
+
+/* Анимации */
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.mobile-device .parchment {
+    animation: fadeIn 0.5s ease-out;
+}
+
+/* Улучшенная доступность */
+.mobile-device button:focus,
+.mobile-device input:focus,
+.mobile-device select:focus {
+    outline: 2px solid #8B4513;
+    outline-offset: 2px;
 }
 </style>
 `;
 
 // Добавляем стили в head
-document.head.insertAdjacentHTML('beforeend', mobileStyles);
+document.head.insertAdjacentHTML('beforeend', simpleMobileStyles);
