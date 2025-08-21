@@ -53,6 +53,50 @@ function initMobileFeatures() {
 
     // Инициализируем управление админ-ссылкой
     initAdminLinkManagement();
+    
+    // Исправляем позиционирование элементов
+    fixMobileLayout();
+}
+
+// ===== ИСПРАВЛЕНИЕ МОБИЛЬНОГО ЛАЙАУТА =====
+
+function fixMobileLayout() {
+    // Перемещаем переключатель темы в безопасное место
+    const themeToggle = document.querySelector('.theme-toggle');
+    if (themeToggle) {
+        themeToggle.style.position = 'fixed';
+        themeToggle.style.top = '80px';
+        themeToggle.style.right = '15px';
+        themeToggle.style.zIndex = '1000';
+    }
+    
+    // Улучшаем позиционирование админ-ссылки
+    const adminLink = document.querySelector('.admin-link');
+    if (adminLink) {
+        adminLink.style.position = 'fixed';
+        adminLink.style.top = '80px';
+        adminLink.style.right = '75px';
+        adminLink.style.zIndex = '1000';
+    }
+    
+    // Улучшаем пользовательскую информацию
+    const userInfo = document.querySelector('.user-info');
+    if (userInfo) {
+        userInfo.style.position = 'fixed';
+        userInfo.style.top = '15px';
+        userInfo.style.left = '15px';
+        userInfo.style.right = '15px';
+        userInfo.style.zIndex = '1000';
+        userInfo.style.maxWidth = 'none';
+        userInfo.style.justifyContent = 'space-between';
+    }
+    
+    // Добавляем отступ для основного контента
+    const parchment = document.querySelector('.parchment');
+    if (parchment) {
+        parchment.style.marginTop = '120px';
+        parchment.style.paddingTop = '20px';
+    }
 }
 
 // ===== ЖЕСТЫ =====
@@ -413,8 +457,61 @@ function openDiceModal() {
 }
 
 function openNpcModal() {
-    // Открываем модальное окно для генерации NPC
-    showModal('<b class="mini-menu-title">Генерация NPC:</b><div class="npc-race-wrap"><select id=npc-race style="width:120px"><option value="человек">Человек</option><option value="эльф">Эльф</option><option value="гном">Гном</option><option value="полуорк">Полуорк</option><option value="полурослик">Полурослик</option><option value="тифлинг">Тифлинг</option><option value="драконорожденный">Драконорожденный</option><option value="полуэльф">Полуэльф</option><option value="дворф">Дворф</option><option value="гоблин">Гоблин</option><option value="орк">Орк</option><option value="кобольд">Кобольд</option><option value="ящеролюд">Ящеролюд</option><option value="хоббит">Хоббит</option></select></div><div class="npc-class-wrap"><select id=npc-class style="width:120px"><option value="воин">Воин</option><option value="маг">Маг</option><option value="жрец">Жрец</option><option value="плут">Плут</option><option value="паладин">Паладин</option><option value="следопыт">Следопыт</option><option value="варвар">Варвар</option><option value="бард">Бард</option><option value="друид">Друид</option><option value="монах">Монах</option><option value="колдун">Колдун</option><option value="чародей">Чародей</option><option value="изобретатель">Изобретатель</option><option value="кровный охотник">Кровный охотник</option><option value="мистик">Мистик</option><option value="психоник">Психоник</option><option value="артифисер">Артифисер</option></select></div><button class="fast-btn" onclick="generateNpc()">🤖 Создать NPC</button>');
+    // Открываем модальное окно для генерации NPC с улучшенным мобильным интерфейсом
+    const modalContent = `
+        <div class="mobile-npc-modal">
+            <b class="mini-menu-title">Генерация NPC:</b>
+            <div class="mobile-npc-form">
+                <div class="mobile-form-group">
+                    <label>Раса:</label>
+                    <select id="npc-race" class="mobile-select">
+                        <option value="человек">Человек</option>
+                        <option value="эльф">Эльф</option>
+                        <option value="гном">Гном</option>
+                        <option value="полуорк">Полуорк</option>
+                        <option value="полурослик">Полурослик</option>
+                        <option value="тифлинг">Тифлинг</option>
+                        <option value="драконорожденный">Драконорожденный</option>
+                        <option value="полуэльф">Полуэльф</option>
+                        <option value="дворф">Дворф</option>
+                        <option value="гоблин">Гоблин</option>
+                        <option value="орк">Орк</option>
+                        <option value="кобольд">Кобольд</option>
+                        <option value="ящеролюд">Ящеролюд</option>
+                        <option value="хоббит">Хоббит</option>
+                    </select>
+                </div>
+                <div class="mobile-form-group">
+                    <label>Класс:</label>
+                    <select id="npc-class" class="mobile-select">
+                        <option value="воин">Воин</option>
+                        <option value="маг">Маг</option>
+                        <option value="жрец">Жрец</option>
+                        <option value="плут">Плут</option>
+                        <option value="паладин">Паладин</option>
+                        <option value="следопыт">Следопыт</option>
+                        <option value="варвар">Варвар</option>
+                        <option value="бард">Бард</option>
+                        <option value="друид">Друид</option>
+                        <option value="монах">Монах</option>
+                        <option value="колдун">Колдун</option>
+                        <option value="чародей">Чародей</option>
+                        <option value="изобретатель">Изобретатель</option>
+                        <option value="кровный охотник">Кровный охотник</option>
+                        <option value="мистик">Мистик</option>
+                        <option value="психоник">Психоник</option>
+                        <option value="артифисер">Артифисер</option>
+                    </select>
+                </div>
+                <div class="mobile-form-group">
+                    <label>Уровень:</label>
+                    <input type="number" id="npc-level" value="1" min="1" max="20" class="mobile-input">
+                </div>
+                <button class="fast-btn mobile-npc-btn" onclick="generateNpcMobile()">🤖 Создать NPC</button>
+            </div>
+        </div>
+    `;
+    showModal(modalContent);
 }
 
 function openInitiativeModal() {
@@ -440,6 +537,32 @@ function submitMessage() {
     if (form) {
         form.submit();
     }
+}
+
+// Функция для генерации NPC на мобильных устройствах
+function generateNpcMobile() {
+    const race = document.getElementById('npc-race').value;
+    const npcClass = document.getElementById('npc-class').value;
+    const level = document.getElementById('npc-level').value;
+    
+    if (!race || !npcClass || !level) {
+        alert('Заполните все поля');
+        return;
+    }
+    
+    // Закрываем модальное окно и открываем генерацию
+    closeModal();
+    setTimeout(() => {
+        openNpcStep2(race);
+        // Устанавливаем выбранные значения
+        window.npcRace = race;
+        window.npcClass = npcClass;
+        window.npcLevel = parseInt(level);
+        // Переходим к генерации
+        setTimeout(() => {
+            generateNpcWithLevel();
+        }, 100);
+    }, 300);
 }
 
 // ===== CSS АНИМАЦИИ =====
@@ -562,15 +685,24 @@ const mobileStyles = `
 
 /* Мобильные улучшения для основного контента */
 .mobile-device .parchment {
-    margin-top: 70px;
+    margin-top: 120px;
+    padding-top: 20px;
 }
 
+/* Исправленное позиционирование переключателя темы */
 .mobile-device .theme-toggle {
-    top: 70px;
+    position: fixed !important;
+    top: 80px !important;
+    right: 15px !important;
+    z-index: 1000 !important;
 }
 
+/* Исправленное позиционирование админ-ссылки */
 .mobile-device .admin-link {
-    top: 70px;
+    position: fixed !important;
+    top: 80px !important;
+    right: 75px !important;
+    z-index: 1000 !important;
     opacity: 0.5;
     transform: scale(0.9);
     transition: all 0.3s ease;
@@ -585,6 +717,21 @@ const mobileStyles = `
     opacity: 0;
     transform: scale(0.8);
     pointer-events: none;
+}
+
+/* Улучшенная пользовательская информация */
+.mobile-device .user-info {
+    position: fixed !important;
+    top: 15px !important;
+    left: 15px !important;
+    right: 15px !important;
+    z-index: 1000 !important;
+    max-width: none !important;
+    justify-content: space-between !important;
+    background: rgba(255, 255, 255, 0.1);
+    padding: 8px 12px;
+    border-radius: 8px;
+    backdrop-filter: blur(5px);
 }
 
 /* Улучшения для touch-устройств */
@@ -606,6 +753,8 @@ const mobileStyles = `
 /* Улучшенные модальные окна для мобильных */
 .mobile-device .modal {
     transition: transform 0.3s ease;
+    max-height: 90vh;
+    overflow-y: auto;
 }
 
 .mobile-device .modal.closing {
@@ -645,6 +794,120 @@ const mobileStyles = `
     to {
         transform: translate(-50%, -50%) scale(1);
         opacity: 1;
+    }
+}
+
+/* Мобильные формы для NPC */
+.mobile-npc-modal {
+    padding: 20px;
+}
+
+.mobile-npc-form {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.mobile-form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+.mobile-form-group label {
+    font-weight: bold;
+    color: var(--text-primary);
+    font-size: 0.9em;
+}
+
+.mobile-select,
+.mobile-input {
+    padding: 12px;
+    border: 2px solid var(--border-primary);
+    border-radius: 8px;
+    background: var(--bg-tertiary);
+    color: var(--text-primary);
+    font-size: 1em;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.mobile-select:focus,
+.mobile-input:focus {
+    outline: none;
+    border-color: var(--accent-primary);
+    box-shadow: 0 0 5px rgba(0, 124, 186, 0.3);
+}
+
+.mobile-npc-btn {
+    margin-top: 10px;
+    padding: 15px;
+    font-size: 1.1em;
+    font-weight: bold;
+}
+
+/* Улучшения для мобильных кнопок */
+.mobile-device .fast-btn {
+    min-height: 44px;
+    padding: 12px 20px;
+    font-size: 1em;
+    touch-action: manipulation;
+}
+
+/* Улучшения для мобильного чата */
+.mobile-device .chat-box {
+    max-height: 50vh;
+    overflow-y: auto;
+}
+
+.mobile-device .chat-box::-webkit-scrollbar {
+    width: 6px;
+}
+
+.mobile-device .chat-box::-webkit-scrollbar-track {
+    background: var(--bg-tertiary);
+}
+
+.mobile-device .chat-box::-webkit-scrollbar-thumb {
+    background: var(--accent-primary);
+    border-radius: 3px;
+}
+
+/* Улучшения для заметок на мобильных */
+.mobile-device .notes-block {
+    margin-top: 20px;
+    padding: 15px;
+    background: var(--bg-tertiary);
+    border-radius: 8px;
+    border: 1px solid var(--border-primary);
+}
+
+/* Адаптивные размеры для мобильных */
+@media (max-width: 480px) {
+    .mobile-device .parchment {
+        margin: 120px 10px 20px 10px;
+        padding: 15px;
+    }
+    
+    .mobile-device .fast-bar {
+        flex-direction: column;
+        gap: 10px;
+    }
+    
+    .mobile-device .fast-btn {
+        width: 100%;
+        margin: 2px 0;
+    }
+    
+    .mobile-device .user-info {
+        flex-direction: column;
+        gap: 8px;
+        align-items: flex-start;
+    }
+    
+    .mobile-device .welcome-text {
+        max-width: none;
+        white-space: normal;
     }
 }
 </style>
