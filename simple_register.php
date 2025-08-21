@@ -12,37 +12,57 @@ $messageType = '';
 
 // Обработка формы регистрации
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $username = trim($_POST['username'] ?? '');
-    $password = $_POST['password'] ?? '';
-    $password_confirm = $_POST['password_confirm'] ?? '';
-    
-    if (empty($username) || empty($password) || empty($password_confirm)) {
-        $message = 'Заполните все поля';
-        $messageType = 'error';
-    } elseif ($password !== $password_confirm) {
-        $message = 'Пароли не совпадают';
-        $messageType = 'error';
-    } elseif (strlen($password) < 4) {
-        $message = 'Пароль должен быть не менее 4 символов';
+    // Проверяем CSRF токен
+    if (!verifyCSRFToken($_POST['csrf_token'] ?? '')) {
+        $message = 'Ошибка безопасности. Обновите страницу.';
         $messageType = 'error';
     } else {
-        $result = registerUser($username, $password);
-        if ($result['success']) {
-            $message = $result['message'] . '. Теперь можете войти.';
-            $messageType = 'success';
-        } else {
-            $message = $result['message'];
+        $username = trim($_POST['username'] ?? '');
+        $password = $_POST['password'] ?? '';
+        $password_confirm = $_POST['password_confirm'] ?? '';
+        
+        if (empty($username) || empty($password) || empty($password_confirm)) {
+            $message = 'Заполните все поля';
             $messageType = 'error';
+        } elseif ($password !== $password_confirm) {
+            $message = 'Пароли не совпадают';
+            $messageType = 'error';
+        } else {
+            // Проверяем сложность пароля
+            $password_errors = validatePassword($password);
+            if (!empty($password_errors)) {
+                $message = implode('. ', $password_errors);
+                $messageType = 'error';
+            } else {
+                $result = registerUser($username, $password);
+                if ($result['success']) {
+                    // Автоматически входим в систему после успешной регистрации
+                    $_SESSION['user'] = $username;
+                    $_SESSION['access_granted'] = true;
+                    $_SESSION['login_time'] = time();
+                    $_SESSION['ip'] = $_SERVER['REMOTE_ADDR'] ?? 'unknown';
+                    
+                    // Перенаправляем на главную страницу
+                    header('Location: index.php?welcome=1');
+                    exit;
+                } else {
+                    $message = $result['message'];
+                    $messageType = 'error';
+                }
+            }
         }
     }
 }
+
+// Генерируем CSRF токен
+$csrf_token = generateCSRFToken();
 ?>
 <!DOCTYPE html>
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Простая регистрация - DnD Copilot</title>
+    <title>Регистрация - DnD Copilot</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -77,6 +97,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             font-size: 16px;
             box-sizing: border-box;
         }
+        input:focus {
+            outline: none;
+            border-color: #007cba;
+            box-shadow: 0 0 5px rgba(0,124,186,0.3);
+        }
         button {
             width: 100%;
             padding: 12px;
@@ -86,6 +111,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             border-radius: 5px;
             font-size: 16px;
             cursor: pointer;
+            transition: background 0.3s ease;
         }
         button:hover {
             background: #005a87;
@@ -116,6 +142,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         .links a:hover {
             text-decoration: underline;
         }
+        .loading {
+            display: none;
+            text-align: center;
+            margin-top: 10px;
+        }
     </style>
 </head>
 <body>
@@ -128,30 +159,66 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             </div>
         <?php endif; ?>
         
-        <form method="post">
+        <form method="post" id="registerForm">
             <div class="form-group">
                 <label for="username">Имя пользователя:</label>
-                <input type="text" id="username" name="username" value="<?php echo htmlspecialchars($_POST['username'] ?? ''); ?>" required>
+                <input type="text" id="username" name="username" value="<?php echo htmlspecialchars($_POST['username'] ?? ''); ?>" required autocomplete="username">
             </div>
             
             <div class="form-group">
                 <label for="password">Пароль:</label>
-                <input type="password" id="password" name="password" required>
+                <input type="password" id="password" name="password" required autocomplete="new-password">
+                <small style="color: #666; font-size: 0.9em; margin-top: 5px; display: block;">
+                    Пароль должен содержать минимум 8 символов, включая заглавные и строчные буквы, цифры и специальные символы
+                </small>
             </div>
             
             <div class="form-group">
                 <label for="password_confirm">Подтвердите пароль:</label>
-                <input type="password" id="password_confirm" name="password_confirm" required>
+                <input type="password" id="password_confirm" name="password_confirm" required autocomplete="new-password">
             </div>
             
-            <button type="submit">Зарегистрироваться</button>
+            <input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars($csrf_token); ?>">
+            <button type="submit" id="submitBtn">Зарегистрироваться</button>
+            <div class="loading" id="loading">Регистрация...</div>
         </form>
         
         <div class="links">
-            <p><a href="login.php">Перейти к странице входа</a></p>
+            <p><a href="login.php">Уже есть аккаунт? Войти</a></p>
             <p><a href="debug.php">Диагностика системы</a></p>
             <p><a href="index.php">Главная страница</a></p>
         </div>
     </div>
+
+    <script>
+        // Автофокус на первое поле при загрузке страницы
+        document.addEventListener('DOMContentLoaded', function() {
+            const usernameField = document.getElementById('username');
+            if (usernameField && !usernameField.value) {
+                usernameField.focus();
+            }
+        });
+
+        // Показываем индикатор загрузки при отправке формы
+        document.getElementById('registerForm').addEventListener('submit', function() {
+            document.getElementById('submitBtn').style.display = 'none';
+            document.getElementById('loading').style.display = 'block';
+        });
+
+        // Автоматический переход к следующему полю при нажатии Enter
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Enter') {
+                const activeElement = document.activeElement;
+                if (activeElement.tagName === 'INPUT') {
+                    const inputs = Array.from(document.querySelectorAll('input[type="text"], input[type="password"]'));
+                    const currentIndex = inputs.indexOf(activeElement);
+                    if (currentIndex < inputs.length - 1) {
+                        inputs[currentIndex + 1].focus();
+                        e.preventDefault();
+                    }
+                }
+            }
+        });
+    </script>
 </body>
 </html>

@@ -10,6 +10,17 @@
     Deny from all
 </Files>
 
+# Защита файлов безопасности
+<Files "login_attempts.json">
+    Order allow,deny
+    Deny from all
+</Files>
+
+<Files "security.log">
+    Order allow,deny
+    Deny from all
+</Files>
+
 # Защита файлов .json в корне
 <Files "*.json">
     Order allow,deny

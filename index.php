@@ -110,7 +110,7 @@ if (isset($_GET['reset'])) {
 // --- Новый systemInstruction с усиленными требованиями ---
 $systemInstruction = "Ты — помощник мастера DnD. Твоя задача — сгенерировать NPC для быстрого и удобного вывода в игровом приложении. Каждый блок будет отображаться отдельно, поэтому не добавляй пояснений, не используй лишние слова, не пиши ничего кроме блоков.\nСтрого по шаблону, каждый блок с новой строки:\nИмя: ...\nКраткое описание: ...\nЧерта характера: ...\nСлабость: ...\nКороткая характеристика: Оружие: ... Урон: ... Хиты: ... Способность: ...\n\nВАЖНО: НЕ используй слово 'Описание' в начале блоков. Начинай блоки сразу с содержимого. НЕ дублируй информацию между блоками. Каждый блок должен содержать только релевантную информацию.
 
-ВАЖНО: Способность — это конкретный навык персонажа в D&D, например: 'Двойная атака', 'Исцеление ран', 'Скрытность', 'Божественная кара', 'Ярость', 'Вдохновение', 'Магическая защита', 'Элементальная магия', 'Боевой стиль', 'Связь с природой', 'Боевые искусства', 'Скрытные способности', 'Магическое исследование', 'Общение с животными', 'Магическая обработка', 'Магическое красноречие'. НЕ пиши описания, только название способности. ОБЯЗАТЕЛЬНО указывай способность для каждого класса кроме 'Без класса'.\nТехнические параметры (Оружие, Урон, Хиты, Способность) обязательны и всегда идут первым блоком. Если не можешь заполнить какой-то параметр — напиши ‘-’. Не добавляй ничего лишнего.";
+ВАЖНО: Способность — это конкретный навык персонажа в D&D, например: 'Двойная атака', 'Исцеление ран', 'Скрытность', 'Божественная кара', 'Ярость', 'Вдохновение', 'Магическая защита', 'Элементальная магия', 'Боевой стиль', 'Связь с природой', 'Боевые искусства', 'Скрытные способности', 'Магическое исследование', 'Общение с животными', 'Магическая обработка', 'Магическое красноречие'. НЕ пиши описания, только название способности. ОБЯЗАТЕЛЬНО указывай способность для каждого класса кроме 'Без класса'.\nТехнические параметры (Оружие, Урон, Хиты, Способность) обязательны и всегда идут первым блоком. Если не можешь заполнить какой-то параметр — напиши ‘-'. Не добавляй ничего лишнего.";
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['message']) && !isset($_POST['add_note']) && !isset($_POST['remove_note'])) {
     $userMessage = trim($_POST['message']);
     if ($userMessage !== '') {
@@ -279,6 +279,8 @@ function openDiceStep1() {
 function openDiceStep2(dice) {
     showModal(`<b class="mini-menu-title">Сколько бросков ${dice}?</b><div class="npc-level-wrap"><input type=number id=dice-count value=1 min=1 max=20 style=\'width:60px\'></div><div class="npc-level-wrap"><input type=text id=dice-label placeholder=\'Комментарий (необязательно)\' style=\'margin-top:8px;width:90%\'></div><button class=\'fast-btn\' onclick=\'getDiceResult("${dice}")\'>Бросить</button>`);
     document.getElementById('modal-save').style.display = 'none';
+    // Автофокус на поле количества
+    setTimeout(() => document.getElementById('dice-count').focus(), 100);
 }
 function getDiceResult(dice) {
     let count = document.getElementById('dice-count').value;
@@ -315,6 +317,8 @@ function openNpcStepLevel(cls) {
     npcClass = cls;
     showModal('<b class="mini-menu-title">Укажите уровень NPC (1-20):</b><div class="npc-level-wrap"><input type=number id=npc-level value=1 min=1 max=20 style=\'width:60px\'></div><button class=\'fast-btn\' onclick=\'generateNpcWithLevel()\'>Создать NPC</button>');
     document.getElementById('modal-save').style.display = 'none';
+    // Автофокус на поле уровня
+    setTimeout(() => document.getElementById('npc-level').focus(), 100);
 }
 // --- Загрузка базы уникальных торговцев ---
 window.uniqueTraders = [];
@@ -479,6 +483,8 @@ function addInitiativeEntry(type) {
         '</div>' +
     '</div>');
     document.getElementById('modal-save').style.display = 'none';
+    // Автофокус на поле имени
+    setTimeout(() => document.getElementById('initiative-name').focus(), 100);
 }
 
 function rollInitiativeDice() {
@@ -646,6 +652,8 @@ function editInitiativeEntry(id) {
         '</div>' +
     '</div>');
     document.getElementById('modal-save').style.display = 'none';
+    // Автофокус на поле имени
+    setTimeout(() => document.getElementById('initiative-name').focus(), 100);
 }
 
 function updateInitiativeEntry(id) {
@@ -1198,4 +1206,45 @@ document.querySelector('form').onsubmit = function(e) {
     });
     return false;
 };
+
+        // Показываем приветственное сообщение для новых пользователей
+        const urlParams = new URLSearchParams(window.location.search);
+        if (urlParams.get('welcome') === '1') {
+            showWelcomeMessage();
+        }
+
+        // Горячие клавиши для быстрого доступа
+        document.addEventListener('keydown', function(e) {
+            // Ctrl+Enter для отправки сообщения
+            if (e.ctrlKey && e.key === 'Enter') {
+                e.preventDefault();
+                document.getElementById('chatForm').submit();
+            }
+            
+            // F1 для броска костей
+            if (e.key === 'F1') {
+                e.preventDefault();
+                openDiceStep1();
+            }
+            
+            // F2 для генерации NPC
+            if (e.key === 'F2') {
+                e.preventDefault();
+                openNpcStep1();
+            }
+            
+            // F3 для инициативы
+            if (e.key === 'F3') {
+                e.preventDefault();
+                openInitiativeModal();
+            }
+            
+            // Escape для закрытия модального окна
+            if (e.key === 'Escape') {
+                const modal = document.getElementById('modal-bg');
+                if (modal && modal.classList.contains('active')) {
+                    closeModal();
+                }
+            }
+        });
 </script>

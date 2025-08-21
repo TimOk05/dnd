@@ -6,6 +6,9 @@ if (isLoggedIn()) {
     header('Location: index.php');
     exit;
 }
+
+// Генерируем CSRF токен
+$csrf_token = generateCSRFToken();
 ?>
 <!DOCTYPE html>
 <html lang="ru">
@@ -258,6 +261,7 @@ if (isLoggedIn()) {
                     <label for="login-password">Пароль:</label>
                     <input type="password" id="login-password" name="password" required>
                 </div>
+                <input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars($csrf_token); ?>">
                 <button type="submit" class="submit-btn">Войти</button>
             </form>
         </div>
@@ -272,11 +276,15 @@ if (isLoggedIn()) {
                 <div class="form-group">
                     <label for="register-password">Пароль:</label>
                     <input type="password" id="register-password" name="password" required>
+                    <small style="color: #666; font-size: 0.9em; margin-top: 5px; display: block;">
+                        Минимум 8 символов: заглавные, строчные, цифры, спецсимволы
+                    </small>
                 </div>
                 <div class="form-group">
                     <label for="register-password-confirm">Подтвердите пароль:</label>
                     <input type="password" id="register-password-confirm" name="password_confirm" required>
                 </div>
+                <input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars($csrf_token); ?>">
                 <button type="submit" class="submit-btn">Зарегистрироваться</button>
             </form>
         </div>
@@ -296,9 +304,13 @@ if (isLoggedIn()) {
             if (tab === 'login') {
                 document.querySelector('.tab-btn:first-child').classList.add('active');
                 document.getElementById('login-form').classList.add('active');
+                // Фокус на поле ввода имени пользователя
+                setTimeout(() => document.getElementById('login-username').focus(), 100);
             } else {
                 document.querySelector('.tab-btn:last-child').classList.add('active');
                 document.getElementById('register-form').classList.add('active');
+                // Фокус на поле ввода имени пользователя
+                setTimeout(() => document.getElementById('register-username').focus(), 100);
             }
             
             // Очищаем сообщения
@@ -314,12 +326,36 @@ if (isLoggedIn()) {
             document.getElementById('loading').style.display = show ? 'block' : 'none';
         }
         
+        // Автофокус при загрузке страницы
+        document.addEventListener('DOMContentLoaded', function() {
+            document.getElementById('login-username').focus();
+        });
+        
+        // Автоматический переход к следующему полю при нажатии Enter
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Enter') {
+                const activeElement = document.activeElement;
+                if (activeElement.tagName === 'INPUT') {
+                    const currentForm = activeElement.closest('.form-content');
+                    if (currentForm) {
+                        const inputs = Array.from(currentForm.querySelectorAll('input[type="text"], input[type="password"]'));
+                        const currentIndex = inputs.indexOf(activeElement);
+                        if (currentIndex < inputs.length - 1) {
+                            inputs[currentIndex + 1].focus();
+                            e.preventDefault();
+                        }
+                    }
+                }
+            }
+        });
+        
         // Обработка формы входа
         document.getElementById('loginForm').addEventListener('submit', function(e) {
             e.preventDefault();
             
             const username = document.getElementById('login-username').value.trim();
             const password = document.getElementById('login-password').value;
+            const csrfToken = document.querySelector('#loginForm input[name="csrf_token"]').value;
             
             if (!username || !password) {
                 showMessage('Заполните все поля', 'error');
@@ -332,6 +368,7 @@ if (isLoggedIn()) {
             formData.append('action', 'login');
             formData.append('username', username);
             formData.append('password', password);
+            formData.append('csrf_token', csrfToken);
             
             fetch('users.php', {
                 method: 'POST',
@@ -347,6 +384,8 @@ if (isLoggedIn()) {
                     }, 1000);
                 } else {
                     showMessage(data.message, 'error');
+                    // Фокус на поле пароля при ошибке
+                    document.getElementById('login-password').focus();
                 }
             })
             .catch(error => {
@@ -362,6 +401,7 @@ if (isLoggedIn()) {
             const username = document.getElementById('register-username').value.trim();
             const password = document.getElementById('register-password').value;
             const passwordConfirm = document.getElementById('register-password-confirm').value;
+            const csrfToken = document.querySelector('#registerForm input[name="csrf_token"]').value;
             
             if (!username || !password || !passwordConfirm) {
                 showMessage('Заполните все поля', 'error');
@@ -370,11 +410,38 @@ if (isLoggedIn()) {
             
             if (password !== passwordConfirm) {
                 showMessage('Пароли не совпадают', 'error');
+                document.getElementById('register-password-confirm').focus();
                 return;
             }
             
-            if (password.length < 4) {
-                showMessage('Пароль должен быть не менее 4 символов', 'error');
+            // Проверяем сложность пароля на клиенте
+            if (password.length < 8) {
+                showMessage('Пароль должен быть не менее 8 символов', 'error');
+                document.getElementById('register-password').focus();
+                return;
+            }
+            
+            if (!/[A-Z]/.test(password)) {
+                showMessage('Пароль должен содержать хотя бы одну заглавную букву', 'error');
+                document.getElementById('register-password').focus();
+                return;
+            }
+            
+            if (!/[a-z]/.test(password)) {
+                showMessage('Пароль должен содержать хотя бы одну строчную букву', 'error');
+                document.getElementById('register-password').focus();
+                return;
+            }
+            
+            if (!/[0-9]/.test(password)) {
+                showMessage('Пароль должен содержать хотя бы одну цифру', 'error');
+                document.getElementById('register-password').focus();
+                return;
+            }
+            
+            if (!/[^A-Za-z0-9]/.test(password)) {
+                showMessage('Пароль должен содержать хотя бы один специальный символ', 'error');
+                document.getElementById('register-password').focus();
                 return;
             }
             
@@ -384,6 +451,7 @@ if (isLoggedIn()) {
             formData.append('action', 'register');
             formData.append('username', username);
             formData.append('password', password);
+            formData.append('csrf_token', csrfToken);
             
             fetch('users.php', {
                 method: 'POST',
@@ -393,16 +461,39 @@ if (isLoggedIn()) {
             .then(data => {
                 showLoading(false);
                 if (data.success) {
-                    showMessage(data.message, 'success');
-                    // Очищаем форму
-                    document.getElementById('registerForm').reset();
-                    // Переключаемся на вкладку входа
+                    showMessage('Регистрация успешна! Выполняется вход...', 'success');
+                    // Автоматически входим в систему после регистрации
                     setTimeout(() => {
-                        switchTab('login');
-                        document.getElementById('login-username').value = username;
+                        const loginData = new FormData();
+                        loginData.append('action', 'login');
+                        loginData.append('username', username);
+                        loginData.append('password', password);
+                        loginData.append('csrf_token', csrfToken);
+                        
+                        fetch('users.php', {
+                            method: 'POST',
+                            body: loginData
+                        })
+                        .then(response => response.json())
+                        .then(loginResult => {
+                            if (loginResult.success) {
+                                window.location.href = 'index.php?welcome=1';
+                            } else {
+                                // Если автоматический вход не удался, переключаемся на вкладку входа
+                                switchTab('login');
+                                document.getElementById('login-username').value = username;
+                                showMessage('Регистрация успешна! Теперь войдите в систему.', 'success');
+                            }
+                        });
                     }, 1500);
                 } else {
                     showMessage(data.message, 'error');
+                    // Фокус на поле, где произошла ошибка
+                    if (data.message.includes('имя пользователя')) {
+                        document.getElementById('register-username').focus();
+                    } else if (data.message.includes('пароль')) {
+                        document.getElementById('register-password').focus();
+                    }
                 }
             })
             .catch(error => {

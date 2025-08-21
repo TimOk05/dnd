@@ -126,6 +126,20 @@
             margin-bottom: 14px;
         }
         
+        .hotkeys-hint {
+            margin-top: 8px;
+            color: var(--text-senary);
+            font-size: 0.85em;
+            opacity: 0.8;
+        }
+        
+        .hotkeys-hint small {
+            background: var(--bg-tertiary);
+            padding: 4px 8px;
+            border-radius: 6px;
+            border: 1px solid var(--border-tertiary);
+        }
+        
         .fast-btn {
             display: inline-block;
             margin: 0 6px 10px 0;
@@ -1362,6 +1376,50 @@
             transform: translateY(-1px);
             box-shadow: 0 4px 12px var(--shadow-secondary);
         }
+        
+        .admin-link {
+            background: var(--accent-warning);
+            color: var(--bg-secondary);
+            border: 2px solid var(--accent-warning);
+            border-radius: 8px;
+            padding: 8px 12px;
+            font-size: 1.1em;
+            font-family: inherit;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 8px var(--shadow-primary);
+            text-decoration: none;
+            display: inline-block;
+        }
+        
+        .admin-link:hover {
+            background: var(--bg-secondary);
+            color: var(--accent-warning);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px var(--shadow-secondary);
+        }
+        
+        .stats-link {
+            background: var(--accent-info);
+            color: var(--bg-secondary);
+            border: 2px solid var(--accent-info);
+            border-radius: 8px;
+            padding: 8px 12px;
+            font-size: 1.1em;
+            font-family: inherit;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 8px var(--shadow-primary);
+            text-decoration: none;
+            display: inline-block;
+        }
+        
+        .stats-link:hover {
+            background: var(--bg-secondary);
+            color: var(--accent-info);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px var(--shadow-secondary);
+        }
         /* Улучшенные мобильные стили */
         
         @media (max-width: 768px) {
@@ -1376,11 +1434,18 @@
                 left: auto;
                 margin-bottom: 15px;
                 justify-content: center;
+                flex-wrap: wrap;
+                gap: 10px;
             }
             .welcome-text {
                 font-size: 1em;
+                order: -1;
+                width: 100%;
+                text-align: center;
             }
-            .logout-btn {
+            .logout-btn,
+            .stats-link,
+            .admin-link {
                 padding: 6px 12px;
                 font-size: 0.8em;
             }
@@ -1395,6 +1460,10 @@
                 margin: 4px;
                 padding: 10px 16px;
                 font-size: 0.95em;
+            }
+            .hotkeys-hint {
+                display: none;
+                /* Скрываем на мобильных */
             }
             .chat-box {
                 min-height: 200px;
@@ -1460,17 +1529,24 @@
         </div>
         <div class="user-info">
             <span class="welcome-text">Добро пожаловать, <?php echo htmlspecialchars($currentUser); ?>!</span>
+            <a href="stats.php" class="stats-link" title="Статистика">📊</a>
             <button class="logout-btn" onclick="logout()">Выйти</button>
+            <?php if (isAdmin()): ?>
+            <a href="admin.php" class="admin-link" title="Админ панель">🔧</a>
+            <?php endif; ?>
         </div>
         <h1>DnD AI Чат</h1>
         <div class="fast-bar">
             {{fast_buttons}}
+            <div class="hotkeys-hint">
+                <small>Горячие клавиши: F1 (кости) | F2 (NPC) | F3 (инициатива) | Ctrl+Enter (отправить)</small>
+            </div>
         </div>
         <div class="chat-box">
             {{chat_messages}}
         </div>
-        <form method="post">
-            <input type="text" name="message" placeholder="Введите сообщение..." autocomplete="off" required>
+        <form method="post" id="chatForm">
+            <input type="text" name="message" id="messageInput" placeholder="Введите сообщение..." autocomplete="off" required>
             <button type="submit">Отправить</button>
             <a class="reset-link" href="?reset=1">Сбросить чат</a>
         </form>
@@ -1496,6 +1572,20 @@
             const themeToggle = document.getElementById('theme-toggle');
             const themeIcon = themeToggle.querySelector('.theme-icon');
             const body = document.body;
+            const messageInput = document.getElementById('messageInput');
+
+            // Автофокус на поле ввода сообщения
+            if (messageInput) {
+                messageInput.focus();
+
+                // Автоматическая отправка по Enter
+                messageInput.addEventListener('keydown', function(e) {
+                    if (e.key === 'Enter' && !e.shiftKey) {
+                        e.preventDefault();
+                        document.getElementById('chatForm').submit();
+                    }
+                });
+            }
 
             // Загружаем сохраненную тему
             const savedTheme = localStorage.getItem('theme') || 'light';
@@ -1514,7 +1604,30 @@
             function updateThemeIcon(theme) {
                 themeIcon.textContent = theme === 'dark' ? '☀️' : '🌙';
             }
+
+            // Показываем приветственное сообщение для новых пользователей
+            const urlParams = new URLSearchParams(window.location.search);
+            if (urlParams.get('welcome') === '1') {
+                showWelcomeMessage();
+            }
         });
+
+        // Функция показа приветственного сообщения
+        function showWelcomeMessage() {
+            const welcomeDiv = document.createElement('div');
+            welcomeDiv.className = 'npc-toast active';
+            welcomeDiv.textContent = 'Добро пожаловать в DnD Copilot! Начните с генерации NPC или броска костей.';
+            document.body.appendChild(welcomeDiv);
+
+            setTimeout(() => {
+                welcomeDiv.classList.remove('active');
+                setTimeout(() => {
+                    if (welcomeDiv.parentNode) {
+                        welcomeDiv.parentNode.removeChild(welcomeDiv);
+                    }
+                }, 300);
+            }, 4000);
+        }
 
         // Функция выхода
         function logout() {
