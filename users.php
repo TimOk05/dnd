@@ -304,7 +304,7 @@ function getCurrentUser() {
 // Функция для проверки административного пароля
 function checkAdminPassword($password) {
     // Хеш пароля Timdndadmin
-    $adminHash = '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi';
+    $adminHash = '$2y$10$QeNLDq6pe1.ZYEoF1v5Wd.BI4yD8o.IPTr4Tycxr/K5fdRh6SPEmi';
     return password_verify($password, $adminHash);
 }
 

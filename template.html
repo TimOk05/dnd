@@ -83,7 +83,7 @@
             border-radius: 24px;
             box-shadow: 0 8px 32px var(--shadow-secondary), 0 0 0 12px rgba(210, 180, 140, 0.3);
             max-width: 760px;
-            margin: 36px auto;
+            margin: 60px auto 36px auto;
             padding: 32px 24px 18px 24px;
             position: relative;
             transition: all 0.3s ease;
@@ -1346,15 +1346,25 @@
             left: 20px;
             display: flex;
             align-items: center;
-            gap: 15px;
+            gap: 12px;
             z-index: 100;
+            max-width: calc(100% - 80px);
+            flex-wrap: wrap;
+            background: rgba(255, 255, 255, 0.1);
+            padding: 8px 12px;
+            border-radius: 8px;
+            backdrop-filter: blur(5px);
         }
         
         .welcome-text {
             color: var(--text-tertiary);
             font-weight: bold;
-            font-size: 1.1em;
+            font-size: 0.95em;
             text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+            white-space: nowrap;
+            max-width: 200px;
+            overflow: hidden;
+            text-overflow: ellipsis;
         }
         
         .logout-btn {
@@ -1362,12 +1372,13 @@
             color: var(--bg-secondary);
             border: 2px solid var(--accent-danger);
             border-radius: 8px;
-            padding: 8px 16px;
-            font-size: 0.9em;
+            padding: 6px 12px;
+            font-size: 0.85em;
             font-family: inherit;
             cursor: pointer;
             transition: all 0.3s ease;
             box-shadow: 0 2px 8px var(--shadow-primary);
+            white-space: nowrap;
         }
         
         .logout-btn:hover {
@@ -1378,6 +1389,9 @@
         }
         
         .admin-link {
+            position: fixed;
+            top: 10px;
+            right: 10px;
             background: var(--accent-warning);
             color: var(--bg-secondary);
             border: 2px solid var(--accent-warning);
@@ -1390,6 +1404,7 @@
             box-shadow: 0 2px 8px var(--shadow-primary);
             text-decoration: none;
             display: inline-block;
+            z-index: 1000;
         }
         
         .admin-link:hover {
@@ -1404,14 +1419,15 @@
             color: var(--bg-secondary);
             border: 2px solid var(--accent-info);
             border-radius: 8px;
-            padding: 8px 12px;
-            font-size: 1.1em;
+            padding: 6px 10px;
+            font-size: 0.85em;
             font-family: inherit;
             cursor: pointer;
             transition: all 0.3s ease;
             box-shadow: 0 2px 8px var(--shadow-primary);
             text-decoration: none;
             display: inline-block;
+            white-space: nowrap;
         }
         
         .stats-link:hover {
@@ -1435,7 +1451,9 @@
                 margin-bottom: 15px;
                 justify-content: center;
                 flex-wrap: wrap;
-                gap: 10px;
+                gap: 8px;
+                max-width: 100%;
+                background: rgba(255, 255, 255, 0.15);
             }
             .welcome-text {
                 font-size: 1em;
@@ -1444,10 +1462,17 @@
                 text-align: center;
             }
             .logout-btn,
-            .stats-link,
-            .admin-link {
+            .stats-link {
                 padding: 6px 12px;
                 font-size: 0.8em;
+            }
+            .admin-link {
+                position: fixed;
+                top: 5px;
+                right: 5px;
+                padding: 6px 10px;
+                font-size: 0.9em;
+                z-index: 1000;
             }
             h1 {
                 font-size: 1.8em;
@@ -1531,10 +1556,11 @@
             <span class="welcome-text">Добро пожаловать, <?php echo htmlspecialchars($currentUser); ?>!</span>
             <a href="stats.php" class="stats-link" title="Статистика">📊</a>
             <button class="logout-btn" onclick="logout()">Выйти</button>
-            <?php if (isAdmin()): ?>
-            <a href="admin.php" class="admin-link" title="Админ панель">🔧</a>
-            <?php endif; ?>
         </div>
+
+        <?php if (isAdmin()): ?>
+        <a href="admin.php" class="admin-link" title="Админ панель">🔧</a>
+        <?php endif; ?>
         <h1>DnD AI Чат</h1>
         <div class="fast-bar">
             {{fast_buttons}}
