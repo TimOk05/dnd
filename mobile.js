@@ -23,12 +23,15 @@ function initSimpleMobile() {
 
     // Инициализируем мобильные формы
     initMobileForms();
+
+    // Создаем боковое меню
+    createSideMenu();
 }
 
 // ===== ПРОСТОЕ ИСПРАВЛЕНИЕ ЛАЙАУТА =====
 
 function fixSimpleLayout() {
-    // Переключатель темы - простое позиционирование
+    // Переключатель темы - в правом верхнем углу
     const themeToggle = document.querySelector('.theme-toggle');
     if (themeToggle) {
         themeToggle.style.position = 'fixed';
@@ -46,24 +49,82 @@ function fixSimpleLayout() {
         adminLink.style.zIndex = '1000';
     }
 
-    // Пользовательская информация - вверху
+    // Убираем приветствие - скрываем пользовательскую информацию
     const userInfo = document.querySelector('.user-info');
     if (userInfo) {
-        userInfo.style.position = 'fixed';
-        userInfo.style.top = '20px';
-        userInfo.style.left = '20px';
-        userInfo.style.right = '160px';
-        userInfo.style.zIndex = '1000';
-        userInfo.style.background = 'rgba(255, 255, 255, 0.9)';
-        userInfo.style.padding = '10px';
-        userInfo.style.borderRadius = '8px';
+        userInfo.style.display = 'none';
     }
 
     // Основной контент - отступ сверху
     const parchment = document.querySelector('.parchment');
     if (parchment) {
-        parchment.style.marginTop = '80px';
+        parchment.style.marginTop = '60px';
         parchment.style.paddingTop = '20px';
+    }
+}
+
+// ===== БОКОВОЕ МЕНЮ =====
+
+function createSideMenu() {
+    // Создаем кнопку меню
+    const menuButton = document.createElement('div');
+    menuButton.className = 'mobile-menu-button';
+    menuButton.innerHTML = '☰';
+    menuButton.onclick = toggleSideMenu;
+    document.body.appendChild(menuButton);
+
+    // Создаем боковое меню
+    const sideMenu = document.createElement('div');
+    sideMenu.className = 'mobile-side-menu';
+    sideMenu.innerHTML = `
+        <div class="side-menu-header">
+            <h3>Меню</h3>
+            <button class="close-menu" onclick="toggleSideMenu()">×</button>
+        </div>
+        <div class="side-menu-content">
+            <a href="stats.php" class="menu-item">
+                <span class="menu-icon">📊</span>
+                <span class="menu-text">Статистика</span>
+            </a>
+            <a href="#" class="menu-item" onclick="toggleThemeMobile(); toggleSideMenu();">
+                <span class="menu-icon" id="theme-menu-icon">🌙</span>
+                <span class="menu-text">Сменить тему</span>
+            </a>
+            <div class="menu-item logout-item" onclick="logout()">
+                <span class="menu-icon">🚪</span>
+                <span class="menu-text">Выйти</span>
+            </div>
+        </div>
+    `;
+    document.body.appendChild(sideMenu);
+
+    // Добавляем затемнение
+    const overlay = document.createElement('div');
+    overlay.className = 'mobile-menu-overlay';
+    overlay.onclick = toggleSideMenu;
+    document.body.appendChild(overlay);
+
+    // Устанавливаем правильную иконку темы
+    setTimeout(() => {
+        const body = document.body;
+        const currentTheme = body.getAttribute('data-theme') || 'light';
+        const themeMenuIcon = document.getElementById('theme-menu-icon');
+        if (themeMenuIcon) {
+            themeMenuIcon.textContent = currentTheme === 'dark' ? '☀️' : '🌙';
+        }
+    }, 100);
+}
+
+function toggleSideMenu() {
+    const sideMenu = document.querySelector('.mobile-side-menu');
+    const overlay = document.querySelector('.mobile-menu-overlay');
+
+    if (sideMenu.classList.contains('active')) {
+        sideMenu.classList.remove('active');
+        overlay.classList.remove('active');
+    } else {
+        sideMenu.classList.add('active');
+        overlay.classList.add('active');
     }
 }
 
@@ -259,77 +320,224 @@ function generateSimpleNpc() {
     }, 300);
 }
 
+// Функция для переключения темы в мобильном меню
+function toggleThemeMobile() {
+    const themeToggle = document.getElementById('theme-toggle');
+    if (themeToggle) {
+        themeToggle.click();
+    } else {
+        // Альтернативный способ переключения темы
+        const body = document.body;
+        const currentTheme = body.getAttribute('data-theme');
+        const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+
+        body.setAttribute('data-theme', newTheme);
+        localStorage.setItem('theme', newTheme);
+
+        // Обновляем иконку в меню
+        const themeMenuIcon = document.getElementById('theme-menu-icon');
+        if (themeMenuIcon) {
+            themeMenuIcon.textContent = newTheme === 'dark' ? '☀️' : '🌙';
+        }
+    }
+}
+
 // ===== ПРОСТЫЕ CSS СТИЛИ =====
 
 const simpleMobileStyles = `
 <style>
-/* Простые мобильные стили */
+/* Простые мобильные стили - сохраняем дизайн ПК версии */
 .mobile-device .parchment {
-    margin: 80px 10px 20px 10px;
+    margin: 60px 10px 20px 10px;
     padding: 15px;
-    border-radius: 12px;
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
 }
 
-/* Улучшенные кнопки */
-.mobile-device .fast-btn {
-    margin: 5px 0;
-    padding: 15px 20px;
-    font-size: 16px;
-    border-radius: 10px;
-    border: none;
-    background: linear-gradient(135deg, #8B4513, #A0522D);
-    color: white;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+/* Кнопка бокового меню */
+.mobile-menu-button {
+    position: fixed;
+    top: 20px;
+    left: 20px;
+    width: 40px;
+    height: 40px;
+    background: var(--accent-primary);
+    color: var(--bg-secondary);
+    border: 2px solid var(--accent-secondary);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 20px;
+    cursor: pointer;
+    z-index: 1000;
+    box-shadow: 0 2px 8px var(--shadow-primary);
     transition: all 0.3s ease;
 }
 
-.mobile-device .fast-btn:active {
-    transform: scale(0.98);
-    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.3);
+.mobile-menu-button:hover {
+    background: var(--accent-secondary);
+    transform: scale(1.1);
+    box-shadow: 0 4px 12px var(--shadow-secondary);
 }
 
-/* Улучшенные поля ввода */
+/* Боковое меню */
+.mobile-side-menu {
+    position: fixed;
+    top: 0;
+    left: -280px;
+    width: 280px;
+    height: 100vh;
+    background: var(--bg-secondary);
+    border-right: 2px solid var(--border-primary);
+    z-index: 1001;
+    transition: left 0.3s ease;
+    box-shadow: 2px 0 10px rgba(0, 0, 0, 0.1);
+}
+
+.mobile-side-menu.active {
+    left: 0;
+}
+
+.side-menu-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px;
+    border-bottom: 1px solid var(--border-primary);
+    background: var(--bg-tertiary);
+}
+
+.side-menu-header h3 {
+    margin: 0;
+    color: var(--text-primary);
+    font-size: 18px;
+}
+
+.close-menu {
+    background: none;
+    border: none;
+    font-size: 24px;
+    color: var(--text-primary);
+    cursor: pointer;
+    padding: 0;
+    width: 30px;
+    height: 30px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.close-menu:hover {
+    color: var(--accent-primary);
+}
+
+.side-menu-content {
+    padding: 20px;
+}
+
+.menu-item {
+    display: flex;
+    align-items: center;
+    padding: 15px;
+    margin: 5px 0;
+    background: var(--bg-tertiary);
+    border: 1px solid var(--border-primary);
+    border-radius: 8px;
+    text-decoration: none;
+    color: var(--text-primary);
+    font-size: 16px;
+    transition: all 0.3s ease;
+}
+
+.menu-item:hover {
+    background: var(--bg-quaternary);
+    transform: translateX(5px);
+    text-decoration: none;
+    color: var(--text-primary);
+}
+
+.menu-icon {
+    margin-right: 15px;
+    font-size: 20px;
+    width: 24px;
+    text-align: center;
+}
+
+.menu-text {
+    flex: 1;
+}
+
+.logout-item {
+    background: var(--accent-danger);
+    color: white;
+    border-color: var(--accent-danger);
+}
+
+.logout-item:hover {
+    background: var(--bg-secondary);
+    color: var(--accent-danger);
+}
+
+/* Затемнение */
+.mobile-menu-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(0, 0, 0, 0.5);
+    z-index: 1000;
+    opacity: 0;
+    visibility: hidden;
+    transition: all 0.3s ease;
+}
+
+.mobile-menu-overlay.active {
+    opacity: 1;
+    visibility: visible;
+}
+
+/* Улучшенные поля ввода - сохраняем стили ПК */
 .mobile-device input[type="text"],
 .mobile-device input[type="number"],
 .mobile-device select {
     width: 100%;
     padding: 12px;
     font-size: 16px;
-    border: 2px solid #ddd;
+    border: 2px solid var(--border-primary);
     border-radius: 8px;
-    background: white;
+    background: var(--bg-tertiary);
+    color: var(--text-primary);
     margin: 5px 0;
 }
 
 .mobile-device input:focus,
 .mobile-device select:focus {
     outline: none;
-    border-color: #8B4513;
-    box-shadow: 0 0 5px rgba(139, 69, 19, 0.3);
+    border-color: var(--accent-primary);
+    box-shadow: 0 0 5px rgba(0, 124, 186, 0.3);
 }
 
-/* Улучшенный чат */
+/* Улучшенный чат - сохраняем стили ПК */
 .mobile-device .chat-box {
     max-height: 60vh;
     overflow-y: auto;
     padding: 15px;
-    background: rgba(255, 255, 255, 0.9);
+    background: var(--bg-tertiary);
     border-radius: 10px;
-    border: 1px solid #ddd;
+    border: 1px solid var(--border-primary);
     margin: 10px 0;
 }
 
-/* Улучшенные заметки */
+/* Улучшенные заметки - сохраняем стили ПК */
 .mobile-device .notes-block {
     margin-top: 20px;
     padding: 15px;
-    background: rgba(255, 255, 255, 0.9);
+    background: var(--bg-tertiary);
     border-radius: 10px;
-    border: 1px solid #ddd;
+    border: 1px solid var(--border-primary);
 }
 
-/* Улучшенные модальные окна */
+/* Улучшенные модальные окна - сохраняем стили ПК */
 .mobile-device .modal {
     width: 95vw;
     max-width: 400px;
@@ -338,7 +546,7 @@ const simpleMobileStyles = `
     margin: 5vh auto;
     border-radius: 15px;
     overflow-y: auto;
-    background: white;
+    background: var(--bg-secondary);
     box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
 }
 
@@ -346,7 +554,7 @@ const simpleMobileStyles = `
     padding: 20px;
 }
 
-/* Улучшенная форма чата */
+/* Улучшенная форма чата - сохраняем стили ПК */
 .mobile-device form {
     display: flex;
     gap: 10px;
@@ -364,14 +572,14 @@ const simpleMobileStyles = `
     font-size: 16px;
     border-radius: 8px;
     border: none;
-    background: #8B4513;
-    color: white;
+    background: var(--accent-primary);
+    color: var(--bg-secondary);
     white-space: nowrap;
 }
 
-/* Улучшенные ссылки */
+/* Улучшенные ссылки - сохраняем стили ПК */
 .mobile-device .reset-link {
-    color: #8B4513;
+    color: var(--accent-primary);
     text-decoration: none;
     font-size: 14px;
     margin-left: 10px;
@@ -386,16 +594,16 @@ const simpleMobileStyles = `
     scroll-behavior: smooth;
 }
 
-/* Улучшенные заголовки */
+/* Улучшенные заголовки - сохраняем стили ПК */
 .mobile-device h1 {
     text-align: center;
     margin: 20px 0;
-    color: #8B4513;
+    color: var(--text-primary);
     font-size: 24px;
     text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.1);
 }
 
-/* Адаптивная сетка кнопок */
+/* Адаптивная сетка кнопок - сохраняем стили ПК */
 .mobile-device .fast-bar {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
@@ -403,32 +611,13 @@ const simpleMobileStyles = `
     margin: 15px 0;
 }
 
-/* Улучшенные подсказки */
+/* Улучшенные подсказки - сохраняем стили ПК */
 .mobile-device .hotkeys-hint {
     text-align: center;
     margin: 10px 0;
     font-size: 12px;
-    color: #666;
+    color: var(--text-tertiary);
     opacity: 0.8;
-}
-
-/* Темная тема для мобильных */
-.mobile-device[data-theme="dark"] .parchment {
-    background: #2a2a2a;
-    color: #fff;
-}
-
-.mobile-device[data-theme="dark"] input,
-.mobile-device[data-theme="dark"] select {
-    background: #3a3a3a;
-    color: #fff;
-    border-color: #555;
-}
-
-.mobile-device[data-theme="dark"] .chat-box,
-.mobile-device[data-theme="dark"] .notes-block {
-    background: rgba(58, 58, 58, 0.9);
-    border-color: #555;
 }
 
 /* Анимации */
@@ -445,7 +634,7 @@ const simpleMobileStyles = `
 .mobile-device button:focus,
 .mobile-device input:focus,
 .mobile-device select:focus {
-    outline: 2px solid #8B4513;
+    outline: 2px solid var(--accent-primary);
     outline-offset: 2px;
 }
 </style>
