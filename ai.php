@@ -1,4 +1,13 @@
 <?php
+session_start();
+require_once 'users.php';
+
+// Проверяем авторизацию пользователя
+if (!isLoggedIn()) {
+    echo json_encode(['error' => 'Unauthorized - please login']);
+    exit;
+}
+
 header('Content-Type: application/json; charset=utf-8');
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     echo json_encode(['error' => 'POST only']);
@@ -62,40 +71,48 @@ $data = array(
     'temperature' => $temperature
 );
 
-// Используем cURL для лучшего контроля timeout
-$ch = curl_init();
-curl_setopt($ch, CURLOPT_URL, $api_url);
-curl_setopt($ch, CURLOPT_POST, true);
-curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($data));
-curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-curl_setopt($ch, CURLOPT_TIMEOUT, $timeout);
-curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 10);
-curl_setopt($ch, CURLOPT_HTTPHEADER, array(
-    'Content-Type: application/json',
-    'Authorization: Bearer ' . $api_key
-));
-curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, true);
+// Используем file_get_contents для совместимости
+$options = array(
+    'http' => array(
+        'header' => "Content-Type: application/json\r\n" .
+                    "Authorization: Bearer " . $api_key . "\r\n",
+        'method' => 'POST',
+        'content' => json_encode($data),
+        'timeout' => $timeout,
+        'ignore_errors' => true
+    )
+);
 
-$response = curl_exec($ch);
-$httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-$curlError = curl_error($ch);
-curl_close($ch);
+$context = stream_context_create($options);
+$response = file_get_contents($api_url, false, $context);
 
-if ($curlError) {
-    echo json_encode(['error' => 'Connection error: ' . $curlError]);
+if ($response === false) {
+    $error = error_get_last();
+    echo json_encode(['error' => 'Request failed: ' . ($error['message'] ?? 'unknown')]);
     exit;
 }
 
-if ($httpCode !== 200) {
-    echo json_encode(['error' => "HTTP Error $httpCode: " . $response]);
+if (!isset($http_response_header) || empty($http_response_header)) {
+    echo json_encode(['error' => 'No HTTP response headers received']);
+    exit;
+}
+
+list($version, $status, $msg) = explode(' ', $http_response_header[0], 3);
+if ($status != 200) {
+    echo json_encode(['error' => "HTTP Error $status: $msg - $response"]);
     exit;
 }
 
 $result = json_decode($response, true);
 if (json_last_error() !== JSON_ERROR_NONE) {
-    echo json_encode(['error' => 'Invalid JSON response: ' . json_last_error_msg()]);
+    echo json_encode(['error' => 'Invalid JSON response: ' . json_last_error_msg() . ' - Raw response: ' . substr($response, 0, 200)]);
     exit;
 }
 
 $aiMessage = $result['choices'][0]['message']['content'] ?? '';
+if (empty($aiMessage)) {
+    echo json_encode(['error' => 'Empty AI response - Full response: ' . json_encode($result)]);
+    exit;
+}
+
 echo json_encode(['result' => $aiMessage], JSON_UNESCAPED_UNICODE);
