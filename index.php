@@ -163,7 +163,6 @@ $fastBtns = '';
 $fastBtns .= '<button class="fast-btn" onclick="openDiceStep1()">🎲 Бросок костей</button>';
 $fastBtns .= '<button class="fast-btn" onclick="openNpcStep1()">🗣️ NPC</button>';
 $fastBtns .= '<button class="fast-btn" onclick="openInitiativeModal()">⚡ Инициатива</button>';
-$fastBtns .= '<button class="fast-btn" onclick="testTechnicalParams()" style="background: var(--accent-warning);">🧪 Тест</button>';
 
 // --- Генерация сообщений чата (пропускаем system) ---
 $chatMsgs = '';
@@ -372,10 +371,31 @@ function toggleAdvancedSettings() {
     }
 }
 // --- Загрузка базы уникальных торговцев ---
-window.uniqueTraders = [];
-fetch('pdf/d100_unique_traders.json')
-  .then(r => r.json())
-  .then(data => { window.uniqueTraders = data; });
+window.uniqueTraders = {
+  data: {
+    traits: [
+      'Любознательный и наблюдательный',
+      'Осторожный и расчетливый',
+      'Дружелюбный и общительный',
+      'Гордый и независимый',
+      'Мудрый и терпеливый'
+    ],
+    motivation: [
+      'Поиск знаний и мудрости',
+      'Защита близких и слабых',
+      'Достижение власти и влияния',
+      'Исследование мира и приключения',
+      'Служение высшей цели'
+    ],
+    occupations: [
+      { name_ru: 'Торговец' },
+      { name_ru: 'Ремесленник' },
+      { name_ru: 'Стражник' },
+      { name_ru: 'Ученый' },
+      { name_ru: 'Авантюрист' }
+    ]
+  }
+};
 
 // --- Загрузка механических параметров D&D ---
 window.dndMechanics = {
@@ -639,20 +659,10 @@ function fetchNpcFromAI(race, npcClass, prof, level, advancedSettings = {}) {
         document.getElementById('modal-content').innerHTML = `🎲 Генерация NPC${dots}<br><small>Это может занять до 30 секунд</small>`;
     }, 500);
     
-    fetch('pdf/d100_unique_traders.json', {
-        method: 'GET',
-        headers: {
-            'Cache-Control': 'no-cache'
-        }
-    })
-      .then(r => {
-          if (!r.ok) {
-              throw new Error('HTTP ' + r.status + ': ' + r.statusText);
-          }
-          return r.json();
-      })
-              .then(json => {
-          console.log('JSON loaded successfully:', json);
+        // Используем встроенные данные вместо загрузки JSON
+    const json = window.uniqueTraders;
+    console.log('Using embedded traders data:', json);
+    console.log('JSON loaded successfully:', json);
           // 1. Имя по расе или случайное
         let name = '';
         // Используем предустановленные имена для каждой расы
@@ -767,14 +777,7 @@ function fetchNpcFromAI(race, npcClass, prof, level, advancedSettings = {}) {
             console.error('AI Response Error:', e);
             document.getElementById('modal-content').innerHTML = '<div class="result-segment error">❌ Ошибка AI<br><small>Ошибка: ' + e.message + '</small><br><small>Попробуйте ещё раз</small></div>';
             document.getElementById('modal-save').style.display = 'none';
-        })
-        .catch((e) => {
-            clearInterval(progressInterval);
-            console.error('JSON loading error:', e);
-            document.getElementById('modal-content').innerHTML = '<div class="result-segment error">❌ Ошибка загрузки данных NPC<br><small>Ошибка: ' + e.message + '</small></div>';
-            document.getElementById('modal-save').style.display = 'none';
         });
-      });
 }
 
 
@@ -794,9 +797,9 @@ function generateNpcWithLevel() {
     console.log('Gender radio found:', genderRadio);
     if (genderRadio) {
         console.log('Gender radio value:', genderRadio.value);
-    }
-    if (genderRadio && genderRadio.value !== 'рандом') {
-        advancedSettings.gender = genderRadio.value;
+        if (genderRadio.value !== 'рандом') {
+            advancedSettings.gender = genderRadio.value;
+        }
     }
     
     // Получаем выбранное мировоззрение
@@ -804,9 +807,9 @@ function generateNpcWithLevel() {
     console.log('Alignment radio found:', alignmentRadio);
     if (alignmentRadio) {
         console.log('Alignment radio value:', alignmentRadio.value);
-    }
-    if (alignmentRadio && alignmentRadio.value !== 'рандом') {
-        advancedSettings.alignment = alignmentRadio.value;
+        if (alignmentRadio.value !== 'рандом') {
+            advancedSettings.alignment = alignmentRadio.value;
+        }
     }
     
     console.log('Collected advanced settings:', advancedSettings);
@@ -1287,6 +1290,11 @@ function formatNpcBlocks(txt, forcedName = '') {
         if (techBlock.length > 50) {
             techParams.fullBlock = techBlock;
         }
+        
+        // Проверяем, есть ли новые технические параметры (КД, характеристики и т.д.)
+        if (techBlock.includes('Класс доспеха:') || techBlock.includes('Характеристики:') || techBlock.includes('Спасброски:')) {
+            techParams.fullBlock = techBlock;
+        }
     }
     // Проверяем наличие необходимых блоков
     if (!name) {
@@ -1692,11 +1700,5 @@ document.querySelector('form').onsubmit = function(e) {
             }
         }
         
-        // --- Тестовая функция для проверки технических параметров ---
-        function testTechnicalParams() {
-            console.log('Testing technical params...');
-            const testParams = generateTechnicalParams('человек', 'варвар', 5);
-            console.log('Test result:', testParams);
-            alert('Технические параметры: ' + testParams.substring(0, 200) + '...');
-        }
+
 </script>
