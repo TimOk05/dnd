@@ -163,6 +163,7 @@ $fastBtns = '';
 $fastBtns .= '<button class="fast-btn" onclick="openDiceStep1()">🎲 Бросок костей</button>';
 $fastBtns .= '<button class="fast-btn" onclick="openNpcStep1()">🗣️ NPC</button>';
 $fastBtns .= '<button class="fast-btn" onclick="openInitiativeModal()">⚡ Инициатива</button>';
+$fastBtns .= '<button class="fast-btn" onclick="testTechnicalParams()" style="background: var(--accent-warning);">🧪 Тест</button>';
 
 // --- Генерация сообщений чата (пропускаем system) ---
 $chatMsgs = '';
@@ -623,6 +624,7 @@ function generateTechnicalParams(race, npcClass, level) {
         }
     }
     
+    console.log('Technical params result:', result);
     return result;
 }
 
@@ -717,8 +719,12 @@ function fetchNpcFromAI(race, npcClass, prof, level, advancedSettings = {}) {
         
         console.log('Advanced settings:', advancedSettings);
         console.log('Advanced prompt:', advancedPrompt);
+        console.log('Context block:', contextBlock);
+        console.log('Technical params length:', technicalParams.length);
         
         const prompt = `${advancedPrompt}${contextBlock}${technicalParams}`;
+        console.log('Final prompt length:', prompt.length);
+        console.log('Final prompt preview:', prompt.substring(0, 500) + '...');
         fetch('ai.php', {
             method: 'POST',
             headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
@@ -776,20 +782,34 @@ function fetchNpcFromAI(race, npcClass, prof, level, advancedSettings = {}) {
 function generateNpcWithLevel() {
     npcLevel = document.getElementById('npc-level').value;
     
+    console.log('generateNpcWithLevel called with level:', npcLevel);
+    console.log('Current npcRace:', npcRace);
+    console.log('Current npcClass:', npcClass);
+    
     // Собираем расширенные настройки
     let advancedSettings = {};
     
     // Получаем выбранный пол
     const genderRadio = document.querySelector('input[name="gender"]:checked');
+    console.log('Gender radio found:', genderRadio);
+    if (genderRadio) {
+        console.log('Gender radio value:', genderRadio.value);
+    }
     if (genderRadio && genderRadio.value !== 'рандом') {
         advancedSettings.gender = genderRadio.value;
     }
     
     // Получаем выбранное мировоззрение
     const alignmentRadio = document.querySelector('input[name="alignment"]:checked');
+    console.log('Alignment radio found:', alignmentRadio);
+    if (alignmentRadio) {
+        console.log('Alignment radio value:', alignmentRadio.value);
+    }
     if (alignmentRadio && alignmentRadio.value !== 'рандом') {
         advancedSettings.alignment = alignmentRadio.value;
     }
+    
+    console.log('Collected advanced settings:', advancedSettings);
     
     // Сохраняем параметры для повторной генерации
     lastGeneratedParams = {
@@ -1670,5 +1690,13 @@ document.querySelector('form').onsubmit = function(e) {
                 headerElement.classList.add('collapsed');
                 contentElement.classList.add('collapsed');
             }
+        }
+        
+        // --- Тестовая функция для проверки технических параметров ---
+        function testTechnicalParams() {
+            console.log('Testing technical params...');
+            const testParams = generateTechnicalParams('человек', 'варвар', 5);
+            console.log('Test result:', testParams);
+            alert('Технические параметры: ' + testParams.substring(0, 200) + '...');
         }
 </script>
