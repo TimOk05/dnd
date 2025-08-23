@@ -267,6 +267,33 @@ function openSimpleNpcModal() {
                        style="width: 100%; padding: 12px; font-size: 16px;">
             </div>
             
+            <div style="margin-bottom: 15px;">
+                <button class="fast-btn" onclick="toggleMobileAdvancedSettings()" 
+                        style="width: 100%; padding: 12px; font-size: 16px; background: var(--accent-info);">
+                    ⚙️ Расширенные настройки
+                </button>
+            </div>
+            
+            <div id="mobile-advanced-settings" style="display: none; margin-bottom: 15px; padding: 15px; background: var(--bg-tertiary); border-radius: 8px; border: 1px solid var(--border-tertiary);">
+                <div style="margin-bottom: 15px;">
+                    <label style="display: block; margin-bottom: 5px; font-weight: bold;">Пол:</label>
+                    <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+                        <label><input type="radio" name="gender" value="мужской" checked> Мужской</label>
+                        <label><input type="radio" name="gender" value="женский"> Женский</label>
+                        <label><input type="radio" name="gender" value="рандом"> Рандом</label>
+                    </div>
+                </div>
+                <div>
+                    <label style="display: block; margin-bottom: 5px; font-weight: bold;">Мировоззрение:</label>
+                    <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+                        <label><input type="radio" name="alignment" value="добрый" checked> Добрый</label>
+                        <label><input type="radio" name="alignment" value="нейтральный"> Нейтральный</label>
+                        <label><input type="radio" name="alignment" value="злой"> Злой</label>
+                        <label><input type="radio" name="alignment" value="рандом"> Рандом</label>
+                    </div>
+                </div>
+            </div>
+            
             <button class="fast-btn" onclick="generateSimpleNpc()" 
                     style="width: 100%; padding: 15px; font-size: 18px;">
                 🤖 Создать NPC
@@ -310,13 +337,33 @@ function generateSimpleNpc() {
         return;
     }
 
+    // Собираем расширенные настройки (если есть)
+    let advancedSettings = {};
+
+    // Получаем выбранный пол
+    const genderRadio = document.querySelector('input[name="gender"]:checked');
+    if (genderRadio && genderRadio.value !== 'рандом') {
+        advancedSettings.gender = genderRadio.value;
+    }
+
+    // Получаем выбранное мировоззрение
+    const alignmentRadio = document.querySelector('input[name="alignment"]:checked');
+    if (alignmentRadio && alignmentRadio.value !== 'рандом') {
+        advancedSettings.alignment = alignmentRadio.value;
+    }
+
     closeModal();
     setTimeout(() => {
         // Используем существующие функции
         window.npcRace = race;
         window.npcClass = npcClass;
         window.npcLevel = parseInt(level);
-        generateNpcWithLevel();
+
+        // Добавляем отладочную информацию
+        console.log('Mobile NPC Generation:', { race, npcClass, level, advancedSettings });
+
+        // Вызываем генерацию напрямую с правильными параметрами
+        fetchNpcFromAI(race, npcClass, '', parseInt(level), advancedSettings);
     }, 300);
 }
 
@@ -637,8 +684,77 @@ const simpleMobileStyles = `
     outline: 2px solid var(--accent-primary);
     outline-offset: 2px;
 }
+
+/* Стили для сворачиваемых блоков в мобильной версии */
+.mobile-device .npc-collapsible-header {
+    cursor: pointer;
+    user-select: none;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    transition: all 0.3s ease;
+    padding: 8px 0;
+}
+
+.mobile-device .npc-collapsible-header:hover {
+    opacity: 0.8;
+}
+
+.mobile-device .npc-collapsible-header .toggle-icon {
+    font-size: 0.8em;
+    transition: transform 0.3s ease;
+    margin-left: 8px;
+}
+
+.mobile-device .npc-collapsible-header.collapsed .toggle-icon {
+    transform: rotate(-90deg);
+}
+
+.mobile-device .npc-collapsible-content {
+    max-height: 1000px;
+    overflow: hidden;
+    transition: max-height 0.3s ease, opacity 0.3s ease;
+    opacity: 1;
+}
+
+.mobile-device .npc-collapsible-content.collapsed {
+    max-height: 0;
+    opacity: 0;
+}
 </style>
 `;
 
 // Добавляем стили в head
 document.head.insertAdjacentHTML('beforeend', simpleMobileStyles);
+
+// --- Функция для переключения сворачиваемых технических параметров (мобильная версия) ---
+function toggleTechnicalParams(headerElement) {
+    const contentElement = headerElement.nextElementSibling;
+    const isCollapsed = headerElement.classList.contains('collapsed');
+
+    if (isCollapsed) {
+        // Разворачиваем
+        headerElement.classList.remove('collapsed');
+        contentElement.classList.remove('collapsed');
+    } else {
+        // Сворачиваем
+        headerElement.classList.add('collapsed');
+        contentElement.classList.add('collapsed');
+    }
+}
+
+// --- Функция переключения расширенных настроек в мобильной версии ---
+function toggleMobileAdvancedSettings() {
+    const panel = document.getElementById('mobile-advanced-settings');
+    const button = document.querySelector('button[onclick="toggleMobileAdvancedSettings()"]');
+
+    if (panel.style.display === 'none') {
+        panel.style.display = 'block';
+        button.innerHTML = '⚙️ Скрыть расширенные настройки';
+        button.style.background = 'var(--accent-warning)';
+    } else {
+        panel.style.display = 'none';
+        button.innerHTML = '⚙️ Расширенные настройки';
+        button.style.background = 'var(--accent-info)';
+    }
+}

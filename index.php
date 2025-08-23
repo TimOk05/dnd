@@ -319,17 +319,214 @@ function openNpcStep2(race) {
 }
 function openNpcStepLevel(cls) {
     npcClass = cls;
-    showModal('<b class="mini-menu-title">Укажите уровень NPC (1-20):</b><div class="npc-level-wrap"><input type=number id=npc-level value=1 min=1 max=20 style=\'width:60px\'></div><button class=\'fast-btn\' onclick=\'generateNpcWithLevel()\'>Создать NPC</button>');
+    showModal(`
+        <b class="mini-menu-title">Укажите уровень NPC (1-20):</b>
+        <div class="npc-level-wrap">
+            <input type=number id=npc-level value=1 min=1 max=20 style='width:60px'>
+        </div>
+        <div class="npc-advanced-settings" style="margin-top: 15px;">
+            <button class='fast-btn' onclick='toggleAdvancedSettings()' style='background: var(--accent-info);'>⚙️ Расширенные настройки</button>
+        </div>
+        <div id="advanced-settings-panel" style="display: none; margin-top: 15px; padding: 15px; background: var(--bg-tertiary); border-radius: 8px; border: 1px solid var(--border-tertiary);">
+            <div style="margin-bottom: 15px;">
+                <label style="display: block; margin-bottom: 5px; color: var(--text-tertiary); font-weight: bold;">Пол:</label>
+                <div class="advanced-options">
+                    <label style="margin-right: 15px;"><input type="radio" name="gender" value="мужской" checked> Мужской</label>
+                    <label style="margin-right: 15px;"><input type="radio" name="gender" value="женский"> Женский</label>
+                    <label><input type="radio" name="gender" value="рандом"> Рандом</label>
+                </div>
+            </div>
+            <div>
+                <label style="display: block; margin-bottom: 5px; color: var(--text-tertiary); font-weight: bold;">Мировоззрение:</label>
+                <div class="advanced-options">
+                    <label style="margin-right: 15px;"><input type="radio" name="alignment" value="добрый" checked> Добрый</label>
+                    <label style="margin-right: 15px;"><input type="radio" name="alignment" value="нейтральный"> Нейтральный</label>
+                    <label style="margin-right: 15px;"><input type="radio" name="alignment" value="злой"> Злой</label>
+                    <label><input type="radio" name="alignment" value="рандом"> Рандом</label>
+                </div>
+            </div>
+        </div>
+        <div style="margin-top: 15px;">
+            <button class='fast-btn' onclick='generateNpcWithLevel()'>Создать NPC</button>
+        </div>
+    `);
     document.getElementById('modal-save').style.display = 'none';
     // Автофокус на поле уровня
     setTimeout(() => document.getElementById('npc-level').focus(), 100);
+}
+
+// --- Функция переключения расширенных настроек ---
+function toggleAdvancedSettings() {
+    const panel = document.getElementById('advanced-settings-panel');
+    const button = document.querySelector('.npc-advanced-settings .fast-btn');
+    
+    if (panel.style.display === 'none') {
+        panel.style.display = 'block';
+        button.innerHTML = '⚙️ Скрыть расширенные настройки';
+        button.style.background = 'var(--accent-warning)';
+    } else {
+        panel.style.display = 'none';
+        button.innerHTML = '⚙️ Расширенные настройки';
+        button.style.background = 'var(--accent-info)';
+    }
 }
 // --- Загрузка базы уникальных торговцев ---
 window.uniqueTraders = [];
 fetch('pdf/d100_unique_traders.json')
   .then(r => r.json())
   .then(data => { window.uniqueTraders = data; });
-function fetchNpcFromAI(race, npcClass, prof, level) {
+
+// --- Загрузка механических параметров D&D ---
+window.dndMechanics = null;
+fetch('pdf/dnd_npc_mechanics_context_v2.json')
+  .then(r => r.json())
+  .then(data => { 
+    window.dndMechanics = data; 
+    console.log('D&D Mechanics loaded successfully');
+  })
+  .catch(e => {
+    console.error('Failed to load D&D mechanics:', e);
+  });
+
+// --- Функция генерации технических параметров NPC ---
+function generateTechnicalParams(race, npcClass, level) {
+    if (!window.dndMechanics) {
+        return "Технические параметры: Базовые (данные не загружены)";
+    }
+    
+    const mechanics = window.dndMechanics;
+    const classKey = npcClass.toLowerCase();
+    const raceKey = race.toLowerCase();
+    
+    // Генерируем случайные характеристики (10-18)
+    const abilities = {
+        str: Math.floor(Math.random() * 9) + 10,
+        dex: Math.floor(Math.random() * 9) + 10,
+        con: Math.floor(Math.random() * 9) + 10,
+        int: Math.floor(Math.random() * 9) + 10,
+        wis: Math.floor(Math.random() * 9) + 10,
+        cha: Math.floor(Math.random() * 9) + 10
+    };
+    
+    // Определяем бонус мастерства по уровню
+    let proficiencyBonus = 2;
+    if (level >= 5) proficiencyBonus = 3;
+    if (level >= 9) proficiencyBonus = 4;
+    if (level >= 13) proficiencyBonus = 5;
+    if (level >= 17) proficiencyBonus = 6;
+    
+    // Получаем данные класса
+    const classData = mechanics.classes[classKey] || mechanics.classes.fighter;
+    const castingCategory = classData.casting_category || 'none';
+    const spellcastingAbility = classData.spellcasting_ability || null;
+    
+    // Рассчитываем модификаторы
+    const mods = {};
+    for (let ability in abilities) {
+        mods[ability] = Math.floor((abilities[ability] - 10) / 2);
+    }
+    
+    // Рассчитываем КД
+    let ac = 10 + mods.dex; // Базовая формула
+    if (castingCategory !== 'none') {
+        ac = 13 + mods.dex; // Mage Armor для заклинателей
+    }
+    
+    // Рассчитываем инициативу
+    const initiativeMod = mods.dex;
+    
+    // Рассчитываем скорость
+    const raceData = mechanics.races[raceKey] || mechanics.races.human;
+    const speed = raceData.speed.walk || 30;
+    
+    // Рассчитываем спасброски
+    const savingThrows = classData.saving_throws || ['str', 'con'];
+    const savingThrowMods = {};
+    for (let ability of mechanics.enums.saving_throws) {
+        const isProficient = savingThrows.includes(ability);
+        savingThrowMods[ability] = mods[ability] + (isProficient ? proficiencyBonus : 0);
+    }
+    
+    // Рассчитываем параметры заклинаний
+    let spellAttackBonus = 0;
+    let spellSaveDC = 0;
+    let spellSlots = {};
+    
+    if (castingCategory !== 'none' && spellcastingAbility) {
+        spellAttackBonus = proficiencyBonus + mods[spellcastingAbility];
+        spellSaveDC = 8 + proficiencyBonus + mods[spellcastingAbility];
+        
+        // Получаем слоты заклинаний
+        const slotTable = mechanics.rules.slot_tables[castingCategory];
+        if (slotTable && slotTable[level]) {
+            spellSlots = slotTable[level];
+        }
+    }
+    
+    // Рассчитываем боевые параметры
+    let extraAttacks = 0;
+    if (classData.martial && classData.martial.extra_attacks) {
+        extraAttacks = classData.martial.extra_attacks[level] || 0;
+    }
+    
+    // Формируем результат
+    let result = `\n\nТехнические параметры:\n`;
+    result += `Класс доспеха: ${ac}\n`;
+    result += `Инициатива: ${initiativeMod >= 0 ? '+' : ''}${initiativeMod}\n`;
+    result += `Скорость: ${speed} футов\n`;
+    result += `Уровень: ${level}\n`;
+    result += `Бонус мастерства: +${proficiencyBonus}\n`;
+    
+    // Характеристики
+    result += `\nХарактеристики:\n`;
+    result += `СИЛ ${abilities.str} (${mods.str >= 0 ? '+' : ''}${mods.str})\n`;
+    result += `ЛОВ ${abilities.dex} (${mods.dex >= 0 ? '+' : ''}${mods.dex})\n`;
+    result += `ТЕЛ ${abilities.con} (${mods.con >= 0 ? '+' : ''}${mods.con})\n`;
+    result += `ИНТ ${abilities.int} (${mods.int >= 0 ? '+' : ''}${mods.int})\n`;
+    result += `МДР ${abilities.wis} (${mods.wis >= 0 ? '+' : ''}${mods.wis})\n`;
+    result += `ХАР ${abilities.cha} (${mods.cha >= 0 ? '+' : ''}${mods.cha})\n`;
+    
+    // Спасброски
+    result += `\nСпасброски:\n`;
+    for (let ability of mechanics.enums.saving_throws) {
+        const mod = savingThrowMods[ability];
+        const proficient = savingThrows.includes(ability) ? ' (мастерство)' : '';
+        result += `${ability.toUpperCase()} ${mod >= 0 ? '+' : ''}${mod}${proficient}\n`;
+    }
+    
+    // Заклинания
+    if (castingCategory !== 'none') {
+        result += `\nЗаклинания:\n`;
+        result += `Бонус атаки заклинаниями: +${spellAttackBonus}\n`;
+        result += `Сложность спасбросков: ${spellSaveDC}\n`;
+        if (Object.keys(spellSlots).length > 0) {
+            result += `Слоты заклинаний: `;
+            const slotList = [];
+            for (let spellLevel in spellSlots) {
+                slotList.push(`${spellLevel} уровень: ${spellSlots[spellLevel]}`);
+            }
+            result += slotList.join(', ') + '\n';
+        }
+    }
+    
+    // Боевые параметры
+    if (extraAttacks > 0) {
+        result += `\nБоевые параметры:\n`;
+        result += `Дополнительные атаки: ${extraAttacks}\n`;
+    }
+    
+    // Особые способности класса
+    if (classData.martial && classData.martial.special_features) {
+        result += `\nОсобые способности:\n`;
+        for (let feature of classData.martial.special_features) {
+            result += `- ${feature}\n`;
+        }
+    }
+    
+    return result;
+}
+
+function fetchNpcFromAI(race, npcClass, prof, level, advancedSettings = {}) {
     showModal('🎲 Генерация NPC...<br><small>Это может занять до 30 секунд</small>');
     
     // Добавляем индикатор прогресса
@@ -376,8 +573,10 @@ function fetchNpcFromAI(race, npcClass, prof, level) {
         
         // Выбираем имя по расе или случайное
         let raceKey = race ? race.toLowerCase() : 'человек';
+        console.log('NPC Generation Debug:', { race, raceKey, availableRaces: Object.keys(raceNames) });
         let namePool = raceNames[raceKey] || raceNames['человек'];
         name = namePool[Math.floor(Math.random() * namePool.length)];
+        console.log('Selected name:', name, 'from pool:', namePool);
         // 2. Черты, мотивация, профессия
         let trait = '';
         if (json.data && json.data.traits && Array.isArray(json.data.traits) && json.data.traits.length > 0) {
@@ -398,8 +597,23 @@ function fetchNpcFromAI(race, npcClass, prof, level) {
         if (motivation) contextBlock += `\nМотивация: ${motivation}`;
         if (occ) contextBlock += `\nПрофессия: ${occ}`;
         contextBlock += '\nИспользуй эти данные для вдохновения, но придумай цельного NPC.';
-        const systemInstruction = 'Создай уникального NPC для D&D. СТРОГО следуй этому формату:\n\nИмя и Профессия\n[только имя и профессия, например: "Торин Каменщик"]\n\nОписание\n[3-4 предложения о прошлом, мотивации, целях персонажа БЕЗ упоминания имени]\n\nВнешность\n[2-3 предложения о внешнем виде, одежде, особенностях]\n\nЧерты характера\n[1-2 предложения о личности, поведении, привычках]\n\nТехнические параметры\nОружие: [подходящее оружие для класса]\nУрон: [формат урона, например 1d6 рубящий]\nХиты: [количество хитов]\n\nВАЖНО: Имя указывай ТОЛЬКО в блоке "Имя и Профессия". НЕ используй имя в других блоках.';
-        const prompt = `Создай NPC для DnD. Раса: ${race}. Класс: ${npcClass}. Уровень: ${level}. Придумай подходящую профессию для этого персонажа.${contextBlock}`;
+        
+        // Генерируем технические параметры
+        const technicalParams = generateTechnicalParams(race, npcClass, level);
+        
+        const systemInstruction = 'Создай уникального NPC для D&D. СТРОГО следуй этому формату:\n\nИмя и Профессия\n[только имя и профессия, например: "Торин Каменщик"]\n\nОписание\n[3-4 предложения о прошлом, мотивации, целях персонажа БЕЗ упоминания имени]\n\nВнешность\n[2-3 предложения о внешнем виде, одежде, особенностях]\n\nЧерты характера\n[1-2 предложения о личности, поведении, привычках]\n\nТехнические параметры\n[ИСПОЛЬЗУЙ ТОЛЬКО ПРЕДОСТАВЛЕННЫЕ ТЕХНИЧЕСКИЕ ПАРАМЕТРЫ, НЕ ИЗМЕНЯЙ ИХ]\n\nВАЖНО: Имя указывай ТОЛЬКО в блоке "Имя и Профессия". НЕ используй имя в других блоках.';
+        
+        // Добавляем расширенные настройки в промпт
+        let advancedPrompt = `Создай NPC для DnD. Раса: ${race}. Класс: ${npcClass}. Уровень: ${level}. Придумай подходящую профессию для этого персонажа.`;
+        
+        if (advancedSettings.gender) {
+            advancedPrompt += ` Пол: ${advancedSettings.gender}.`;
+        }
+        if (advancedSettings.alignment) {
+            advancedPrompt += ` Мировоззрение: ${advancedSettings.alignment}.`;
+        }
+        
+        const prompt = `${advancedPrompt}${contextBlock}${technicalParams}`;
         fetch('ai.php', {
             method: 'POST',
             headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
@@ -456,19 +670,38 @@ function fetchNpcFromAI(race, npcClass, prof, level) {
 
 function generateNpcWithLevel() {
     npcLevel = document.getElementById('npc-level').value;
+    
+    // Собираем расширенные настройки
+    let advancedSettings = {};
+    
+    // Получаем выбранный пол
+    const genderRadio = document.querySelector('input[name="gender"]:checked');
+    if (genderRadio && genderRadio.value !== 'рандом') {
+        advancedSettings.gender = genderRadio.value;
+    }
+    
+    // Получаем выбранное мировоззрение
+    const alignmentRadio = document.querySelector('input[name="alignment"]:checked');
+    if (alignmentRadio && alignmentRadio.value !== 'рандом') {
+        advancedSettings.alignment = alignmentRadio.value;
+    }
+    
     // Сохраняем параметры для повторной генерации
     lastGeneratedParams = {
         race: npcRace,
         class: npcClass,
-        level: npcLevel
+        level: npcLevel,
+        advancedSettings: advancedSettings
     };
+    
     // AI сам выберет профессию
-    fetchNpcFromAI(npcRace, npcClass, '', npcLevel);
+    fetchNpcFromAI(npcRace, npcClass, '', npcLevel, advancedSettings);
 }
 
 function regenerateNpc() {
     if (lastGeneratedParams.race && lastGeneratedParams.class && lastGeneratedParams.level) {
-        fetchNpcFromAI(lastGeneratedParams.race, lastGeneratedParams.class, '', lastGeneratedParams.level);
+        const advancedSettings = lastGeneratedParams.advancedSettings || {};
+        fetchNpcFromAI(lastGeneratedParams.race, lastGeneratedParams.class, '', lastGeneratedParams.level, advancedSettings);
     } else {
         alert('Нет сохраненных параметров для повторной генерации');
     }
@@ -924,6 +1157,11 @@ function formatNpcBlocks(txt, forcedName = '') {
             if (/урон\s*:/i.test(line)) techParams.damage = line;
             if (/хиты\s*:/i.test(line)) techParams.hp = line;
         }
+        
+        // Если технические параметры найдены, используем их полностью
+        if (techBlock.length > 50) {
+            techParams.fullBlock = techBlock;
+        }
     }
     // Проверяем наличие необходимых блоков
     if (!name) {
@@ -1010,10 +1248,30 @@ function formatNpcBlocks(txt, forcedName = '') {
     cleanName = cleanName.split(/\s+/)[0].replace(/[^\wа-яё]/gi, '').trim();
     out += `<div class='npc-modern-header'>${cleanName || 'NPC'}</div>`;
     
-    // Технические параметры
-    if (summaryLines.length) {
+    // Технические параметры (сворачиваемые)
+    if (techParams.fullBlock) {
+        // Используем полный блок технических параметров
+        let techContent = techParams.fullBlock.replace(/\n/g, '<br>');
+        out += `<div class='npc-col-block'>
+            <div class='npc-collapsible-header collapsed' onclick='toggleTechnicalParams(this)'>
+                <div><span style='font-size:1.2em;'>⚔️</span> <b>Технические параметры</b></div>
+                <span class='toggle-icon'>▼</span>
+            </div>
+            <div class='npc-collapsible-content collapsed'>
+                <div class='npc-content' style='font-family: monospace; font-size: 0.9em; white-space: pre-line; margin-top: 8px;'>${techContent}</div>
+            </div>
+        </div>`;
+    } else if (summaryLines.length) {
         let listHtml = '<ul class="npc-modern-list">' + summaryLines.map(s => `<li>${s}</li>`).join('') + '</ul>';
-        out += `<div class='npc-col-block'><span style='font-size:1.2em;'>⚔️</span> <b>Технические параметры</b>${listHtml}</div>`;
+        out += `<div class='npc-col-block'>
+            <div class='npc-collapsible-header collapsed' onclick='toggleTechnicalParams(this)'>
+                <div><span style='font-size:1.2em;'>⚔️</span> <b>Технические параметры</b></div>
+                <span class='toggle-icon'>▼</span>
+            </div>
+            <div class='npc-collapsible-content collapsed'>
+                <div style='margin-top: 8px;'>${listHtml}</div>
+            </div>
+        </div>`;
     }
     
     // Генерируем случайные fallback значения
@@ -1292,4 +1550,20 @@ document.querySelector('form').onsubmit = function(e) {
                 }
             }
         });
+        
+        // --- Функция для переключения сворачиваемых технических параметров ---
+        function toggleTechnicalParams(headerElement) {
+            const contentElement = headerElement.nextElementSibling;
+            const isCollapsed = headerElement.classList.contains('collapsed');
+            
+            if (isCollapsed) {
+                // Разворачиваем
+                headerElement.classList.remove('collapsed');
+                contentElement.classList.remove('collapsed');
+            } else {
+                // Сворачиваем
+                headerElement.classList.add('collapsed');
+                contentElement.classList.add('collapsed');
+            }
+        }
 </script>
