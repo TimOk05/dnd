@@ -378,25 +378,63 @@ fetch('pdf/d100_unique_traders.json')
 
 // --- Загрузка механических параметров D&D ---
 window.dndMechanics = null;
-fetch('pdf/dnd_npc_mechanics_context_v2.json')
-  .then(r => r.json())
+fetch('dnd_mechanics.json')
+  .then(r => {
+    if (!r.ok) {
+      throw new Error(`HTTP ${r.status}: ${r.statusText}`);
+    }
+    return r.json();
+  })
   .then(data => { 
     window.dndMechanics = data; 
-    console.log('D&D Mechanics loaded successfully');
+    console.log('D&D Mechanics loaded successfully:', data);
   })
   .catch(e => {
     console.error('Failed to load D&D mechanics:', e);
+    // Создаем базовую структуру данных для fallback
+    window.dndMechanics = {
+      classes: {
+        fighter: { casting_category: 'none', saving_throws: ['str', 'con'] },
+        wizard: { casting_category: 'full', spellcasting_ability: 'int', saving_throws: ['int', 'wis'] },
+        cleric: { casting_category: 'full', spellcasting_ability: 'wis', saving_throws: ['wis', 'cha'] },
+        rogue: { casting_category: 'none', saving_throws: ['dex', 'int'] },
+        barbarian: { casting_category: 'none', saving_throws: ['str', 'con'] }
+      },
+      races: {
+        human: { speed: { walk: 30 } },
+        elf: { speed: { walk: 30 } },
+        dwarf: { speed: { walk: 25 } },
+        halfling: { speed: { walk: 25 } },
+        gnome: { speed: { walk: 25 } }
+      },
+      enums: {
+        saving_throws: ['str', 'dex', 'con', 'int', 'wis', 'cha']
+      },
+      rules: {
+        slot_tables: {}
+      }
+    };
+    console.log('Using fallback D&D mechanics data');
   });
 
 // --- Функция генерации технических параметров NPC ---
 function generateTechnicalParams(race, npcClass, level) {
+    console.log('generateTechnicalParams called with:', { race, npcClass, level });
+    console.log('window.dndMechanics:', window.dndMechanics);
+    
     if (!window.dndMechanics) {
-        return "Технические параметры: Базовые (данные не загружены)";
+        console.error('D&D Mechanics not loaded, using fallback');
+        // Возвращаем базовые технические параметры
+        return `\n\nТехнические параметры:\nКласс доспеха: 12\nИнициатива: +1\nСкорость: 30 футов\nУровень: ${level}\nБонус мастерства: +2\n\nХарактеристики:\nСИЛ 12 (+1)\nЛОВ 12 (+1)\nТЕЛ 12 (+1)\nИНТ 12 (+1)\nМДР 12 (+1)\nХАР 12 (+1)\n\nСпасброски:\nСИЛ +1\nЛОВ +1\nТЕЛ +1\nИНТ +1\nМДР +1\nХАР +1`;
     }
     
     const mechanics = window.dndMechanics;
     const classKey = npcClass.toLowerCase();
     const raceKey = race.toLowerCase();
+    
+    console.log('Processing with keys:', { classKey, raceKey });
+    console.log('Available classes:', mechanics.classes ? Object.keys(mechanics.classes) : 'undefined');
+    console.log('Available races:', mechanics.races ? Object.keys(mechanics.races) : 'undefined');
     
     // Генерируем случайные характеристики (10-18)
     const abilities = {
@@ -415,8 +453,13 @@ function generateTechnicalParams(race, npcClass, level) {
     if (level >= 13) proficiencyBonus = 5;
     if (level >= 17) proficiencyBonus = 6;
     
-    // Получаем данные класса
-    const classData = mechanics.classes[classKey] || mechanics.classes.fighter;
+    // Получаем данные класса с дополнительными проверками
+    if (!mechanics.classes) {
+        console.error('D&D Mechanics classes data is missing');
+        return "Технические параметры: Базовые (данные классов не загружены)";
+    }
+    
+    const classData = mechanics.classes[classKey] || mechanics.classes.fighter || {};
     const castingCategory = classData.casting_category || 'none';
     const spellcastingAbility = classData.spellcasting_ability || null;
     
@@ -436,12 +479,23 @@ function generateTechnicalParams(race, npcClass, level) {
     const initiativeMod = mods.dex;
     
     // Рассчитываем скорость
-    const raceData = mechanics.races[raceKey] || mechanics.races.human;
-    const speed = raceData.speed.walk || 30;
+    if (!mechanics.races) {
+        console.error('D&D Mechanics races data is missing');
+        return "Технические параметры: Базовые (данные рас не загружены)";
+    }
+    
+    const raceData = mechanics.races[raceKey] || mechanics.races.human || { speed: { walk: 30 } };
+    const speed = raceData.speed ? raceData.speed.walk : 30;
     
     // Рассчитываем спасброски
     const savingThrows = classData.saving_throws || ['str', 'con'];
     const savingThrowMods = {};
+    
+    if (!mechanics.enums || !mechanics.enums.saving_throws) {
+        console.error('D&D Mechanics enums data is missing');
+        return "Технические параметры: Базовые (данные перечислений не загружены)";
+    }
+    
     for (let ability of mechanics.enums.saving_throws) {
         const isProficient = savingThrows.includes(ability);
         savingThrowMods[ability] = mods[ability] + (isProficient ? proficiencyBonus : 0);
@@ -457,9 +511,11 @@ function generateTechnicalParams(race, npcClass, level) {
         spellSaveDC = 8 + proficiencyBonus + mods[spellcastingAbility];
         
         // Получаем слоты заклинаний
-        const slotTable = mechanics.rules.slot_tables[castingCategory];
-        if (slotTable && slotTable[level]) {
-            spellSlots = slotTable[level];
+        if (mechanics.rules && mechanics.rules.slot_tables) {
+            const slotTable = mechanics.rules.slot_tables[castingCategory];
+            if (slotTable && slotTable[level]) {
+                spellSlots = slotTable[level];
+            }
         }
     }
     
@@ -599,7 +655,9 @@ function fetchNpcFromAI(race, npcClass, prof, level, advancedSettings = {}) {
         contextBlock += '\nИспользуй эти данные для вдохновения, но придумай цельного NPC.';
         
         // Генерируем технические параметры
+        console.log('About to generate technical params for:', { race, npcClass, level });
         const technicalParams = generateTechnicalParams(race, npcClass, level);
+        console.log('Technical params generated:', technicalParams);
         
         const systemInstruction = 'Создай уникального NPC для D&D. СТРОГО следуй этому формату:\n\nИмя и Профессия\n[только имя и профессия, например: "Торин Каменщик"]\n\nОписание\n[3-4 предложения о прошлом, мотивации, целях персонажа БЕЗ упоминания имени]\n\nВнешность\n[2-3 предложения о внешнем виде, одежде, особенностях]\n\nЧерты характера\n[1-2 предложения о личности, поведении, привычках]\n\nТехнические параметры\n[ИСПОЛЬЗУЙ ТОЛЬКО ПРЕДОСТАВЛЕННЫЕ ТЕХНИЧЕСКИЕ ПАРАМЕТРЫ, НЕ ИЗМЕНЯЙ ИХ]\n\nВАЖНО: Имя указывай ТОЛЬКО в блоке "Имя и Профессия". НЕ используй имя в других блоках.';
         
@@ -653,8 +711,8 @@ function fetchNpcFromAI(race, npcClass, prof, level, advancedSettings = {}) {
         })
         .catch((e) => {
             clearInterval(progressInterval); // Останавливаем индикатор прогресса
-            console.error('NPC Generation Error:', e);
-            document.getElementById('modal-content').innerHTML = '<div class="result-segment error">❌ Ошибка загрузки данных<br><small>Ошибка: ' + e.message + '</small><br><small>Проверьте соединение и попробуйте ещё раз</small></div>';
+            console.error('AI Response Error:', e);
+            document.getElementById('modal-content').innerHTML = '<div class="result-segment error">❌ Ошибка AI<br><small>Ошибка: ' + e.message + '</small><br><small>Попробуйте ещё раз</small></div>';
             document.getElementById('modal-save').style.display = 'none';
         })
         .catch((e) => {
