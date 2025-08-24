@@ -154,7 +154,7 @@ require_once 'api/dnd-api.php';
             formData.append('alignment', 'neutral');
             formData.append('background', 'soldier');
             
-            const response = await fetch('api/generate-npc.php', {
+                         const response = await fetch('api/generate-npc-test.php', {
                 method: 'POST',
                 body: formData
             });
