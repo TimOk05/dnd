@@ -23,10 +23,10 @@ const urlsToCache = [
 self.addEventListener('install', function(event) {
     event.waitUntil(
         caches.open(CACHE_NAME)
-            .then(function(cache) {
-                console.log('Opened cache');
-                return cache.addAll(urlsToCache);
-            })
+        .then(function(cache) {
+            console.log('Opened cache');
+            return cache.addAll(urlsToCache);
+        })
     );
 });
 
@@ -50,40 +50,40 @@ self.addEventListener('activate', function(event) {
 self.addEventListener('fetch', function(event) {
     event.respondWith(
         caches.match(event.request)
-            .then(function(response) {
-                // Возвращаем кэшированный ответ, если он есть
-                if (response) {
-                    return response;
-                }
+        .then(function(response) {
+            // Возвращаем кэшированный ответ, если он есть
+            if (response) {
+                return response;
+            }
 
-                // Клонируем запрос, так как он может быть использован только один раз
-                const fetchRequest = event.request.clone();
+            // Клонируем запрос, так как он может быть использован только один раз
+            const fetchRequest = event.request.clone();
 
-                return fetch(fetchRequest).then(
-                    function(response) {
-                        // Проверяем, что ответ валидный
-                        if(!response || response.status !== 200 || response.type !== 'basic') {
-                            return response;
-                        }
-
-                        // Клонируем ответ, так как он может быть использован только один раз
-                        const responseToCache = response.clone();
-
-                        caches.open(CACHE_NAME)
-                            .then(function(cache) {
-                                cache.put(event.request, responseToCache);
-                            });
-
+            return fetch(fetchRequest).then(
+                function(response) {
+                    // Проверяем, что ответ валидный
+                    if (!response || response.status !== 200 || response.type !== 'basic') {
                         return response;
                     }
-                );
-            })
-            .catch(function() {
-                // Возвращаем офлайн страницу для навигационных запросов
-                if (event.request.mode === 'navigate') {
-                    return caches.match('/dnd/offline.html');
+
+                    // Клонируем ответ, так как он может быть использован только один раз
+                    const responseToCache = response.clone();
+
+                    caches.open(CACHE_NAME)
+                        .then(function(cache) {
+                            cache.put(event.request, responseToCache);
+                        });
+
+                    return response;
                 }
-            })
+            );
+        })
+        .catch(function() {
+            // Возвращаем офлайн страницу для навигационных запросов
+            if (event.request.mode === 'navigate') {
+                return caches.match('/dnd/offline.html');
+            }
+        })
     );
 });
 
@@ -100,8 +100,7 @@ self.addEventListener('push', function(event) {
                 dateOfArrival: Date.now(),
                 primaryKey: 1
             },
-            actions: [
-                {
+            actions: [{
                     action: 'explore',
                     title: 'Открыть',
                     icon: '/dnd/favicon.ico'
