@@ -164,6 +164,7 @@ $fastBtns .= '<button class="fast-btn" onclick="openDiceStep1()">🎲 Бросо
 $fastBtns .= '<button class="fast-btn" onclick="openCharacterModal()">⚔️ Персонаж</button>';
 $fastBtns .= '<button class="fast-btn" onclick="openEnemyModal()">👹 Противники</button>';
 $fastBtns .= '<button class="fast-btn" onclick="openInitiativeModal()">⚡ Инициатива</button>';
+$fastBtns .= '<a href="generators.php" class="fast-btn" style="text-decoration: none; display: inline-block;">🎲 Генераторы</a>';
 
 // --- Генерация сообщений чата (пропускаем system) ---
 $chatMsgs = '';
