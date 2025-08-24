@@ -31,12 +31,14 @@
 <Files "manifest.json">
     Order allow,deny
     Allow from all
+    Require all granted
 </Files>
 
 # Разрешаем доступ к dnd_mechanics.json
 <Files "dnd_mechanics.json">
     Order allow,deny
     Allow from all
+    Require all granted
 </Files>
 
 # Разрешаем доступ к JSON файлам в папке pdf

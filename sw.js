@@ -100,17 +100,17 @@ self.addEventListener('push', function(event) {
                 dateOfArrival: Date.now(),
                 primaryKey: 1
             },
-            actions: [{
-                    action: 'explore',
-                    title: 'Открыть',
-                    icon: '/dnd/favicon.ico'
-                },
-                {
-                    action: 'close',
-                    title: 'Закрыть',
-                    icon: '/dnd/favicon.ico'
-                }
-            ]
+                         actions: [{
+                     action: 'explore',
+                     title: 'Открыть',
+                     icon: './favicon.svg'
+                 },
+                 {
+                     action: 'close',
+                     title: 'Закрыть',
+                     icon: './favicon.svg'
+                 }
+             ]
         };
 
         event.waitUntil(
@@ -123,11 +123,11 @@ self.addEventListener('push', function(event) {
 self.addEventListener('notificationclick', function(event) {
     event.notification.close();
 
-    if (event.action === 'explore') {
-        event.waitUntil(
-            clients.openWindow('/dnd/')
-        );
-    }
+         if (event.action === 'explore') {
+         event.waitUntil(
+             clients.openWindow('./')
+         );
+     }
 });
 
 // Обработка фоновой синхронизации

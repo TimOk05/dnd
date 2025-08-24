@@ -38,11 +38,11 @@ header('Content-Type: text/html; charset=utf-8');
     <div class="status info">
         <h2>Проверка файлов:</h2>
         <ul>
-            <li>manifest.json: <?php echo file_exists('manifest.json') ? '✅ Существует' : '❌ Отсутствует'; ?></li>
-            <li>favicon.svg: <?php echo file_exists('favicon.svg') ? '✅ Существует' : '❌ Отсутствует'; ?></li>
-            <li>sw.js: <?php echo file_exists('sw.js') ? '✅ Существует' : '❌ Отсутствует'; ?></li>
-            <li>api/dnd-api.php: <?php echo file_exists('api/dnd-api.php') ? '✅ Существует' : '❌ Отсутствует'; ?></li>
-            <li>api/generate-npc.php: <?php echo file_exists('api/generate-npc.php') ? '✅ Существует' : '❌ Отсутствует'; ?></li>
+            <li>manifest.json: <?php echo file_exists(__DIR__ . '/manifest.json') ? '✅ Существует' : '❌ Отсутствует'; ?></li>
+            <li>favicon.svg: <?php echo file_exists(__DIR__ . '/favicon.svg') ? '✅ Существует' : '❌ Отсутствует'; ?></li>
+            <li>sw.js: <?php echo file_exists(__DIR__ . '/sw.js') ? '✅ Существует' : '❌ Отсутствует'; ?></li>
+            <li>api/dnd-api.php: <?php echo file_exists(__DIR__ . '/api/dnd-api.php') ? '✅ Существует' : '❌ Отсутствует'; ?></li>
+            <li>api/generate-npc.php: <?php echo file_exists(__DIR__ . '/api/generate-npc.php') ? '✅ Существует' : '❌ Отсутствует'; ?></li>
         </ul>
     </div>
     
