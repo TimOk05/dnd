@@ -369,6 +369,24 @@ $currentUser = getCurrentUser();
                         </select>
                     </div>
                     
+                    <div class="form-group">
+                        <label for="npcBackground">Профессия:</label>
+                        <select id="npcBackground" name="background" required>
+                            <option value="soldier">Солдат</option>
+                            <option value="criminal">Преступник</option>
+                            <option value="sage">Мудрец</option>
+                            <option value="noble">Благородный</option>
+                            <option value="merchant">Торговец</option>
+                            <option value="artisan">Ремесленник</option>
+                            <option value="farmer">Фермер</option>
+                            <option value="hermit">Отшельник</option>
+                            <option value="entertainer">Артист</option>
+                            <option value="acolyte">Послушник</option>
+                            <option value="outlander">Чужеземец</option>
+                            <option value="urchin">Бродяга</option>
+                        </select>
+                    </div>
+                    
                     <button type="submit" class="generate-btn">🎯 Сгенерировать NPC</button>
                 </form>
             </div>

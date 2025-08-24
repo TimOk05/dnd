@@ -556,6 +556,23 @@ function openNpcStepLevel(cls) {
                     <label><input type="radio" name="alignment" value="рандом"> Рандом</label>
                 </div>
             </div>
+            <div>
+                <label style="display: block; margin-bottom: 5px; color: var(--text-tertiary); font-weight: bold;">Профессия:</label>
+                <select id="npc-background" style="width: 100%; padding: 8px; border-radius: 4px; border: 1px solid var(--border-tertiary); background: var(--bg-primary); color: var(--text-primary);">
+                    <option value="soldier">Солдат</option>
+                    <option value="criminal">Преступник</option>
+                    <option value="sage">Мудрец</option>
+                    <option value="noble">Благородный</option>
+                    <option value="merchant">Торговец</option>
+                    <option value="artisan">Ремесленник</option>
+                    <option value="farmer">Фермер</option>
+                    <option value="hermit">Отшельник</option>
+                    <option value="entertainer">Артист</option>
+                    <option value="acolyte">Послушник</option>
+                    <option value="outlander">Чужеземец</option>
+                    <option value="urchin">Бродяга</option>
+                </select>
+            </div>
         </div>
         <div style="margin-top: 15px;">
             <button class='fast-btn' onclick='generateNpcWithLevel()'>Создать NPC</button>
@@ -949,7 +966,7 @@ function fetchNpcFromAI(race, npcClass, prof, level, advancedSettings = {}) {
         formData.append('class', npcClass);
         formData.append('level', level);
         formData.append('alignment', advancedSettings.alignment || 'neutral');
-        formData.append('background', 'soldier');
+        formData.append('background', prof || 'soldier');
         
         fetch('api/generate-npc.php', {
             method: 'POST',
@@ -1063,6 +1080,15 @@ function generateNpcWithLevel() {
         }
     }
     
+    // Получаем выбранную профессию
+    const backgroundSelect = document.getElementById('npc-background');
+    console.log('Background select found:', backgroundSelect);
+    let background = 'soldier'; // значение по умолчанию
+    if (backgroundSelect) {
+        background = backgroundSelect.value;
+        console.log('Background value:', background);
+    }
+    
     console.log('Collected advanced settings:', advancedSettings);
     
     // Сохраняем параметры для повторной генерации
@@ -1070,17 +1096,19 @@ function generateNpcWithLevel() {
         race: npcRace,
         class: npcClass,
         level: npcLevel,
+        background: background,
         advancedSettings: advancedSettings
     };
     
-    // AI сам выберет профессию
-    fetchNpcFromAI(npcRace, npcClass, '', npcLevel, advancedSettings);
+    // Передаем выбранную профессию
+    fetchNpcFromAI(npcRace, npcClass, background, npcLevel, advancedSettings);
 }
 
 function regenerateNpc() {
     if (lastGeneratedParams.race && lastGeneratedParams.class && lastGeneratedParams.level) {
         const advancedSettings = lastGeneratedParams.advancedSettings || {};
-        fetchNpcFromAI(lastGeneratedParams.race, lastGeneratedParams.class, '', lastGeneratedParams.level, advancedSettings);
+        const background = lastGeneratedParams.background || 'soldier';
+        fetchNpcFromAI(lastGeneratedParams.race, lastGeneratedParams.class, background, lastGeneratedParams.level, advancedSettings);
     } else {
         alert('Нет сохраненных параметров для повторной генерации');
     }

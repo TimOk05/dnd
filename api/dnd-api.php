@@ -237,7 +237,7 @@ class DndApiManager {
             'class' => $classInfo['name'],
             'level' => $params['level'],
             'alignment' => $params['alignment'],
-            'background' => $params['background'],
+            'background' => $this->translateBackground($params['background']),
             'abilities' => $abilities,
             'description' => $description,
             'technical_params' => $technicalParams
@@ -327,6 +327,28 @@ class DndApiManager {
         $alignmentDesc = $alignmentDescriptions[$alignment] ?? 'с неопределенным мировоззрением';
         
         return $classDesc . '. ' . $alignmentDesc . '.';
+    }
+    
+    /**
+     * Перевод профессии на русский язык
+     */
+    private function translateBackground($background) {
+        $translations = [
+            'soldier' => 'Солдат',
+            'criminal' => 'Преступник',
+            'sage' => 'Мудрец',
+            'noble' => 'Благородный',
+            'merchant' => 'Торговец',
+            'artisan' => 'Ремесленник',
+            'farmer' => 'Фермер',
+            'hermit' => 'Отшельник',
+            'entertainer' => 'Артист',
+            'acolyte' => 'Послушник',
+            'outlander' => 'Чужеземец',
+            'urchin' => 'Бродяга'
+        ];
+        
+        return $translations[$background] ?? $background;
     }
     
     /**
