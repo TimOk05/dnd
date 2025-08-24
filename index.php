@@ -450,18 +450,13 @@ function openEnemyModal() {
                     
                     <div class="form-group">
                         <label for="enemy-type">Тип противников</label>
-                        <select id="enemy-type" name="enemy_type" required>
-                            <option value="">Выберите тип</option>
+                        <select id="enemy-type" name="enemy_type">
+                            <option value="">Любой тип</option>
                             <option value="humanoid">Гуманоиды</option>
                             <option value="beast">Звери</option>
-                            <option value="monstrosity">Чудовища</option>
-                            <option value="dragon">Драконы</option>
                             <option value="undead">Нежить</option>
-                            <option value="fiend">Демоны</option>
-                            <option value="celestial">Небожители</option>
-                            <option value="elemental">Элементали</option>
                             <option value="giant">Великаны</option>
-                            <option value="aberration">Аберрации</option>
+                            <option value="dragon">Драконы</option>
                         </select>
                     </div>
                     

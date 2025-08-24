@@ -137,16 +137,16 @@ class EnemyGenerator {
      */
     private function getFallbackMonsters() {
         return [
-            ['index' => 'goblin', 'name' => 'Goblin'],
-            ['index' => 'orc', 'name' => 'Orc'],
-            ['index' => 'wolf', 'name' => 'Wolf'],
-            ['index' => 'bandit', 'name' => 'Bandit'],
-            ['index' => 'cultist', 'name' => 'Cultist'],
-            ['index' => 'dragon', 'name' => 'Dragon'],
-            ['index' => 'troll', 'name' => 'Troll'],
-            ['index' => 'ogre', 'name' => 'Ogre'],
-            ['index' => 'skeleton', 'name' => 'Skeleton'],
-            ['index' => 'zombie', 'name' => 'Zombie']
+            ['index' => 'goblin', 'name' => 'Гоблин'],
+            ['index' => 'orc', 'name' => 'Орк'],
+            ['index' => 'wolf', 'name' => 'Волк'],
+            ['index' => 'bandit', 'name' => 'Бандит'],
+            ['index' => 'cultist', 'name' => 'Культист'],
+            ['index' => 'skeleton', 'name' => 'Скелет'],
+            ['index' => 'zombie', 'name' => 'Зомби'],
+            ['index' => 'troll', 'name' => 'Тролль'],
+            ['index' => 'ogre', 'name' => 'Огр'],
+            ['index' => 'dragon', 'name' => 'Дракон']
         ];
     }
     
@@ -167,13 +167,13 @@ class EnemyGenerator {
                 continue;
             }
             
-            // Проверяем тип
-            if ($enemy_type && strpos(strtolower($details['type']), strtolower($enemy_type)) === false) {
+            // Проверяем тип (если указан)
+            if ($enemy_type && $enemy_type !== '' && strpos(strtolower($details['type']), strtolower($enemy_type)) === false) {
                 continue;
             }
             
             // Проверяем среду (если указана)
-            if ($environment && !$this->checkEnvironment($details, $environment)) {
+            if ($environment && $environment !== '' && !$this->checkEnvironment($details, $environment)) {
                 continue;
             }
             
@@ -201,13 +201,13 @@ class EnemyGenerator {
                 continue;
             }
             
-            // Проверяем тип
-            if ($enemy_type && strpos(strtolower($details['type']), strtolower($enemy_type)) === false) {
+            // Проверяем тип (если указан)
+            if ($enemy_type && $enemy_type !== '' && strpos(strtolower($details['type']), strtolower($enemy_type)) === false) {
                 continue;
             }
             
             // Проверяем среду (если указана)
-            if ($environment && !$this->checkEnvironment($details, $environment)) {
+            if ($environment && $environment !== '' && !$this->checkEnvironment($details, $environment)) {
                 continue;
             }
             
@@ -241,8 +241,8 @@ class EnemyGenerator {
                 'name' => 'Гоблин',
                 'challenge_rating' => '1/4',
                 'type' => 'humanoid',
-                'size' => 'Small',
-                'alignment' => 'Neutral Evil',
+                'size' => 'Маленький',
+                'alignment' => 'Нейтрально-злой',
                 'desc' => 'Маленькое зеленокожее существо с острыми ушами и желтыми глазами.',
                 'stats' => ['str' => 8, 'dex' => 14, 'con' => 10, 'int' => 10, 'wis' => 8, 'cha' => 8],
                 'armor_class' => [['value' => 15]],
@@ -256,8 +256,8 @@ class EnemyGenerator {
                 'name' => 'Орк',
                 'challenge_rating' => '1/2',
                 'type' => 'humanoid',
-                'size' => 'Medium',
-                'alignment' => 'Chaotic Evil',
+                'size' => 'Средний',
+                'alignment' => 'Хаотично-злой',
                 'desc' => 'Крупное мускулистое существо с зеленой кожей и клыками.',
                 'stats' => ['str' => 16, 'dex' => 12, 'con' => 16, 'int' => 7, 'wis' => 11, 'cha' => 10],
                 'armor_class' => [['value' => 13]],
@@ -271,8 +271,8 @@ class EnemyGenerator {
                 'name' => 'Волк',
                 'challenge_rating' => '1/4',
                 'type' => 'beast',
-                'size' => 'Medium',
-                'alignment' => 'Unaligned',
+                'size' => 'Средний',
+                'alignment' => 'Без мировоззрения',
                 'desc' => 'Дикий волк с серой шерстью и острыми клыками.',
                 'stats' => ['str' => 12, 'dex' => 15, 'con' => 12, 'int' => 3, 'wis' => 12, 'cha' => 6],
                 'armor_class' => [['value' => 13]],
@@ -286,8 +286,8 @@ class EnemyGenerator {
                 'name' => 'Бандит',
                 'challenge_rating' => '1/8',
                 'type' => 'humanoid',
-                'size' => 'Medium',
-                'alignment' => 'Any non-lawful',
+                'size' => 'Средний',
+                'alignment' => 'Любое не-законное',
                 'desc' => 'Обычный разбойник с кинжалом и луком.',
                 'stats' => ['str' => 12, 'dex' => 12, 'con' => 12, 'int' => 10, 'wis' => 10, 'cha' => 10],
                 'armor_class' => [['value' => 12]],
@@ -301,8 +301,8 @@ class EnemyGenerator {
                 'name' => 'Культист',
                 'challenge_rating' => '1/8',
                 'type' => 'humanoid',
-                'size' => 'Medium',
-                'alignment' => 'Any non-good',
+                'size' => 'Средний',
+                'alignment' => 'Любое не-доброе',
                 'desc' => 'Последователь темного культа с кинжалом.',
                 'stats' => ['str' => 11, 'dex' => 12, 'con' => 10, 'int' => 10, 'wis' => 8, 'cha' => 8],
                 'armor_class' => [['value' => 12]],
@@ -316,8 +316,8 @@ class EnemyGenerator {
                 'name' => 'Скелет',
                 'challenge_rating' => '1/4',
                 'type' => 'undead',
-                'size' => 'Medium',
-                'alignment' => 'Lawful Evil',
+                'size' => 'Средний',
+                'alignment' => 'Законно-злой',
                 'desc' => 'Анимированный скелет с коротким мечом.',
                 'stats' => ['str' => 10, 'dex' => 14, 'con' => 15, 'int' => 6, 'wis' => 8, 'cha' => 5],
                 'armor_class' => [['value' => 13]],
@@ -331,8 +331,8 @@ class EnemyGenerator {
                 'name' => 'Зомби',
                 'challenge_rating' => '1/4',
                 'type' => 'undead',
-                'size' => 'Medium',
-                'alignment' => 'Neutral Evil',
+                'size' => 'Средний',
+                'alignment' => 'Нейтрально-злой',
                 'desc' => 'Медлительный зомби с дубиной.',
                 'stats' => ['str' => 13, 'dex' => 6, 'con' => 16, 'int' => 3, 'wis' => 6, 'cha' => 5],
                 'armor_class' => [['value' => 8]],
@@ -340,6 +340,51 @@ class EnemyGenerator {
                 'speed' => ['walk' => '20'],
                 'actions' => [
                     ['name' => 'Дубина', 'desc' => 'Рукопашная атака оружием: +3 к попаданию, досягаемость 5 футов, одна цель. Попадание: 3 (1d6) дробящего урона.']
+                ]
+            ],
+            'troll' => [
+                'name' => 'Тролль',
+                'challenge_rating' => '5',
+                'type' => 'giant',
+                'size' => 'Большой',
+                'alignment' => 'Хаотично-злой',
+                'desc' => 'Мощное регенерирующее существо с длинными когтями.',
+                'stats' => ['str' => 18, 'dex' => 13, 'con' => 20, 'int' => 7, 'wis' => 9, 'cha' => 7],
+                'armor_class' => [['value' => 15]],
+                'hit_points' => ['average' => 84],
+                'speed' => ['walk' => '30'],
+                'actions' => [
+                    ['name' => 'Когти', 'desc' => 'Рукопашная атака оружием: +7 к попаданию, досягаемость 5 футов, одна цель. Попадание: 11 (2d6 + 4) рубящего урона.']
+                ]
+            ],
+            'ogre' => [
+                'name' => 'Огр',
+                'challenge_rating' => '2',
+                'type' => 'giant',
+                'size' => 'Большой',
+                'alignment' => 'Хаотично-злой',
+                'desc' => 'Огромное тупое существо с дубиной.',
+                'stats' => ['str' => 19, 'dex' => 8, 'con' => 16, 'int' => 5, 'wis' => 7, 'cha' => 7],
+                'armor_class' => [['value' => 11]],
+                'hit_points' => ['average' => 59],
+                'speed' => ['walk' => '40'],
+                'actions' => [
+                    ['name' => 'Дубина', 'desc' => 'Рукопашная атака оружием: +6 к попаданию, досягаемость 5 футов, одна цель. Попадание: 13 (2d8 + 4) дробящего урона.']
+                ]
+            ],
+            'dragon' => [
+                'name' => 'Молодой дракон',
+                'challenge_rating' => '10',
+                'type' => 'dragon',
+                'size' => 'Большой',
+                'alignment' => 'Хаотично-злой',
+                'desc' => 'Молодой красный дракон с огненным дыханием.',
+                'stats' => ['str' => 23, 'dex' => 10, 'con' => 21, 'int' => 14, 'wis' => 11, 'cha' => 19],
+                'armor_class' => [['value' => 18]],
+                'hit_points' => ['average' => 178],
+                'speed' => ['walk' => '40', 'fly' => '80'],
+                'actions' => [
+                    ['name' => 'Укус', 'desc' => 'Рукопашная атака оружием: +11 к попаданию, досягаемость 10 футов, одна цель. Попадание: 17 (2d10 + 6) колющего урона плюс 3 (1d6) огненного урона.']
                 ]
             ]
         ];

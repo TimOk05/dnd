@@ -37,10 +37,12 @@ header('Content-Type: text/html; charset=utf-8');
             <p>
                 <label>Тип:</label>
                 <select name="enemy_type">
-                    <option value="">Любой</option>
+                    <option value="">Любой тип</option>
                     <option value="humanoid">Гуманоиды</option>
                     <option value="beast">Звери</option>
                     <option value="undead">Нежить</option>
+                    <option value="giant">Великаны</option>
+                    <option value="dragon">Драконы</option>
                 </select>
             </p>
             <p>
