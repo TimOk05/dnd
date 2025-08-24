@@ -398,7 +398,7 @@ function openCharacterModal() {
         submitBtn.disabled = true;
         resultDiv.innerHTML = '<div class="loading">Создание персонажа с AI-улучшением...</div>';
         
-        fetch('api/generate-hybrid-npc.php', {
+        fetch('api/generate-characters.php', {
             method: 'POST',
             body: formData
         })
