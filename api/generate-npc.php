@@ -1,5 +1,14 @@
 <?php
+session_start();
+require_once '../users.php';
 require_once 'dnd-api.php';
+
+// Проверяем авторизацию
+if (!isLoggedIn()) {
+    header('Content-Type: application/json; charset=utf-8');
+    echo json_encode(['error' => 'Unauthorized']);
+    exit;
+}
 
 header('Content-Type: application/json; charset=utf-8');
 

@@ -943,22 +943,62 @@ function fetchNpcFromAI(race, npcClass, prof, level, advancedSettings = {}) {
         console.log('Context block:', contextBlock);
         console.log('Technical params length:', technicalParams.length);
         
-        const prompt = `${advancedPrompt}${contextBlock}${technicalParams}`;
-        console.log('Final prompt length:', prompt.length);
-        console.log('Final prompt preview:', prompt.substring(0, 500) + '...');
-        fetch('ai.php', {
+        // Используем новый API для генерации NPC
+        const formData = new FormData();
+        formData.append('race', race);
+        formData.append('class', npcClass);
+        formData.append('level', level);
+        formData.append('alignment', advancedSettings.alignment || 'neutral');
+        formData.append('background', 'soldier');
+        
+        fetch('api/generate-npc.php', {
             method: 'POST',
-            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-            body: 'prompt=' + encodeURIComponent(prompt) + '&system=' + encodeURIComponent(systemInstruction) + '&type=npc'
+            body: formData
         })
         .then(r => r.json())
         .then(data => {
             clearInterval(progressInterval); // Останавливаем индикатор прогресса
             
-            console.log('AI Response:', data); // Отладочная информация
+            console.log('API Response:', data); // Отладочная информация
             
-            if (data && data.result) {
-                document.getElementById('modal-content').innerHTML = formatNpcBlocks(data.result, name);
+            if (data && data.success && data.npc) {
+                const npc = data.npc;
+                let html = `
+                    <div class="npc-header">
+                        <h3>${npc.name}</h3>
+                        <div class="npc-subtitle">${npc.race} - ${npc.class} (уровень ${npc.level})</div>
+                    </div>
+                    
+                    <div class="npc-section">
+                        <h4>Основная информация</h4>
+                        <div class="info-grid">
+                            <div class="info-item">
+                                <strong>Мировоззрение:</strong> ${npc.alignment}
+                            </div>
+                            <div class="info-item">
+                                <strong>Профессия:</strong> ${npc.background}
+                            </div>
+                        </div>
+                    </div>
+                    
+                    ${npc.description ? `
+                        <div class="npc-section">
+                            <h4>Описание</h4>
+                            <p>${npc.description}</p>
+                        </div>
+                    ` : ''}
+                    
+                    ${npc.technical_params && npc.technical_params.length > 0 ? `
+                        <div class="npc-section">
+                            <h4>Технические параметры</h4>
+                            <div class="technical-params">
+                                ${npc.technical_params.map(param => `<div class="param-item">${param}</div>`).join('')}
+                            </div>
+                        </div>
+                    ` : ''}
+                `;
+                
+                document.getElementById('modal-content').innerHTML = html;
                 document.getElementById('modal-save').style.display = '';
                 document.getElementById('modal-save').onclick = function() { saveNote(document.getElementById('modal-content').innerHTML); closeModal(); };
                 
