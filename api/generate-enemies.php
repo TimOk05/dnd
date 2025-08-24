@@ -74,26 +74,22 @@ class EnemyGenerator {
      * Генерация одного противника
      */
     private function generateSingleEnemy($cr_range, $enemy_type, $environment, $use_ai) {
-        // Получаем список монстров из API
-        $monsters = $this->getMonstersList();
-        
-        if (!$monsters) {
-            throw new Exception('Не удалось получить список монстров');
-        }
+        // Используем fallback данные для надежности
+        $fallback_monsters = $this->getFallbackMonsters();
         
         // Фильтруем монстров по CR и типу
-        $filtered_monsters = $this->filterMonsters($monsters, $cr_range, $enemy_type, $environment);
+        $filtered_monsters = $this->filterFallbackMonsters($fallback_monsters, $cr_range, $enemy_type, $environment);
         
         if (empty($filtered_monsters)) {
             // Если не найдено подходящих, берем случайного монстра
-            $filtered_monsters = $monsters;
+            $filtered_monsters = $fallback_monsters;
         }
         
         // Выбираем случайного монстра
         $monster = $filtered_monsters[array_rand($filtered_monsters)];
         
         // Получаем детальную информацию о монстре
-        $monster_details = $this->getMonsterDetails($monster['index']);
+        $monster_details = $this->getFallbackMonsterDetails($monster['index']);
         
         if (!$monster_details) {
             throw new Exception('Не удалось получить информацию о монстре');
@@ -152,6 +148,39 @@ class EnemyGenerator {
             ['index' => 'skeleton', 'name' => 'Skeleton'],
             ['index' => 'zombie', 'name' => 'Zombie']
         ];
+    }
+    
+    /**
+     * Фильтрация fallback монстров
+     */
+    private function filterFallbackMonsters($monsters, $cr_range, $enemy_type, $environment) {
+        $filtered = [];
+        
+        foreach ($monsters as $monster) {
+            $details = $this->getFallbackMonsterDetails($monster['index']);
+            
+            if (!$details) continue;
+            
+            // Проверяем CR
+            $cr = $this->parseCR($details['challenge_rating']);
+            if ($cr < $cr_range['min'] || $cr > $cr_range['max']) {
+                continue;
+            }
+            
+            // Проверяем тип
+            if ($enemy_type && strpos(strtolower($details['type']), strtolower($enemy_type)) === false) {
+                continue;
+            }
+            
+            // Проверяем среду (если указана)
+            if ($environment && !$this->checkEnvironment($details, $environment)) {
+                continue;
+            }
+            
+            $filtered[] = $monster;
+        }
+        
+        return $filtered;
     }
     
     /**
@@ -251,6 +280,66 @@ class EnemyGenerator {
                 'speed' => ['walk' => '40'],
                 'actions' => [
                     ['name' => 'Укус', 'desc' => 'Атака оружием ближнего боя: +4 к попаданию, досягаемость 5 футов, одна цель. Попадание: 7 (2d4 + 2) колющего урона.']
+                ]
+            ],
+            'bandit' => [
+                'name' => 'Бандит',
+                'challenge_rating' => '1/8',
+                'type' => 'humanoid',
+                'size' => 'Medium',
+                'alignment' => 'Any non-lawful',
+                'desc' => 'Обычный разбойник с кинжалом и луком.',
+                'stats' => ['str' => 12, 'dex' => 12, 'con' => 12, 'int' => 10, 'wis' => 10, 'cha' => 10],
+                'armor_class' => [['value' => 12]],
+                'hit_points' => ['average' => 11],
+                'speed' => ['walk' => '30'],
+                'actions' => [
+                    ['name' => 'Кинжал', 'desc' => 'Рукопашная атака оружием: +3 к попаданию, досягаемость 5 футов, одна цель. Попадание: 3 (1d4 + 1) колющего урона.']
+                ]
+            ],
+            'cultist' => [
+                'name' => 'Культист',
+                'challenge_rating' => '1/8',
+                'type' => 'humanoid',
+                'size' => 'Medium',
+                'alignment' => 'Any non-good',
+                'desc' => 'Последователь темного культа с кинжалом.',
+                'stats' => ['str' => 11, 'dex' => 12, 'con' => 10, 'int' => 10, 'wis' => 8, 'cha' => 8],
+                'armor_class' => [['value' => 12]],
+                'hit_points' => ['average' => 9],
+                'speed' => ['walk' => '30'],
+                'actions' => [
+                    ['name' => 'Кинжал', 'desc' => 'Рукопашная атака оружием: +3 к попаданию, досягаемость 5 футов, одна цель. Попадание: 3 (1d4 + 1) колющего урона.']
+                ]
+            ],
+            'skeleton' => [
+                'name' => 'Скелет',
+                'challenge_rating' => '1/4',
+                'type' => 'undead',
+                'size' => 'Medium',
+                'alignment' => 'Lawful Evil',
+                'desc' => 'Анимированный скелет с коротким мечом.',
+                'stats' => ['str' => 10, 'dex' => 14, 'con' => 15, 'int' => 6, 'wis' => 8, 'cha' => 5],
+                'armor_class' => [['value' => 13]],
+                'hit_points' => ['average' => 13],
+                'speed' => ['walk' => '30'],
+                'actions' => [
+                    ['name' => 'Короткий меч', 'desc' => 'Рукопашная атака оружием: +4 к попаданию, досягаемость 5 футов, одна цель. Попадание: 5 (1d6 + 2) колющего урона.']
+                ]
+            ],
+            'zombie' => [
+                'name' => 'Зомби',
+                'challenge_rating' => '1/4',
+                'type' => 'undead',
+                'size' => 'Medium',
+                'alignment' => 'Neutral Evil',
+                'desc' => 'Медлительный зомби с дубиной.',
+                'stats' => ['str' => 13, 'dex' => 6, 'con' => 16, 'int' => 3, 'wis' => 6, 'cha' => 5],
+                'armor_class' => [['value' => 8]],
+                'hit_points' => ['average' => 22],
+                'speed' => ['walk' => '20'],
+                'actions' => [
+                    ['name' => 'Дубина', 'desc' => 'Рукопашная атака оружием: +3 к попаданию, досягаемость 5 футов, одна цель. Попадание: 3 (1d6) дробящего урона.']
                 ]
             ]
         ];
