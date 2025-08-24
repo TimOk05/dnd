@@ -6,7 +6,6 @@ const urlsToCache = [
     './index.php',
     './template.html',
     './mobile.js',
-    './manifest.json',
     './favicon.svg',
     './offline.html',
     './login.php',
@@ -100,17 +99,17 @@ self.addEventListener('push', function(event) {
                 dateOfArrival: Date.now(),
                 primaryKey: 1
             },
-                         actions: [{
-                     action: 'explore',
-                     title: 'Открыть',
-                     icon: './favicon.svg'
-                 },
-                 {
-                     action: 'close',
-                     title: 'Закрыть',
-                     icon: './favicon.svg'
-                 }
-             ]
+            actions: [{
+                    action: 'explore',
+                    title: 'Открыть',
+                    icon: './favicon.svg'
+                },
+                {
+                    action: 'close',
+                    title: 'Закрыть',
+                    icon: './favicon.svg'
+                }
+            ]
         };
 
         event.waitUntil(
@@ -123,11 +122,11 @@ self.addEventListener('push', function(event) {
 self.addEventListener('notificationclick', function(event) {
     event.notification.close();
 
-         if (event.action === 'explore') {
-         event.waitUntil(
-             clients.openWindow('./')
-         );
-     }
+    if (event.action === 'explore') {
+        event.waitUntil(
+            clients.openWindow('./')
+        );
+    }
 });
 
 // Обработка фоновой синхронизации
