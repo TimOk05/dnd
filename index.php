@@ -163,7 +163,8 @@ $fastBtns = '';
 $fastBtns .= '<button class="fast-btn" onclick="openDiceStep1()">🎲 Бросок костей</button>';
 $fastBtns .= '<button class="fast-btn" onclick="openNpcStep1()">🗣️ NPC</button>';
 $fastBtns .= '<button class="fast-btn" onclick="openInitiativeModal()">⚡ Инициатива</button>';
-$fastBtns .= '<a href="test-npc-api.php" class="fast-btn" style="background: #4a90e2 !important; border-color: #4a90e2 !important; color: white !important; font-weight: bold;">🧪 Тест API</a>';
+$fastBtns .= '<a href="test-working.php" class="fast-btn" style="background: var(--accent-success); border-color: var(--accent-success);">🚀 Рабочая версия</a>';
+$fastBtns .= '<a href="test-simple.php" class="fast-btn" style="background: var(--accent-info); border-color: var(--accent-info);">🧪 Простой тест</a>';
 
 // --- Генерация сообщений чата (пропускаем system) ---
 $chatMsgs = '';

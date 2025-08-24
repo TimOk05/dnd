@@ -203,8 +203,17 @@ class DndApiManager {
      * Генерация NPC на основе D&D 5e API
      */
     private function generateFromDnd5eAPI($params) {
+        // Пытаемся получить данные из API
         $raceInfo = $this->getRaceInfo($params['race']);
         $classInfo = $this->getClassInfo($params['class']);
+        
+        // Если API недоступен, используем локальные данные
+        if (!$raceInfo) {
+            $raceInfo = $this->getLocalRaceInfo($params['race']);
+        }
+        if (!$classInfo) {
+            $classInfo = $this->getLocalClassInfo($params['class']);
+        }
         
         if (!$raceInfo || !$classInfo) {
             return null;
@@ -447,6 +456,107 @@ class DndApiManager {
         ];
         
         return $traits[$alignment] ?? 'Сбалансированный характер с разными чертами.';
+    }
+    
+    /**
+     * Получение локальной информации о расе
+     */
+    private function getLocalRaceInfo($race) {
+        $races = [
+            'human' => [
+                'name' => 'Human',
+                'ability_bonuses' => [
+                    ['ability_score' => ['name' => 'STR'], 'bonus' => 1],
+                    ['ability_score' => ['name' => 'DEX'], 'bonus' => 1],
+                    ['ability_score' => ['name' => 'CON'], 'bonus' => 1],
+                    ['ability_score' => ['name' => 'INT'], 'bonus' => 1],
+                    ['ability_score' => ['name' => 'WIS'], 'bonus' => 1],
+                    ['ability_score' => ['name' => 'CHA'], 'bonus' => 1]
+                ]
+            ],
+            'elf' => [
+                'name' => 'Elf',
+                'ability_bonuses' => [
+                    ['ability_score' => ['name' => 'DEX'], 'bonus' => 2]
+                ]
+            ],
+            'dwarf' => [
+                'name' => 'Dwarf',
+                'ability_bonuses' => [
+                    ['ability_score' => ['name' => 'CON'], 'bonus' => 2]
+                ]
+            ],
+            'halfling' => [
+                'name' => 'Halfling',
+                'ability_bonuses' => [
+                    ['ability_score' => ['name' => 'DEX'], 'bonus' => 2]
+                ]
+            ],
+            'orc' => [
+                'name' => 'Orc',
+                'ability_bonuses' => [
+                    ['ability_score' => ['name' => 'STR'], 'bonus' => 2],
+                    ['ability_score' => ['name' => 'CON'], 'bonus' => 1]
+                ]
+            ],
+            'tiefling' => [
+                'name' => 'Tiefling',
+                'ability_bonuses' => [
+                    ['ability_score' => ['name' => 'CHA'], 'bonus' => 2],
+                    ['ability_score' => ['name' => 'INT'], 'bonus' => 1]
+                ]
+            ],
+            'dragonborn' => [
+                'name' => 'Dragonborn',
+                'ability_bonuses' => [
+                    ['ability_score' => ['name' => 'STR'], 'bonus' => 2],
+                    ['ability_score' => ['name' => 'CHA'], 'bonus' => 1]
+                ]
+            ],
+            'gnome' => [
+                'name' => 'Gnome',
+                'ability_bonuses' => [
+                    ['ability_score' => ['name' => 'INT'], 'bonus' => 2]
+                ]
+            ],
+            'half-elf' => [
+                'name' => 'Half-Elf',
+                'ability_bonuses' => [
+                    ['ability_score' => ['name' => 'CHA'], 'bonus' => 2]
+                ]
+            ],
+            'half-orc' => [
+                'name' => 'Half-Orc',
+                'ability_bonuses' => [
+                    ['ability_score' => ['name' => 'STR'], 'bonus' => 2],
+                    ['ability_score' => ['name' => 'CON'], 'bonus' => 1]
+                ]
+            ]
+        ];
+        
+        return $races[$race] ?? $races['human'];
+    }
+    
+    /**
+     * Получение локальной информации о классе
+     */
+    private function getLocalClassInfo($class) {
+        $classes = [
+            'fighter' => ['name' => 'Fighter', 'hit_die' => 10],
+            'wizard' => ['name' => 'Wizard', 'hit_die' => 6],
+            'rogue' => ['name' => 'Rogue', 'hit_die' => 8],
+            'cleric' => ['name' => 'Cleric', 'hit_die' => 8],
+            'ranger' => ['name' => 'Ranger', 'hit_die' => 10],
+            'barbarian' => ['name' => 'Barbarian', 'hit_die' => 12],
+            'bard' => ['name' => 'Bard', 'hit_die' => 8],
+            'druid' => ['name' => 'Druid', 'hit_die' => 8],
+            'monk' => ['name' => 'Monk', 'hit_die' => 8],
+            'paladin' => ['name' => 'Paladin', 'hit_die' => 10],
+            'sorcerer' => ['name' => 'Sorcerer', 'hit_die' => 6],
+            'warlock' => ['name' => 'Warlock', 'hit_die' => 8]
+        ];
+        
+        return $classes[$class] ?? $classes['fighter'];
     }
     
     /**
