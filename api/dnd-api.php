@@ -1,0 +1,496 @@
+<?php
+/**
+ * Интеграция с внешними D&D API
+ * Поддерживаемые API:
+ * - D&D 5e API (dnd5eapi.co)
+ * - Open5e API
+ * - Custom NPC Generator API
+ */
+
+class DndApiManager {
+    private $dnd5e_api_url = 'https://www.dnd5eapi.co/api';
+    private $open5e_api_url = 'https://open5e.com/api';
+    private $custom_npc_api_url = 'https://api.example.com/npc'; // Замените на реальный API
+    
+    /**
+     * Получение списка классов из D&D 5e API
+     */
+    public function getClasses() {
+        $url = $this->dnd5e_api_url . '/classes';
+        $response = $this->makeRequest($url);
+        
+        if ($response && isset($response['results'])) {
+            return array_map(function($class) {
+                return [
+                    'name' => $class['name'],
+                    'url' => $class['url']
+                ];
+            }, $response['results']);
+        }
+        
+        return [];
+    }
+    
+    /**
+     * Получение информации о классе
+     */
+    public function getClassInfo($className) {
+        $url = $this->dnd5e_api_url . '/classes/' . strtolower($className);
+        return $this->makeRequest($url);
+    }
+    
+    /**
+     * Получение списка рас
+     */
+    public function getRaces() {
+        $url = $this->dnd5e_api_url . '/races';
+        $response = $this->makeRequest($url);
+        
+        if ($response && isset($response['results'])) {
+            return array_map(function($race) {
+                return [
+                    'name' => $race['name'],
+                    'url' => $race['url']
+                ];
+            }, $response['results']);
+        }
+        
+        return [];
+    }
+    
+    /**
+     * Получение информации о расе
+     */
+    public function getRaceInfo($raceName) {
+        $url = $this->dnd5e_api_url . '/races/' . strtolower($raceName);
+        return $this->makeRequest($url);
+    }
+    
+    /**
+     * Получение списка оружия
+     */
+    public function getWeapons() {
+        $url = $this->dnd5e_api_url . '/equipment-categories/weapon';
+        $response = $this->makeRequest($url);
+        
+        if ($response && isset($response['equipment'])) {
+            return array_map(function($weapon) {
+                return [
+                    'name' => $weapon['name'],
+                    'url' => $weapon['url']
+                ];
+            }, $response['equipment']);
+        }
+        
+        return [];
+    }
+    
+    /**
+     * Получение информации об оружии
+     */
+    public function getWeaponInfo($weaponName) {
+        $url = $this->dnd5e_api_url . '/equipment/' . strtolower(str_replace(' ', '-', $weaponName));
+        return $this->makeRequest($url);
+    }
+    
+    /**
+     * Получение списка заклинаний
+     */
+    public function getSpells($level = null) {
+        $url = $this->dnd5e_api_url . '/spells';
+        if ($level !== null) {
+            $url .= '?level=' . $level;
+        }
+        $response = $this->makeRequest($url);
+        
+        if ($response && isset($response['results'])) {
+            return array_map(function($spell) {
+                return [
+                    'name' => $spell['name'],
+                    'url' => $spell['url']
+                ];
+            }, $response['results']);
+        }
+        
+        return [];
+    }
+    
+    /**
+     * Получение информации о заклинании
+     */
+    public function getSpellInfo($spellName) {
+        $url = $this->dnd5e_api_url . '/spells/' . strtolower(str_replace(' ', '-', $spellName));
+        return $this->makeRequest($url);
+    }
+    
+    /**
+     * Получение списка монстров
+     */
+    public function getMonsters($challenge_rating = null) {
+        $url = $this->dnd5e_api_url . '/monsters';
+        if ($challenge_rating !== null) {
+            $url .= '?challenge_rating=' . $challenge_rating;
+        }
+        $response = $this->makeRequest($url);
+        
+        if ($response && isset($response['results'])) {
+            return array_map(function($monster) {
+                return [
+                    'name' => $monster['name'],
+                    'url' => $monster['url']
+                ];
+            }, $response['results']);
+        }
+        
+        return [];
+    }
+    
+    /**
+     * Получение информации о монстре
+     */
+    public function getMonsterInfo($monsterName) {
+        $url = $this->dnd5e_api_url . '/monsters/' . strtolower(str_replace(' ', '-', $monsterName));
+        return $this->makeRequest($url);
+    }
+    
+    /**
+     * Генерация NPC с использованием внешнего API
+     */
+    public function generateNPC($params = []) {
+        $defaultParams = [
+            'race' => 'human',
+            'class' => 'fighter',
+            'level' => 1,
+            'alignment' => 'neutral',
+            'background' => 'soldier'
+        ];
+        
+        $params = array_merge($defaultParams, $params);
+        
+        // Попытка использовать внешний API для генерации NPC
+        $npcData = $this->generateFromExternalAPI($params);
+        
+        if ($npcData) {
+            return $this->formatNPCData($npcData);
+        }
+        
+        // Fallback: генерация на основе данных D&D 5e API
+        return $this->generateFromDnd5eAPI($params);
+    }
+    
+    /**
+     * Генерация NPC из внешнего API
+     */
+    private function generateFromExternalAPI($params) {
+        // Здесь можно подключить различные API для генерации NPC
+        // Например: ChatGPT API, OpenAI API, или специализированные D&D API
+        
+        $apiData = [
+            'race' => $params['race'],
+            'class' => $params['class'],
+            'level' => $params['level'],
+            'alignment' => $params['alignment'],
+            'background' => $params['background']
+        ];
+        
+        // Пример запроса к внешнему API
+        $response = $this->makeRequest($this->custom_npc_api_url, 'POST', $apiData);
+        
+        return $response;
+    }
+    
+    /**
+     * Генерация NPC на основе D&D 5e API
+     */
+    private function generateFromDnd5eAPI($params) {
+        $raceInfo = $this->getRaceInfo($params['race']);
+        $classInfo = $this->getClassInfo($params['class']);
+        
+        if (!$raceInfo || !$classInfo) {
+            return null;
+        }
+        
+        // Генерация базовых характеристик
+        $abilities = $this->generateAbilities($raceInfo, $classInfo);
+        
+        // Генерация имени
+        $name = $this->generateName($params['race']);
+        
+        // Генерация описания
+        $description = $this->generateDescription($params);
+        
+        // Генерация технических параметров
+        $technicalParams = $this->generateTechnicalParams($params, $abilities);
+        
+        return [
+            'name' => $name,
+            'race' => $raceInfo['name'],
+            'class' => $classInfo['name'],
+            'level' => $params['level'],
+            'alignment' => $params['alignment'],
+            'background' => $params['background'],
+            'abilities' => $abilities,
+            'description' => $description,
+            'technical_params' => $technicalParams
+        ];
+    }
+    
+    /**
+     * Генерация характеристик
+     */
+    private function generateAbilities($raceInfo, $classInfo) {
+        $abilities = [
+            'strength' => rand(8, 18),
+            'dexterity' => rand(8, 18),
+            'constitution' => rand(8, 18),
+            'intelligence' => rand(8, 18),
+            'wisdom' => rand(8, 18),
+            'charisma' => rand(8, 18)
+        ];
+        
+        // Применяем бонусы расы
+        if (isset($raceInfo['ability_bonuses'])) {
+            foreach ($raceInfo['ability_bonuses'] as $bonus) {
+                $ability = $bonus['ability_score']['name'];
+                $abilities[strtolower($ability)] += $bonus['bonus'];
+            }
+        }
+        
+        return $abilities;
+    }
+    
+    /**
+     * Генерация имени
+     */
+    private function generateName($race) {
+        $names = [
+            'human' => ['Алексей', 'Мария', 'Дмитрий', 'Анна', 'Сергей', 'Елена'],
+            'elf' => ['Леголас', 'Галадриэль', 'Элронд', 'Арвен', 'Трандуил', 'Келеборн'],
+            'dwarf' => ['Гимли', 'Торин', 'Балин', 'Двалин', 'Бомбур', 'Глоин'],
+            'halfling' => ['Бильбо', 'Фродо', 'Сэм', 'Пиппин', 'Мерри', 'Розмари'],
+            'orc' => ['Гром', 'Железный Кулак', 'Кровавый Топор', 'Темный Дух', 'Волчья Грива']
+        ];
+        
+        $raceNames = $names[$race] ?? $names['human'];
+        return $raceNames[array_rand($raceNames)];
+    }
+    
+    /**
+     * Генерация описания
+     */
+    private function generateDescription($params) {
+        $descriptions = [
+            'fighter' => 'Опытный воин, закаленный в боях и сражениях.',
+            'wizard' => 'Мудрый маг, изучающий древние тайны магии.',
+            'rogue' => 'Ловкий плут, мастер скрытности и точных ударов.',
+            'cleric' => 'Благочестивый жрец, служащий своему божеству.',
+            'ranger' => 'Следопыт, знающий дикие земли как свои пять пальцев.',
+            'barbarian' => 'Дикий варвар, чья ярость в бою не знает границ.',
+            'bard' => 'Обаятельный бард, чьи песни и истории покоряют сердца.',
+            'druid' => 'Друид, связанный с природой и её силами.',
+            'monk' => 'Дисциплинированный монах, владеющий боевыми искусствами.',
+            'paladin' => 'Благородный паладин, защитник справедливости и добра.',
+            'sorcerer' => 'Сорсерер, чья магия рождается из внутренней силы.',
+            'warlock' => 'Колдун, заключивший договор с могущественным покровителем.'
+        ];
+        
+        return $descriptions[$params['class']] ?? 'Загадочный персонаж с интересным прошлым.';
+    }
+    
+    /**
+     * Генерация технических параметров
+     */
+    private function generateTechnicalParams($params, $abilities) {
+        $level = $params['level'];
+        $class = $params['class'];
+        
+        // Базовые хиты
+        $baseHP = $this->getBaseHP($class);
+        $conMod = floor(($abilities['constitution'] - 10) / 2);
+        $hp = $baseHP + ($conMod * $level);
+        
+        // Класс доспеха
+        $ac = 10 + floor(($abilities['dexterity'] - 10) / 2);
+        
+        // Оружие
+        $weapon = $this->getClassWeapon($class);
+        
+        return [
+            'hit_points' => $hp,
+            'armor_class' => $ac,
+            'weapon' => $weapon,
+            'damage' => $this->getWeaponDamage($weapon),
+            'abilities' => $abilities
+        ];
+    }
+    
+    /**
+     * Получение базовых хитов для класса
+     */
+    private function getBaseHP($class) {
+        $hpTable = [
+            'barbarian' => 12,
+            'fighter' => 10,
+            'paladin' => 10,
+            'ranger' => 10,
+            'monk' => 8,
+            'rogue' => 8,
+            'bard' => 8,
+            'cleric' => 8,
+            'druid' => 8,
+            'warlock' => 8,
+            'sorcerer' => 6,
+            'wizard' => 6
+        ];
+        
+        return $hpTable[$class] ?? 8;
+    }
+    
+    /**
+     * Получение оружия для класса
+     */
+    private function getClassWeapon($class) {
+        $weapons = [
+            'barbarian' => 'Топор',
+            'fighter' => 'Меч',
+            'paladin' => 'Меч',
+            'ranger' => 'Лук',
+            'monk' => 'Кулаки',
+            'rogue' => 'Кинжал',
+            'bard' => 'Рапира',
+            'cleric' => 'Булава',
+            'druid' => 'Посох',
+            'warlock' => 'Кинжал',
+            'sorcerer' => 'Посох',
+            'wizard' => 'Посох'
+        ];
+        
+        return $weapons[$class] ?? 'Кулаки';
+    }
+    
+    /**
+     * Получение урона оружия
+     */
+    private function getWeaponDamage($weapon) {
+        $damage = [
+            'Топор' => '1d12 рубящий',
+            'Меч' => '1d8 рубящий',
+            'Лук' => '1d8 колющий',
+            'Кулаки' => '1d4 дробящий',
+            'Кинжал' => '1d4 колющий',
+            'Рапира' => '1d8 колющий',
+            'Булава' => '1d6 дробящий',
+            'Посох' => '1d6 дробящий'
+        ];
+        
+        return $damage[$weapon] ?? '1d4 дробящий';
+    }
+    
+    /**
+     * Форматирование данных NPC для отображения
+     */
+    private function formatNPCData($npcData) {
+        $abilities = $npcData['abilities'];
+        $tech = $npcData['technical_params'];
+        
+        $abilityScores = [];
+        foreach ($abilities as $ability => $score) {
+            $modifier = floor(($score - 10) / 2);
+            $modStr = $modifier >= 0 ? "+$modifier" : "$modifier";
+            $abilityScores[] = ucfirst($ability) . ": $score ($modStr)";
+        }
+        
+        return [
+            'name' => $npcData['name'],
+            'description' => $npcData['description'],
+            'appearance' => $this->generateAppearance($npcData['race']),
+            'traits' => $this->generateTraits($npcData['alignment']),
+            'technical_params' => [
+                'Хиты: ' . $tech['hit_points'],
+                'Класс доспеха: ' . $tech['armor_class'],
+                'Оружие: ' . $tech['weapon'],
+                'Урон: ' . $tech['damage'],
+                'Характеристики: ' . implode(', ', $abilityScores)
+            ]
+        ];
+    }
+    
+    /**
+     * Генерация внешности
+     */
+    private function generateAppearance($race) {
+        $appearances = [
+            'human' => 'Среднего роста с крепким телосложением и уверенной походкой.',
+            'elf' => 'Высокий и стройный, с острыми чертами лица и внимательным взглядом.',
+            'dwarf' => 'Коренастый и сильный, с широкими плечами и грубыми руками.',
+            'halfling' => 'Невысокий и проворный, с добродушным выражением лица.',
+            'orc' => 'Мощный и мускулистый, с грубыми чертами лица и решительным взглядом.'
+        ];
+        
+        return $appearances[$race] ?? 'Среднего роста с крепким телосложением.';
+    }
+    
+    /**
+     * Генерация черт характера
+     */
+    private function generateTraits($alignment) {
+        $traits = [
+            'lawful good' => 'Честный и справедливый, всегда следует закону и защищает слабых.',
+            'neutral good' => 'Добрый и сострадательный, помогает другим без оглядки на закон.',
+            'chaotic good' => 'Свободолюбивый и добрый, действует по велению сердца.',
+            'lawful neutral' => 'Дисциплинированный и организованный, следует порядку и традициям.',
+            'neutral' => 'Уравновешенный и спокойный, избегает крайностей.',
+            'chaotic neutral' => 'Свободолюбивый и непредсказуемый, ценит личную свободу.',
+            'lawful evil' => 'Жестокий и организованный, использует закон для достижения целей.',
+            'neutral evil' => 'Эгоистичный и беспринципный, заботится только о себе.',
+            'chaotic evil' => 'Жестокий и непредсказуемый, разрушает всё вокруг себя.'
+        ];
+        
+        return $traits[$alignment] ?? 'Сбалансированный характер с разными чертами.';
+    }
+    
+    /**
+     * Выполнение HTTP запроса
+     */
+    private function makeRequest($url, $method = 'GET', $data = null) {
+        $ch = curl_init();
+        
+        curl_setopt($ch, CURLOPT_URL, $url);
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+        curl_setopt($ch, CURLOPT_TIMEOUT, 30);
+        curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
+        curl_setopt($ch, CURLOPT_HTTPHEADER, [
+            'Content-Type: application/json',
+            'User-Agent: DnD-Copilot/1.0'
+        ]);
+        
+        if ($method === 'POST' && $data) {
+            curl_setopt($ch, CURLOPT_POST, true);
+            curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($data));
+        }
+        
+        $response = curl_exec($ch);
+        $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+        $error = curl_error($ch);
+        
+        curl_close($ch);
+        
+        if ($error) {
+            error_log("DnD API Error: $error");
+            return null;
+        }
+        
+        if ($httpCode !== 200) {
+            error_log("DnD API HTTP Error: $httpCode");
+            return null;
+        }
+        
+        return json_decode($response, true);
+    }
+}
+
+// Экспорт класса для использования в других файлах
+if (isset($GLOBALS['dnd_api_manager'])) {
+    $GLOBALS['dnd_api_manager'] = new DndApiManager();
+}
+?>
