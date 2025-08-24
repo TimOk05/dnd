@@ -22,10 +22,11 @@
 </Files>
 
 # Временно разрешаем доступ ко всем JSON файлам для тестирования
-# <Files "*.json">
-#     Order allow,deny
-#     Deny from all
-# </Files>
+<Files "*.json">
+    Order allow,deny
+    Allow from all
+    Require all granted
+</Files>
 
 # Разрешаем доступ к manifest.json
 <Files "manifest.json">
