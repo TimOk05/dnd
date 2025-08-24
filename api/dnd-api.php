@@ -261,7 +261,10 @@ class DndApiManager {
         if (isset($raceInfo['ability_bonuses'])) {
             foreach ($raceInfo['ability_bonuses'] as $bonus) {
                 $ability = $bonus['ability_score']['name'];
-                $abilities[strtolower($ability)] += $bonus['bonus'];
+                $abilityKey = strtolower($ability);
+                if (isset($abilities[$abilityKey])) {
+                    $abilities[$abilityKey] += $bonus['bonus'];
+                }
             }
         }
         
@@ -313,10 +316,17 @@ class DndApiManager {
         $level = $params['level'];
         $class = $params['class'];
         
-        // Базовые хиты
-        $baseHP = $this->getBaseHP($class);
+        // Базовые хиты по правилам D&D 5e
+        $hitDie = $this->getBaseHP($class); // Это на самом деле hit die
         $conMod = floor(($abilities['constitution'] - 10) / 2);
-        $hp = $baseHP + ($conMod * $level);
+        
+        // Хиты 1 уровня = максимальный результат hit die + модификатор телосложения
+        $hp = $hitDie + $conMod;
+        
+        // Хиты за каждый дополнительный уровень
+        for ($i = 2; $i <= $level; $i++) {
+            $hp += rand(1, $hitDie) + $conMod;
+        }
         
         // Класс доспеха
         $ac = 10 + floor(($abilities['dexterity'] - 10) / 2);
@@ -402,11 +412,22 @@ class DndApiManager {
         $abilities = $npcData['abilities'];
         $tech = $npcData['technical_params'];
         
+        // Перевод названий характеристик
+        $abilityTranslations = [
+            'strength' => 'Сила',
+            'dexterity' => 'Ловкость',
+            'constitution' => 'Телосложение',
+            'intelligence' => 'Интеллект',
+            'wisdom' => 'Мудрость',
+            'charisma' => 'Харизма'
+        ];
+        
         $abilityScores = [];
         foreach ($abilities as $ability => $score) {
             $modifier = floor(($score - 10) / 2);
             $modStr = $modifier >= 0 ? "+$modifier" : "$modifier";
-            $abilityScores[] = ucfirst($ability) . ": $score ($modStr)";
+            $abilityName = $abilityTranslations[$ability] ?? ucfirst($ability);
+            $abilityScores[] = "$abilityName: $score ($modStr)";
         }
         
         return [

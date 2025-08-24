@@ -2,17 +2,17 @@
 
 const CACHE_NAME = 'dnd-chat-v1.0.0';
 const urlsToCache = [
-    '/dnd/',
-    '/dnd/index.php',
-    '/dnd/template.html',
-    '/dnd/mobile.js',
-    '/dnd/manifest.json',
-    '/dnd/favicon.ico',
-    '/dnd/offline.html',
-    '/dnd/login.php',
-    '/dnd/simple_register.php',
-    '/dnd/stats.php',
-    '/dnd/admin.php',
+    './',
+    './index.php',
+    './template.html',
+    './mobile.js',
+    './manifest.json',
+    './favicon.svg',
+    './offline.html',
+    './login.php',
+    './simple_register.php',
+    './stats.php',
+    './admin.php',
     'https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&family=UnifrakturCook:wght@700&family=IM+Fell+English+SC&display=swap',
     'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?auto=format&fit=crop&w=1500&q=80',
     'https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=1500&q=80',
@@ -81,7 +81,7 @@ self.addEventListener('fetch', function(event) {
         .catch(function() {
             // Возвращаем офлайн страницу для навигационных запросов
             if (event.request.mode === 'navigate') {
-                return caches.match('/dnd/offline.html');
+                return caches.match('./offline.html');
             }
         })
     );
@@ -93,8 +93,8 @@ self.addEventListener('push', function(event) {
         const data = event.data.json();
         const options = {
             body: data.body,
-            icon: '/dnd/favicon.ico',
-            badge: '/dnd/favicon.ico',
+            icon: './favicon.svg',
+            badge: './favicon.svg',
             vibrate: [100, 50, 100],
             data: {
                 dateOfArrival: Date.now(),

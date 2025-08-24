@@ -21,7 +21,7 @@
     Deny from all
 </Files>
 
-# Защита файлов .json в корне (кроме manifest.json)
+# Защита файлов .json в корне (кроме manifest.json и dnd_mechanics.json)
 <Files "*.json">
     Order allow,deny
     Deny from all
@@ -29,6 +29,12 @@
 
 # Разрешаем доступ к manifest.json
 <Files "manifest.json">
+    Order allow,deny
+    Allow from all
+</Files>
+
+# Разрешаем доступ к dnd_mechanics.json
+<Files "dnd_mechanics.json">
     Order allow,deny
     Allow from all
 </Files>
