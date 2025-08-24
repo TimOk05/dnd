@@ -132,7 +132,26 @@ class EnemyGenerator {
             return $response['results'];
         }
         
-        return null;
+        // Fallback: возвращаем базовый список монстров если API недоступен
+        return $this->getFallbackMonsters();
+    }
+    
+    /**
+     * Fallback список монстров
+     */
+    private function getFallbackMonsters() {
+        return [
+            ['index' => 'goblin', 'name' => 'Goblin'],
+            ['index' => 'orc', 'name' => 'Orc'],
+            ['index' => 'wolf', 'name' => 'Wolf'],
+            ['index' => 'bandit', 'name' => 'Bandit'],
+            ['index' => 'cultist', 'name' => 'Cultist'],
+            ['index' => 'dragon', 'name' => 'Dragon'],
+            ['index' => 'troll', 'name' => 'Troll'],
+            ['index' => 'ogre', 'name' => 'Ogre'],
+            ['index' => 'skeleton', 'name' => 'Skeleton'],
+            ['index' => 'zombie', 'name' => 'Zombie']
+        ];
     }
     
     /**
@@ -174,7 +193,69 @@ class EnemyGenerator {
      */
     private function getMonsterDetails($monster_index) {
         $url = $this->dnd5e_api_url . '/monsters/' . $monster_index;
-        return $this->makeRequest($url);
+        $response = $this->makeRequest($url);
+        
+        if ($response) {
+            return $response;
+        }
+        
+        // Fallback: возвращаем базовые данные если API недоступен
+        return $this->getFallbackMonsterDetails($monster_index);
+    }
+    
+    /**
+     * Fallback данные монстров
+     */
+    private function getFallbackMonsterDetails($monster_index) {
+        $fallback_data = [
+            'goblin' => [
+                'name' => 'Гоблин',
+                'challenge_rating' => '1/4',
+                'type' => 'humanoid',
+                'size' => 'Small',
+                'alignment' => 'Neutral Evil',
+                'desc' => 'Маленькое зеленокожее существо с острыми ушами и желтыми глазами.',
+                'stats' => ['str' => 8, 'dex' => 14, 'con' => 10, 'int' => 10, 'wis' => 8, 'cha' => 8],
+                'armor_class' => [['value' => 15]],
+                'hit_points' => ['average' => 7],
+                'speed' => ['walk' => '30'],
+                'actions' => [
+                    ['name' => 'Короткий меч', 'desc' => 'Рукопашная атака оружием: +4 к попаданию, досягаемость 5 футов, одна цель. Попадание: 5 (1d6 + 2) колющего урона.']
+                ]
+            ],
+            'orc' => [
+                'name' => 'Орк',
+                'challenge_rating' => '1/2',
+                'type' => 'humanoid',
+                'size' => 'Medium',
+                'alignment' => 'Chaotic Evil',
+                'desc' => 'Крупное мускулистое существо с зеленой кожей и клыками.',
+                'stats' => ['str' => 16, 'dex' => 12, 'con' => 16, 'int' => 7, 'wis' => 11, 'cha' => 10],
+                'armor_class' => [['value' => 13]],
+                'hit_points' => ['average' => 15],
+                'speed' => ['walk' => '30'],
+                'actions' => [
+                    ['name' => 'Грейсворд', 'desc' => 'Рукопашная атака оружием: +5 к попаданию, досягаемость 5 футов, одна цель. Попадание: 9 (1d12 + 3) рубящего урона.']
+                ]
+            ],
+            'wolf' => [
+                'name' => 'Волк',
+                'challenge_rating' => '1/4',
+                'type' => 'beast',
+                'size' => 'Medium',
+                'alignment' => 'Unaligned',
+                'desc' => 'Дикий волк с серой шерстью и острыми клыками.',
+                'stats' => ['str' => 12, 'dex' => 15, 'con' => 12, 'int' => 3, 'wis' => 12, 'cha' => 6],
+                'armor_class' => [['value' => 13]],
+                'hit_points' => ['average' => 11],
+                'speed' => ['walk' => '40'],
+                'actions' => [
+                    ['name' => 'Укус', 'desc' => 'Атака оружием ближнего боя: +4 к попаданию, досягаемость 5 футов, одна цель. Попадание: 7 (2d4 + 2) колющего урона.']
+                ]
+            ]
+        ];
+        
+        return $fallback_data[$monster_index] ?? $fallback_data['goblin'];
     }
     
     /**
@@ -351,17 +432,32 @@ class EnemyGenerator {
     private function makeRequest($url) {
         $ch = curl_init($url);
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-        curl_setopt($ch, CURLOPT_TIMEOUT, 10);
+        curl_setopt($ch, CURLOPT_TIMEOUT, 15);
         curl_setopt($ch, CURLOPT_USERAGENT, 'DnD-Copilot/1.0');
+        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+        curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
         
         $response = curl_exec($ch);
         $http_code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+        $error = curl_error($ch);
         curl_close($ch);
         
-        if ($http_code === 200 && $response) {
-            return json_decode($response, true);
+        if ($error) {
+            error_log("CURL Error for $url: $error");
+            return null;
         }
         
+        if ($http_code === 200 && $response) {
+            $decoded = json_decode($response, true);
+            if (json_last_error() === JSON_ERROR_NONE) {
+                return $decoded;
+            } else {
+                error_log("JSON decode error for $url: " . json_last_error_msg());
+                return null;
+            }
+        }
+        
+        error_log("HTTP Error for $url: $http_code");
         return null;
     }
 }

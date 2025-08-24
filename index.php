@@ -371,13 +371,7 @@ function openCharacterModal() {
                     </div>
                 </div>
                 
-                <div class="form-options">
-                    <label class="checkbox-label">
-                        <input type="checkbox" name="use_ai" checked>
-                        <span class="checkmark"></span>
-                        Использовать AI-улучшение для описаний
-                    </label>
-                </div>
+
                 
                 <button type="submit" class="generate-btn">
                     <span class="btn-icon">⚔️</span>
@@ -396,6 +390,7 @@ function openCharacterModal() {
         e.preventDefault();
         
         const formData = new FormData(this);
+        formData.append('use_ai', 'on'); // AI всегда включен
         const submitBtn = this.querySelector('button[type="submit"]');
         const resultDiv = document.getElementById('characterResult');
         
@@ -488,13 +483,7 @@ function openEnemyModal() {
                     </div>
                 </div>
                 
-                <div class="form-options">
-                    <label class="checkbox-label">
-                        <input type="checkbox" name="use_ai" checked>
-                        <span class="checkmark"></span>
-                        Использовать AI для тактики и описаний
-                    </label>
-                </div>
+
                 
                 <button type="submit" class="generate-btn">
                     <span class="btn-icon">👹</span>
@@ -513,6 +502,7 @@ function openEnemyModal() {
         e.preventDefault();
         
         const formData = new FormData(this);
+        formData.append('use_ai', 'on'); // AI всегда включен
         const submitBtn = this.querySelector('button[type="submit"]');
         const resultDiv = document.getElementById('enemyResult');
         

@@ -110,7 +110,7 @@
                 formData.append('class', 'fighter');
                 formData.append('level', '5');
                 formData.append('alignment', 'lawful good');
-                formData.append('use_ai', 'on');
+                // AI теперь всегда включен по умолчанию
                 
                 const response = await fetch('api/generate-hybrid-npc.php', {
                     method: 'POST',
@@ -158,7 +158,7 @@
                 formData.append('count', '2');
                 formData.append('enemy_type', 'humanoid');
                 formData.append('environment', 'forest');
-                formData.append('use_ai', 'on');
+                // AI теперь всегда включен по умолчанию
                 
                 const response = await fetch('api/generate-enemies.php', {
                     method: 'POST',
