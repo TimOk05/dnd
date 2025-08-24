@@ -163,8 +163,6 @@ $fastBtns = '';
 $fastBtns .= '<button class="fast-btn" onclick="openDiceStep1()">🎲 Бросок костей</button>';
 $fastBtns .= '<button class="fast-btn" onclick="openNpcStep1()">🗣️ NPC</button>';
 $fastBtns .= '<button class="fast-btn" onclick="openInitiativeModal()">⚡ Инициатива</button>';
-$fastBtns .= '<a href="test-hybrid.php" class="fast-btn" style="background: var(--accent-success); border-color: var(--accent-success);">🚀 Гибридная система</a>';
-$fastBtns .= '<a href="test-simple.php" class="fast-btn" style="background: var(--accent-info); border-color: var(--accent-info);">🧪 Простой тест</a>';
 
 // --- Генерация сообщений чата (пропускаем system) ---
 $chatMsgs = '';
@@ -318,7 +316,7 @@ function openNpcStep1() {
             </div>
             <div style="font-size: 0.9em; color: var(--text-tertiary); padding: 10px; background: var(--bg-tertiary); border-radius: 8px;">
                 <strong>AI генерация:</strong> Использует AI для создания уникальных описаний<br>
-                <strong>API генерация:</strong> Использует реальные D&D API для точных параметров
+                <strong>API генерация:</strong> Использует реальные D&D API для точных параметров + AI улучшение
             </div>
         `);
         document.getElementById('modal-save').style.display = 'none';
@@ -333,7 +331,7 @@ function openNpcStep2(race) {
 // --- Функция открытия рабочей системы генерации NPC ---
 function openWorkingNpcModal() {
     showModal(`
-        <b class="mini-menu-title">Генерация NPC с использованием D&D API</b>
+        <b class="mini-menu-title">Генерация NPC с использованием D&D API + AI</b>
         <div style="margin: 15px 0; padding: 15px; background: var(--bg-tertiary); border-radius: 8px; border: 1px solid var(--border-tertiary);">
             <form id="workingNpcForm">
                 <div style="margin-bottom: 15px;">
@@ -390,6 +388,11 @@ function openWorkingNpcModal() {
                     </select>
                 </div>
                 
+                <div style="margin-bottom: 15px; display: flex; align-items: center; gap: 10px;">
+                    <input type="checkbox" name="use_ai" id="use_ai" checked style="width: auto;">
+                    <label for="use_ai" style="margin: 0; color: var(--text-tertiary); font-weight: bold;">Использовать AI-улучшение (DeepSeek)</label>
+                </div>
+                
                 <button type="submit" class="fast-btn" style="background: var(--accent-success); width: 100%;">🚀 Сгенерировать NPC</button>
             </form>
             
@@ -409,9 +412,9 @@ function openWorkingNpcModal() {
         
         submitBtn.textContent = 'Генерация...';
         submitBtn.disabled = true;
-        resultDiv.innerHTML = '<p>Генерация NPC...</p>';
+        resultDiv.innerHTML = '<p>Генерация NPC с AI-улучшением...</p>';
         
-        fetch('api/generate-npc-working.php', {
+        fetch('api/generate-hybrid-npc.php', {
             method: 'POST',
             body: formData
         })
