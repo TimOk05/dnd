@@ -291,22 +291,42 @@ class DndApiManager {
      * Генерация описания
      */
     private function generateDescription($params) {
-        $descriptions = [
-            'fighter' => 'Опытный воин, закаленный в боях и сражениях.',
-            'wizard' => 'Мудрый маг, изучающий древние тайны магии.',
-            'rogue' => 'Ловкий плут, мастер скрытности и точных ударов.',
-            'cleric' => 'Благочестивый жрец, служащий своему божеству.',
-            'ranger' => 'Следопыт, знающий дикие земли как свои пять пальцев.',
-            'barbarian' => 'Дикий варвар, чья ярость в бою не знает границ.',
-            'bard' => 'Обаятельный бард, чьи песни и истории покоряют сердца.',
-            'druid' => 'Друид, связанный с природой и её силами.',
-            'monk' => 'Дисциплинированный монах, владеющий боевыми искусствами.',
-            'paladin' => 'Благородный паладин, защитник справедливости и добра.',
-            'sorcerer' => 'Сорсерер, чья магия рождается из внутренней силы.',
-            'warlock' => 'Колдун, заключивший договор с могущественным покровителем.'
+        $class = $params['class'];
+        $alignment = $params['alignment'];
+        
+        // Базовые описания классов
+        $classDescriptions = [
+            'fighter' => 'Опытный воин, закаленный в боях и сражениях',
+            'wizard' => 'Мудрый маг, изучающий древние тайны магии',
+            'rogue' => 'Ловкий плут, мастер скрытности и точных ударов',
+            'cleric' => 'Благочестивый жрец, служащий своему божеству',
+            'ranger' => 'Следопыт, знающий дикие земли как свои пять пальцев',
+            'barbarian' => 'Дикий варвар, чья ярость в бою не знает границ',
+            'bard' => 'Обаятельный бард, чьи песни и истории покоряют сердца',
+            'druid' => 'Друид, связанный с природой и её силами',
+            'monk' => 'Дисциплинированный монах, владеющий боевыми искусствами',
+            'paladin' => 'Благородный паладин, защитник справедливости и добра',
+            'sorcerer' => 'Сорсерер, чья магия рождается из внутренней силы',
+            'warlock' => 'Колдун, заключивший договор с могущественным покровителем'
         ];
         
-        return $descriptions[$params['class']] ?? 'Загадочный персонаж с интересным прошлым.';
+        // Описания мировоззрений
+        $alignmentDescriptions = [
+            'lawful good' => 'Следует строгим моральным принципам и всегда стремится помочь другим',
+            'neutral good' => 'Добросердечный и отзывчивый, готов помочь нуждающимся',
+            'chaotic good' => 'Свободолюбивый и добрый, действует по велению сердца',
+            'lawful neutral' => 'Следует порядку и традициям, ценит структуру и дисциплину',
+            'neutral' => 'Балансирует между добром и злом, порядком и хаосом',
+            'chaotic neutral' => 'Свободолюбивый и непредсказуемый, избегает ограничений',
+            'lawful evil' => 'Жестокий и организованный, использует порядок для достижения злых целей',
+            'neutral evil' => 'Эгоистичный и безжалостный, готов на все ради личной выгоды',
+            'chaotic evil' => 'Разрушительный и непредсказуемый, сеет хаос и страдания'
+        ];
+        
+        $classDesc = $classDescriptions[$class] ?? 'Загадочный персонаж с интересным прошлым';
+        $alignmentDesc = $alignmentDescriptions[$alignment] ?? 'с неопределенным мировоззрением';
+        
+        return $classDesc . '. ' . $alignmentDesc . '.';
     }
     
     /**
@@ -317,7 +337,7 @@ class DndApiManager {
         $class = $params['class'];
         
         // Базовые хиты по правилам D&D 5e
-        $hitDie = $this->getBaseHP($class); // Это на самом деле hit die
+        $hitDie = $this->getBaseHP($class);
         $conMod = floor(($abilities['constitution'] - 10) / 2);
         
         // Хиты 1 уровня = максимальный результат hit die + модификатор телосложения
@@ -328,18 +348,47 @@ class DndApiManager {
             $hp += rand(1, $hitDie) + $conMod;
         }
         
-        // Класс доспеха
-        $ac = 10 + floor(($abilities['dexterity'] - 10) / 2);
+        // Класс доспеха (базовый 10 + модификатор ЛОВ + бонус доспеха)
+        $dexMod = floor(($abilities['dexterity'] - 10) / 2);
+        $armorBonus = $this->getArmorBonus($class, $level);
+        $ac = 10 + $dexMod + $armorBonus;
         
-        // Оружие
+        // Оружие и урон
         $weapon = $this->getClassWeapon($class);
+        $weaponDamage = $this->getWeaponDamage($weapon);
+        
+        // Бонус к атаке
+        $attackBonus = $this->getAttackBonus($class, $level, $abilities);
+        
+        // Спасброски
+        $savingThrows = $this->getSavingThrows($class, $abilities);
+        
+        // Инициатива
+        $initiative = $dexMod;
+        
+        // Скорость
+        $speed = $this->getSpeed($params['race']);
         
         return [
-            'hit_points' => $hp,
-            'armor_class' => $ac,
-            'weapon' => $weapon,
-            'damage' => $this->getWeaponDamage($weapon),
-            'abilities' => $abilities
+            "Хиты: {$hp}",
+            "Класс доспеха: {$ac}",
+            "Инициатива: {$initiative}",
+            "Скорость: {$speed} футов",
+            "Оружие: {$weapon} ({$weaponDamage})",
+            "Бонус к атаке: +{$attackBonus}",
+            "Спасброски: " . implode(', ', $savingThrows),
+            "Характеристики: СИЛ " . $abilities['strength'] . 
+                " (" . $this->getModifier($abilities['strength']) . "), " .
+                "ЛОВ " . $abilities['dexterity'] . 
+                " (" . $this->getModifier($abilities['dexterity']) . "), " .
+                "ТЕЛ " . $abilities['constitution'] . 
+                " (" . $this->getModifier($abilities['constitution']) . "), " .
+                "ИНТ " . $abilities['intelligence'] . 
+                " (" . $this->getModifier($abilities['intelligence']) . "), " .
+                "МДР " . $abilities['wisdom'] . 
+                " (" . $this->getModifier($abilities['wisdom']) . "), " .
+                "ХАР " . $abilities['charisma'] . 
+                " (" . $this->getModifier($abilities['charisma']) . ")"
         ];
     }
     
@@ -403,6 +452,121 @@ class DndApiManager {
         ];
         
         return $damage[$weapon] ?? '1d4 дробящий';
+    }
+    
+    /**
+     * Получение бонуса доспеха для класса
+     */
+    private function getArmorBonus($class, $level) {
+        $armorBonuses = [
+            'fighter' => 2, // Кольчуга
+            'paladin' => 2, // Кольчуга
+            'ranger' => 1,  // Кожаная броня
+            'barbarian' => 1, // Кожаная броня
+            'monk' => 0,    // Без доспеха
+            'rogue' => 1,   // Кожаная броня
+            'bard' => 1,    // Кожаная броня
+            'cleric' => 2,  // Кольчуга
+            'druid' => 1,   // Кожаная броня
+            'warlock' => 0, // Без доспеха
+            'sorcerer' => 0, // Без доспеха
+            'wizard' => 0   // Без доспеха
+        ];
+        
+        return $armorBonuses[$class] ?? 0;
+    }
+    
+    /**
+     * Получение бонуса к атаке
+     */
+    private function getAttackBonus($class, $level, $abilities) {
+        $proficiencyBonus = floor(($level - 1) / 4) + 2;
+        
+        // Определяем основную характеристику для атаки
+        $primaryAbility = $this->getPrimaryAbility($class);
+        $abilityModifier = floor(($abilities[$primaryAbility] - 10) / 2);
+        
+        return $proficiencyBonus + $abilityModifier;
+    }
+    
+    /**
+     * Получение основной характеристики для класса
+     */
+    private function getPrimaryAbility($class) {
+        $primaryAbilities = [
+            'fighter' => 'strength',
+            'paladin' => 'strength',
+            'ranger' => 'dexterity',
+            'barbarian' => 'strength',
+            'monk' => 'dexterity',
+            'rogue' => 'dexterity',
+            'bard' => 'charisma',
+            'cleric' => 'wisdom',
+            'druid' => 'wisdom',
+            'warlock' => 'charisma',
+            'sorcerer' => 'charisma',
+            'wizard' => 'intelligence'
+        ];
+        
+        return $primaryAbilities[$class] ?? 'strength';
+    }
+    
+    /**
+     * Получение спасбросков
+     */
+    private function getSavingThrows($class, $abilities) {
+        $savingThrows = [
+            'fighter' => ['strength', 'constitution'],
+            'paladin' => ['wisdom', 'charisma'],
+            'ranger' => ['strength', 'dexterity'],
+            'barbarian' => ['strength', 'constitution'],
+            'monk' => ['strength', 'dexterity'],
+            'rogue' => ['dexterity', 'intelligence'],
+            'bard' => ['dexterity', 'charisma'],
+            'cleric' => ['wisdom', 'charisma'],
+            'druid' => ['intelligence', 'wisdom'],
+            'warlock' => ['wisdom', 'charisma'],
+            'sorcerer' => ['constitution', 'charisma'],
+            'wizard' => ['intelligence', 'wisdom']
+        ];
+        
+        $throws = $savingThrows[$class] ?? ['strength', 'dexterity'];
+        $result = [];
+        
+        foreach ($throws as $ability) {
+            $modifier = $this->getModifier($abilities[$ability]);
+            $modStr = $modifier >= 0 ? "+$modifier" : "$modifier";
+            $result[] = ucfirst($ability) . " $modStr";
+        }
+        
+        return $result;
+    }
+    
+    /**
+     * Получение модификатора характеристики
+     */
+    private function getModifier($score) {
+        return floor(($score - 10) / 2);
+    }
+    
+    /**
+     * Получение скорости для расы
+     */
+    private function getSpeed($race) {
+        $speeds = [
+            'human' => 30,
+            'elf' => 30,
+            'dwarf' => 25,
+            'halfling' => 25,
+            'orc' => 30,
+            'tiefling' => 30,
+            'dragonborn' => 30,
+            'gnome' => 25,
+            'half-elf' => 30,
+            'half-orc' => 30
+        ];
+        
+        return $speeds[$race] ?? 30;
     }
     
     /**

@@ -58,15 +58,15 @@ class EnemyGenerator {
     private function getCRRange($threat_level) {
         switch ($threat_level) {
             case 'easy':
-                return ['min' => 0, 'max' => 3]; // CR 0-3
+                return ['min' => 0, 'max' => 2]; // CR 0-2 (1/8, 1/4, 1/2, 1, 2)
             case 'medium':
-                return ['min' => 2, 'max' => 7]; // CR 2-7
+                return ['min' => 1, 'max' => 5]; // CR 1-5
             case 'hard':
-                return ['min' => 5, 'max' => 12]; // CR 5-12
+                return ['min' => 3, 'max' => 10]; // CR 3-10
             case 'deadly':
-                return ['min' => 10, 'max' => 20]; // CR 10-20
+                return ['min' => 8, 'max' => 20]; // CR 8-20
             default:
-                return ['min' => 2, 'max' => 7];
+                return ['min' => 1, 'max' => 5];
         }
     }
     
@@ -137,42 +137,35 @@ class EnemyGenerator {
      */
     private function getFallbackMonsters() {
         return [
-            // Легкие противники (CR 1/8 - 1/4)
-            ['index' => 'bandit', 'name' => 'Бандит'],
-            ['index' => 'cultist', 'name' => 'Культист'],
-            ['index' => 'goblin', 'name' => 'Гоблин'],
-            ['index' => 'kobold', 'name' => 'Кобольд'],
-            ['index' => 'rat', 'name' => 'Гигантская крыса'],
-            ['index' => 'spider', 'name' => 'Гигантский паук'],
-            ['index' => 'wolf', 'name' => 'Волк'],
-            ['index' => 'zombie', 'name' => 'Зомби'],
-            ['index' => 'skeleton', 'name' => 'Скелет'],
+            // Легкие противники (CR 1/8 - 1/2)
+            ['index' => 'bandit', 'name' => 'Бандит', 'cr' => 1/8],
+            ['index' => 'cultist', 'name' => 'Культист', 'cr' => 1/8],
+            ['index' => 'goblin', 'name' => 'Гоблин', 'cr' => 1/4],
+            ['index' => 'kobold', 'name' => 'Кобольд', 'cr' => 1/8],
+            ['index' => 'rat', 'name' => 'Гигантская крыса', 'cr' => 1/8],
+            ['index' => 'spider', 'name' => 'Гигантский паук', 'cr' => 1/4],
+            ['index' => 'wolf', 'name' => 'Волк', 'cr' => 1/4],
+            ['index' => 'zombie', 'name' => 'Зомби', 'cr' => 1/4],
+            ['index' => 'skeleton', 'name' => 'Скелет', 'cr' => 1/4],
             
-            // Средние противники (CR 1/2 - 2)
-            ['index' => 'orc', 'name' => 'Орк'],
-            ['index' => 'hobgoblin', 'name' => 'Хобгоблин'],
-            ['index' => 'bugbear', 'name' => 'Багбир'],
-            ['index' => 'gnoll', 'name' => 'Гнолл'],
-            ['index' => 'ogre', 'name' => 'Огр'],
-            ['index' => 'bear', 'name' => 'Медведь'],
-            ['index' => 'tiger', 'name' => 'Тигр'],
-            ['index' => 'ghoul', 'name' => 'Гуль'],
-            ['index' => 'wight', 'name' => 'Вайт'],
+            // Средние противники (CR 1-3)
+            ['index' => 'orc', 'name' => 'Орк', 'cr' => 1/2],
+            ['index' => 'hobgoblin', 'name' => 'Хобгоблин', 'cr' => 1/2],
+            ['index' => 'bugbear', 'name' => 'Багбир', 'cr' => 1],
+            ['index' => 'ogre', 'name' => 'Огр', 'cr' => 2],
+            ['index' => 'troll', 'name' => 'Тролль', 'cr' => 5],
+            ['index' => 'minotaur', 'name' => 'Минотавр', 'cr' => 3],
             
-            // Сложные противники (CR 3 - 7)
-            ['index' => 'troll', 'name' => 'Тролль'],
-            ['index' => 'minotaur', 'name' => 'Минотавр'],
-            ['index' => 'cyclops', 'name' => 'Циклоп'],
-            ['index' => 'wyvern', 'name' => 'Виверна'],
-            ['index' => 'manticore', 'name' => 'Мантикора'],
-            ['index' => 'vampire', 'name' => 'Вампир'],
-            ['index' => 'wraith', 'name' => 'Призрак'],
+            // Сложные противники (CR 4-8)
+            ['index' => 'young_dragon', 'name' => 'Молодой дракон', 'cr' => 7],
+            ['index' => 'beholder', 'name' => 'Бехолдер', 'cr' => 13],
+            ['index' => 'mind_flayer', 'name' => 'Умыслитель', 'cr' => 7],
+            ['index' => 'giant', 'name' => 'Великан', 'cr' => 9],
             
-            // Смертельные противники (CR 8+)
-            ['index' => 'dragon', 'name' => 'Молодой дракон'],
-            ['index' => 'giant', 'name' => 'Гигант'],
-            ['index' => 'beholder', 'name' => 'Наблюдатель'],
-            ['index' => 'lich', 'name' => 'Лич']
+            // Смертельные противники (CR 9+)
+            ['index' => 'adult_dragon', 'name' => 'Взрослый дракон', 'cr' => 17],
+            ['index' => 'ancient_dragon', 'name' => 'Древний дракон', 'cr' => 24],
+            ['index' => 'tarrasque', 'name' => 'Тарраск', 'cr' => 30]
         ];
     }
     
@@ -223,7 +216,7 @@ class EnemyGenerator {
             
             // Проверяем CR
             $cr = $this->parseCR($details['challenge_rating']);
-            if ($cr < $cr_range['min'] || $cr > $cr_range['max']) {
+            if (!$this->checkCRRange($cr, $cr_range)) {
                 continue;
             }
             
@@ -720,6 +713,18 @@ class EnemyGenerator {
         ];
         
         return $cr_map[$cr_string] ?? 1;
+    }
+    
+    /**
+     * Проверка соответствия CR диапазону
+     */
+    private function checkCRRange($cr, $cr_range) {
+        // Для дробных CR (1/8, 1/4, 1/2) используем специальную логику
+        if ($cr <= 0.5) {
+            return $cr_range['min'] <= 0.5 && $cr_range['max'] >= 0.5;
+        }
+        
+        return $cr >= $cr_range['min'] && $cr <= $cr_range['max'];
     }
     
     /**
