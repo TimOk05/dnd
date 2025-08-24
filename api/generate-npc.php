@@ -28,9 +28,9 @@ $alignment = $_POST['alignment'] ?? 'neutral';
 $background = $_POST['background'] ?? 'soldier';
 $useExternalApi = isset($_POST['use_external_api']) ? (bool)$_POST['use_external_api'] : false;
 
-// Отладочная информация (временно отключена)
-// error_log("NPC Generation Debug - POST data: " . print_r($_POST, true));
-// error_log("NPC Generation Debug - Parameters: race=$race, class=$class, level=$level, alignment=$alignment, background=$background");
+// Отладочная информация
+error_log("NPC Generation Debug - POST data: " . print_r($_POST, true));
+error_log("NPC Generation Debug - Parameters: race=$race, class=$class, level=$level, alignment=$alignment, background=$background");
 
 // Валидация параметров
 $validRaces = ['human', 'elf', 'dwarf', 'halfling', 'orc', 'tiefling', 'dragonborn', 'gnome', 'half-elf', 'half-orc'];
@@ -79,6 +79,10 @@ try {
         'generated_at' => date('Y-m-d H:i:s'),
         'api_used' => $useExternalApi ? 'external' : 'dnd5e'
     ];
+    
+    // Отладочная информация о результате
+    error_log("NPC Generation Result - background: " . ($npcData['background'] ?? 'NULL'));
+    error_log("NPC Generation Result - full data: " . print_r($npcData, true));
     
     echo json_encode($result, JSON_UNESCAPED_UNICODE);
     

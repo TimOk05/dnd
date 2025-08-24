@@ -877,6 +877,7 @@ function generateTechnicalParams(race, npcClass, level) {
 }
 
 function fetchNpcFromAI(race, npcClass, background, level, advancedSettings = {}) {
+    console.log('fetchNpcFromAI called with:', { race, npcClass, background, level, advancedSettings });
     showModal('🎲 Генерация NPC...<br><small>Это может занять до 30 секунд</small>');
     
     // Добавляем индикатор прогресса
@@ -968,15 +969,15 @@ function fetchNpcFromAI(race, npcClass, background, level, advancedSettings = {}
         formData.append('alignment', advancedSettings.alignment || 'neutral');
         formData.append('background', background || 'soldier');
         
-        // Отладочная информация (временно отключена)
-        // console.log('FormData debug:', {
-        //     race: race,
-        //     class: npcClass,
-        //     level: level,
-        //     alignment: advancedSettings.alignment || 'neutral',
-        //     background: background || 'soldier',
-        //     backgroundParam: background
-        // });
+        // Отладочная информация
+        console.log('FormData debug:', {
+            race: race,
+            class: npcClass,
+            level: level,
+            alignment: advancedSettings.alignment || 'neutral',
+            background: background || 'soldier',
+            backgroundParam: background
+        });
         
         fetch('api/generate-npc.php', {
             method: 'POST',
@@ -987,6 +988,8 @@ function fetchNpcFromAI(race, npcClass, background, level, advancedSettings = {}
             clearInterval(progressInterval); // Останавливаем индикатор прогресса
             
             console.log('API Response:', data); // Отладочная информация
+            console.log('NPC data:', data.npc); // Отладочная информация о NPC
+            console.log('Background value:', data.npc?.background); // Отладочная информация о background
             
             if (data && data.success && data.npc) {
                 const npc = data.npc;
@@ -1097,7 +1100,11 @@ function generateNpcWithLevel() {
     if (backgroundSelect) {
         background = backgroundSelect.value;
         console.log('Background value:', background);
+    } else {
+        console.log('Background select NOT found!');
     }
+    
+    console.log('Final background value:', background);
     
     console.log('Collected advanced settings:', advancedSettings);
     
