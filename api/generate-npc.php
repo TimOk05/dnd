@@ -28,6 +28,10 @@ $alignment = $_POST['alignment'] ?? 'neutral';
 $background = $_POST['background'] ?? 'soldier';
 $useExternalApi = isset($_POST['use_external_api']) ? (bool)$_POST['use_external_api'] : false;
 
+// Отладочная информация (временно отключена)
+// error_log("NPC Generation Debug - POST data: " . print_r($_POST, true));
+// error_log("NPC Generation Debug - Parameters: race=$race, class=$class, level=$level, alignment=$alignment, background=$background");
+
 // Валидация параметров
 $validRaces = ['human', 'elf', 'dwarf', 'halfling', 'orc', 'tiefling', 'dragonborn', 'gnome', 'half-elf', 'half-orc'];
 $validClasses = ['fighter', 'wizard', 'rogue', 'cleric', 'ranger', 'barbarian', 'bard', 'druid', 'monk', 'paladin', 'sorcerer', 'warlock'];

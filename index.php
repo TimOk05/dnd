@@ -876,7 +876,7 @@ function generateTechnicalParams(race, npcClass, level) {
     return result;
 }
 
-function fetchNpcFromAI(race, npcClass, prof, level, advancedSettings = {}) {
+function fetchNpcFromAI(race, npcClass, background, level, advancedSettings = {}) {
     showModal('🎲 Генерация NPC...<br><small>Это может занять до 30 секунд</small>');
     
     // Добавляем индикатор прогресса
@@ -966,7 +966,17 @@ function fetchNpcFromAI(race, npcClass, prof, level, advancedSettings = {}) {
         formData.append('class', npcClass);
         formData.append('level', level);
         formData.append('alignment', advancedSettings.alignment || 'neutral');
-        formData.append('background', prof || 'soldier');
+        formData.append('background', background || 'soldier');
+        
+        // Отладочная информация (временно отключена)
+        // console.log('FormData debug:', {
+        //     race: race,
+        //     class: npcClass,
+        //     level: level,
+        //     alignment: advancedSettings.alignment || 'neutral',
+        //     background: background || 'soldier',
+        //     backgroundParam: background
+        // });
         
         fetch('api/generate-npc.php', {
             method: 'POST',

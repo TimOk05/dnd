@@ -770,6 +770,36 @@ class DndApiManager {
      * Выполнение HTTP запроса
      */
     private function makeRequest($url, $method = 'GET', $data = null) {
+        // Проверяем, доступен ли cURL
+        if (!function_exists('curl_init')) {
+            // Fallback: используем file_get_contents для GET запросов
+            if ($method === 'GET') {
+                $context = stream_context_create([
+                    'http' => [
+                        'method' => 'GET',
+                        'header' => [
+                            'Content-Type: application/json',
+                            'User-Agent: DnD-Copilot/1.0'
+                        ],
+                        'timeout' => 30
+                    ]
+                ]);
+                
+                $response = @file_get_contents($url, false, $context);
+                if ($response === false) {
+                    error_log("DnD API Error: Failed to fetch $url");
+                    return null;
+                }
+                
+                return json_decode($response, true);
+            } else {
+                // Для POST запросов возвращаем null, чтобы использовать локальные данные
+                error_log("DnD API Error: cURL not available for POST requests");
+                return null;
+            }
+        }
+        
+        // Используем cURL если доступен
         $ch = curl_init();
         
         curl_setopt($ch, CURLOPT_URL, $url);
