@@ -310,7 +310,17 @@ function openNpcStep1() {
     if (document.body.classList.contains('mobile-device')) {
         openSimpleNpcModal();
     } else {
-        showModal('<b class="mini-menu-title">Выберите расу NPC:</b><div class="mini-menu-btns">' + npcRaces.map(r => `<button onclick=\'openNpcStep2("${r}")\' class=\'fast-btn\'>${r}</button>`).join(' ') + '</div>');
+        showModal(`
+            <b class="mini-menu-title">Выберите способ генерации NPC:</b>
+            <div class="mini-menu-btns" style="margin-bottom: 15px;">
+                <button onclick="openNpcStep2('Человек')" class="fast-btn">🗣️ AI генерация</button>
+                <button onclick="openWorkingNpcModal()" class="fast-btn" style="background: var(--accent-success);">🚀 API генерация</button>
+            </div>
+            <div style="font-size: 0.9em; color: var(--text-tertiary); padding: 10px; background: var(--bg-tertiary); border-radius: 8px;">
+                <strong>AI генерация:</strong> Использует AI для создания уникальных описаний<br>
+                <strong>API генерация:</strong> Использует реальные D&D API для точных параметров
+            </div>
+        `);
         document.getElementById('modal-save').style.display = 'none';
     }
 }
@@ -318,6 +328,110 @@ function openNpcStep2(race) {
     npcRace = race;
     showModal('<b class="mini-menu-title">Выберите класс NPC:</b><div class="mini-menu-btns">' + npcClasses.map(c => `<button onclick=\'openNpcStepLevel("${c}")\' class=\'fast-btn\'>${c}</button>`).join(' ') + '</div>');
     document.getElementById('modal-save').style.display = 'none';
+}
+
+// --- Функция открытия рабочей системы генерации NPC ---
+function openWorkingNpcModal() {
+    showModal(`
+        <b class="mini-menu-title">Генерация NPC с использованием D&D API</b>
+        <div style="margin: 15px 0; padding: 15px; background: var(--bg-tertiary); border-radius: 8px; border: 1px solid var(--border-tertiary);">
+            <form id="workingNpcForm">
+                <div style="margin-bottom: 15px;">
+                    <label style="display: block; margin-bottom: 5px; color: var(--text-tertiary); font-weight: bold;">Раса:</label>
+                    <select name="race" style="width: 100%; padding: 8px; border: 2px solid var(--border-primary); border-radius: 6px; background: var(--bg-secondary);">
+                        <option value="human">Человек</option>
+                        <option value="elf">Эльф</option>
+                        <option value="dwarf">Дварф</option>
+                        <option value="halfling">Полурослик</option>
+                        <option value="orc">Орк</option>
+                        <option value="tiefling">Тифлинг</option>
+                        <option value="dragonborn">Драконорожденный</option>
+                        <option value="gnome">Гном</option>
+                        <option value="half-elf">Полуэльф</option>
+                        <option value="half-orc">Полуорк</option>
+                    </select>
+                </div>
+                
+                <div style="margin-bottom: 15px;">
+                    <label style="display: block; margin-bottom: 5px; color: var(--text-tertiary); font-weight: bold;">Класс:</label>
+                    <select name="class" style="width: 100%; padding: 8px; border: 2px solid var(--border-primary); border-radius: 6px; background: var(--bg-secondary);">
+                        <option value="fighter">Воин</option>
+                        <option value="wizard">Волшебник</option>
+                        <option value="rogue">Плут</option>
+                        <option value="cleric">Жрец</option>
+                        <option value="ranger">Следопыт</option>
+                        <option value="barbarian">Варвар</option>
+                        <option value="bard">Бард</option>
+                        <option value="druid">Друид</option>
+                        <option value="monk">Монах</option>
+                        <option value="paladin">Паладин</option>
+                        <option value="sorcerer">Сорсерер</option>
+                        <option value="warlock">Колдун</option>
+                    </select>
+                </div>
+                
+                <div style="margin-bottom: 15px;">
+                    <label style="display: block; margin-bottom: 5px; color: var(--text-tertiary); font-weight: bold;">Уровень:</label>
+                    <input type="number" name="level" min="1" max="20" value="1" style="width: 100%; padding: 8px; border: 2px solid var(--border-primary); border-radius: 6px; background: var(--bg-secondary);">
+                </div>
+                
+                <div style="margin-bottom: 15px;">
+                    <label style="display: block; margin-bottom: 5px; color: var(--text-tertiary); font-weight: bold;">Мировоззрение:</label>
+                    <select name="alignment" style="width: 100%; padding: 8px; border: 2px solid var(--border-primary); border-radius: 6px; background: var(--bg-secondary);">
+                        <option value="lawful good">Законно-добрый</option>
+                        <option value="neutral good">Нейтрально-добрый</option>
+                        <option value="chaotic good">Хаотично-добрый</option>
+                        <option value="lawful neutral">Законно-нейтральный</option>
+                        <option value="neutral">Нейтральный</option>
+                        <option value="chaotic neutral">Хаотично-нейтральный</option>
+                        <option value="lawful evil">Законно-злой</option>
+                        <option value="neutral evil">Нейтрально-злой</option>
+                        <option value="chaotic evil">Хаотично-злой</option>
+                    </select>
+                </div>
+                
+                <button type="submit" class="fast-btn" style="background: var(--accent-success); width: 100%;">🚀 Сгенерировать NPC</button>
+            </form>
+            
+            <div id="workingNpcResult" style="margin-top: 15px;"></div>
+        </div>
+    `);
+    
+    document.getElementById('modal-save').style.display = 'none';
+    
+    // Добавляем обработчик формы
+    document.getElementById('workingNpcForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+        
+        const formData = new FormData(this);
+        const submitBtn = this.querySelector('button[type="submit"]');
+        const resultDiv = document.getElementById('workingNpcResult');
+        
+        submitBtn.textContent = 'Генерация...';
+        submitBtn.disabled = true;
+        resultDiv.innerHTML = '<p>Генерация NPC...</p>';
+        
+        fetch('api/generate-npc-working.php', {
+            method: 'POST',
+            body: formData
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success && data.npc) {
+                resultDiv.innerHTML = formatNpcFromWorkingApi(data.npc);
+            } else {
+                resultDiv.innerHTML = '<p style="color: var(--accent-danger);">Ошибка: ' + (data.error || 'Неизвестная ошибка') + '</p>';
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            resultDiv.innerHTML = '<p style="color: var(--accent-danger);">Ошибка сети. Попробуйте ещё раз.</p>';
+        })
+        .finally(() => {
+            submitBtn.textContent = '🚀 Сгенерировать NPC';
+            submitBtn.disabled = false;
+        });
+    });
 }
 function openNpcStepLevel(cls) {
     npcClass = cls;
@@ -1132,6 +1246,12 @@ function saveInitiativeNote() {
 }
 // --- Форматирование результата NPC по смысловым блокам ---
 function formatNpcBlocks(txt, forcedName = '') {
+    // Проверяем, является ли это данными от рабочей API системы
+    if (typeof txt === 'object' && txt.name && txt.race && txt.class) {
+        return formatNpcFromWorkingApi(txt);
+    }
+    
+    // Оригинальная логика для AI-генерации
     // Очищаем текст от лишних символов
     txt = txt.replace(/[\#\*`>\[\]]+/g, '');
     
@@ -1468,6 +1588,83 @@ function formatNpcBlocks(txt, forcedName = '') {
     }, 100);
     return out;
 }
+
+// --- Форматирование NPC от рабочей API системы ---
+function formatNpcFromWorkingApi(npc) {
+    let out = '<div class="npc-block-modern">';
+    
+    // Заголовок с именем
+    out += '<div class="npc-modern-header">' + npc.name + '</div>';
+    
+    // Основная информация
+    out += '<div class="npc-col-block">';
+    out += '<span style="font-size:1.2em;">🏷️</span> <b>Основная информация</b>';
+    out += '<div class="npc-content">';
+    out += '<strong>Раса и класс:</strong> ' + npc.race + ' - ' + npc.class + ' (уровень ' + npc.level + ')<br>';
+    out += '<strong>Мировоззрение:</strong> ' + npc.alignment + '<br>';
+    out += '<strong>Профессия:</strong> ' + npc.profession;
+    out += '</div></div>';
+    
+    // Описание
+    if (npc.description) {
+        out += '<div class="npc-col-block">';
+        out += '<span style="font-size:1.2em;">📜</span> <b>Описание</b>';
+        out += '<div class="npc-content">' + npc.description + '</div>';
+        out += '</div>';
+    }
+    
+    // Внешность
+    if (npc.appearance) {
+        out += '<div class="npc-col-block">';
+        out += '<span style="font-size:1.2em;">👤</span> <b>Внешность</b>';
+        out += '<div class="npc-content">' + npc.appearance + '</div>';
+        out += '</div>';
+    }
+    
+    // Технические параметры
+    if (npc.technical_params && npc.technical_params.length > 0) {
+        out += '<div class="npc-col-block">';
+        out += '<div class="npc-collapsible-header collapsed" onclick="toggleTechnicalParams(this)">';
+        out += '<div><span style="font-size:1.2em;">⚔️</span> <b>Технические параметры</b></div>';
+        out += '<span class="toggle-icon">▼</span>';
+        out += '</div>';
+        out += '<div class="npc-collapsible-content collapsed">';
+        out += '<div class="npc-content" style="margin-top: 8px;">';
+        out += '<ul class="npc-modern-list">';
+        npc.technical_params.forEach(param => {
+            out += '<li>' + param + '</li>';
+        });
+        out += '</ul>';
+        out += '</div></div></div>';
+    }
+    
+    // Заклинания
+    if (npc.spells && Object.keys(npc.spells).length > 0) {
+        out += '<div class="npc-col-block">';
+        out += '<div class="npc-collapsible-header collapsed" onclick="toggleTechnicalParams(this)">';
+        out += '<div><span style="font-size:1.2em;">🔮</span> <b>Заклинания</b></div>';
+        out += '<span class="toggle-icon">▼</span>';
+        out += '</div>';
+        out += '<div class="npc-collapsible-content collapsed">';
+        out += '<div class="npc-content" style="margin-top: 8px;">';
+        
+        Object.entries(npc.spells).forEach(([level, spells]) => {
+            const levelName = level === 'cantrips' ? 'Заговоры (0 уровень)' : 'Уровень ' + level.replace('level_', '');
+            out += '<strong>' + levelName + ':</strong><br>';
+            out += '<ul class="npc-modern-list">';
+            spells.forEach(spell => {
+                out += '<li>' + spell + '</li>';
+            });
+            out += '</ul>';
+        });
+        
+        out += '</div></div></div>';
+    }
+    
+    out += '</div>';
+    return out;
+}
+
 // --- Форматирование результата бросков ---
 function formatResultSegments(txt, isNpc) {
     if (isNpc) {

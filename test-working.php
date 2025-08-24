@@ -248,24 +248,50 @@ $testNpc = $dndApi->generateNPC([
                         <?php echo htmlspecialchars($testNpc['race']); ?> - <?php echo htmlspecialchars($testNpc['class']); ?> (уровень <?php echo $testNpc['level']; ?>)
                     </div>
                     
-                    <div class="npc-section">
-                        <strong>Описание:</strong>
-                        <?php echo htmlspecialchars($testNpc['description']); ?>
-                    </div>
-                    
-                    <div class="npc-section">
-                        <strong>Технические параметры:</strong>
-                        <ul>
-                            <?php foreach ($testNpc['technical_params'] as $param): ?>
-                                <li><?php echo htmlspecialchars($param); ?></li>
-                            <?php endforeach; ?>
-                        </ul>
-                    </div>
-                    
-                    <div class="npc-section">
-                        <strong>Источник данных:</strong>
-                        <?php echo htmlspecialchars($testNpc['api_source']); ?>
-                    </div>
+                                         <div class="npc-section">
+                         <strong>Описание:</strong>
+                         <?php echo htmlspecialchars($testNpc['description']); ?>
+                     </div>
+                     
+                     <div class="npc-section">
+                         <strong>Внешность:</strong>
+                         <?php echo htmlspecialchars($testNpc['appearance']); ?>
+                     </div>
+                     
+                     <div class="npc-section">
+                         <strong>Профессия:</strong>
+                         <?php echo htmlspecialchars($testNpc['profession']); ?>
+                     </div>
+                     
+                     <div class="npc-section">
+                         <strong>Технические параметры:</strong>
+                         <ul>
+                             <?php foreach ($testNpc['technical_params'] as $param): ?>
+                                 <li><?php echo htmlspecialchars($param); ?></li>
+                             <?php endforeach; ?>
+                         </ul>
+                     </div>
+                     
+                     <?php if (!empty($testNpc['spells'])): ?>
+                     <div class="npc-section">
+                         <strong>Заклинания:</strong>
+                         <?php foreach ($testNpc['spells'] as $level => $spells): ?>
+                             <div style="margin: 8px 0;">
+                                 <strong><?php echo $level === 'cantrips' ? 'Заговоры (0 уровень)' : 'Уровень ' . str_replace('level_', '', $level); ?>:</strong>
+                                 <ul>
+                                     <?php foreach ($spells as $spell): ?>
+                                         <li><?php echo htmlspecialchars($spell); ?></li>
+                                     <?php endforeach; ?>
+                                 </ul>
+                             </div>
+                         <?php endforeach; ?>
+                     </div>
+                     <?php endif; ?>
+                     
+                     <div class="npc-section">
+                         <strong>Источник данных:</strong>
+                         <?php echo htmlspecialchars($testNpc['api_source']); ?>
+                     </div>
                 </div>
             <?php else: ?>
                 <p class="error">❌ Ошибка генерации NPC - API недоступен</p>
@@ -375,22 +401,46 @@ $testNpc = $dndApi->generateNPC([
                                 ${npc.race} - ${npc.class} (уровень ${npc.level})
                             </div>
                             
-                            <div class="npc-section">
-                                <strong>Описание:</strong>
-                                ${npc.description}
-                            </div>
-                            
-                            <div class="npc-section">
-                                <strong>Технические параметры:</strong>
-                                <ul>
-                                    ${npc.technical_params.map(param => `<li>${param}</li>`).join('')}
-                                </ul>
-                            </div>
-                            
-                            <div class="npc-section">
-                                <strong>Источник данных:</strong>
-                                ${npc.api_source}
-                            </div>
+                                                         <div class="npc-section">
+                                 <strong>Описание:</strong>
+                                 ${npc.description}
+                             </div>
+                             
+                             <div class="npc-section">
+                                 <strong>Внешность:</strong>
+                                 ${npc.appearance}
+                             </div>
+                             
+                             <div class="npc-section">
+                                 <strong>Профессия:</strong>
+                                 ${npc.profession}
+                             </div>
+                             
+                             <div class="npc-section">
+                                 <strong>Технические параметры:</strong>
+                                 <ul>
+                                     ${npc.technical_params.map(param => `<li>${param}</li>`).join('')}
+                                 </ul>
+                             </div>
+                             
+                             ${npc.spells && Object.keys(npc.spells).length > 0 ? `
+                             <div class="npc-section">
+                                 <strong>Заклинания:</strong>
+                                 ${Object.entries(npc.spells).map(([level, spells]) => `
+                                     <div style="margin: 8px 0;">
+                                         <strong>${level === 'cantrips' ? 'Заговоры (0 уровень)' : 'Уровень ' + level.replace('level_', '')}:</strong>
+                                         <ul>
+                                             ${spells.map(spell => `<li>${spell}</li>`).join('')}
+                                         </ul>
+                                     </div>
+                                 `).join('')}
+                             </div>
+                             ` : ''}
+                             
+                             <div class="npc-section">
+                                 <strong>Источник данных:</strong>
+                                 ${npc.api_source}
+                             </div>
                         </div>
                     `;
                 } else {

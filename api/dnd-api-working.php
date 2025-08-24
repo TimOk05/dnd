@@ -8,6 +8,39 @@ class DndApiWorking {
     private $dnd5e_api_url = 'https://www.dnd5eapi.co/api';
     private $open5e_api_url = 'https://open5e.com/api';
     
+    // Переводы рас
+    private $raceTranslations = [
+        'human' => 'Человек',
+        'elf' => 'Эльф',
+        'dwarf' => 'Дварф',
+        'halfling' => 'Полурослик',
+        'orc' => 'Орк',
+        'tiefling' => 'Тифлинг',
+        'dragonborn' => 'Драконорожденный',
+        'gnome' => 'Гном',
+        'half-elf' => 'Полуэльф',
+        'half-orc' => 'Полуорк'
+    ];
+    
+    // Переводы классов
+    private $classTranslations = [
+        'fighter' => 'Воин',
+        'wizard' => 'Волшебник',
+        'rogue' => 'Плут',
+        'cleric' => 'Жрец',
+        'ranger' => 'Следопыт',
+        'barbarian' => 'Варвар',
+        'bard' => 'Бард',
+        'druid' => 'Друид',
+        'monk' => 'Монах',
+        'paladin' => 'Паладин',
+        'sorcerer' => 'Сорсерер',
+        'warlock' => 'Колдун'
+    ];
+    
+    // Магические классы
+    private $magicClasses = ['wizard', 'cleric', 'bard', 'druid', 'sorcerer', 'warlock', 'paladin', 'ranger'];
+    
     /**
      * Генерация NPC с использованием реальных API
      */
@@ -37,22 +70,33 @@ class DndApiWorking {
             // Генерируем имя
             $name = $this->generateName($params['race']);
             
-            // Генерируем описание
+            // Генерируем описание, внешность и профессию
             $description = $this->generateDescription($params);
+            $appearance = $this->generateAppearance($params);
+            $profession = $this->generateProfession($params);
             
-            // Генерируем технические параметры
+            // Генерируем технические параметры с учетом уровня
             $technicalParams = $this->generateTechnicalParams($params, $abilities, $classInfo);
+            
+            // Генерируем заклинания для магических классов
+            $spells = [];
+            if (in_array($params['class'], $this->magicClasses)) {
+                $spells = $this->generateSpells($params['class'], $params['level']);
+            }
             
             return [
                 'name' => $name,
-                'race' => $raceInfo['name'],
-                'class' => $classInfo['name'],
+                'race' => $this->raceTranslations[$params['race']] ?? $raceInfo['name'],
+                'class' => $this->classTranslations[$params['class']] ?? $classInfo['name'],
                 'level' => $params['level'],
-                'alignment' => $params['alignment'],
+                'alignment' => $this->translateAlignment($params['alignment']),
                 'background' => $params['background'],
                 'abilities' => $abilities,
                 'description' => $description,
+                'appearance' => $appearance,
+                'profession' => $profession,
                 'technical_params' => $technicalParams,
+                'spells' => $spells,
                 'api_source' => 'D&D 5e API'
             ];
             
@@ -60,6 +104,177 @@ class DndApiWorking {
             error_log("NPC Generation Error: " . $e->getMessage());
             return null;
         }
+    }
+    
+    /**
+     * Перевод мировоззрения на русский
+     */
+    private function translateAlignment($alignment) {
+        $alignments = [
+            'lawful good' => 'Законно-добрый',
+            'neutral good' => 'Нейтрально-добрый',
+            'chaotic good' => 'Хаотично-добрый',
+            'lawful neutral' => 'Законно-нейтральный',
+            'neutral' => 'Нейтральный',
+            'chaotic neutral' => 'Хаотично-нейтральный',
+            'lawful evil' => 'Законно-злой',
+            'neutral evil' => 'Нейтрально-злой',
+            'chaotic evil' => 'Хаотично-злой'
+        ];
+        
+        return $alignments[$alignment] ?? $alignment;
+    }
+    
+    /**
+     * Генерация внешности
+     */
+    private function generateAppearance($params) {
+        $appearances = [
+            'human' => [
+                'Высокий и стройный человек с карими глазами и темными волосами',
+                'Крепкого телосложения человек с голубыми глазами и светлыми волосами',
+                'Среднего роста человек с зелеными глазами и рыжими волосами',
+                'Коренастый человек с серыми глазами и черными волосами'
+            ],
+            'elf' => [
+                'Высокий эльф с острыми чертами лица, длинными светлыми волосами и ярко-зелеными глазами',
+                'Стройный эльф с изящными чертами, серебристыми волосами и голубыми глазами',
+                'Элегантный эльф с тонкими чертами, золотистыми волосами и фиолетовыми глазами'
+            ],
+            'dwarf' => [
+                'Крепкий дварф с густой бородой, карими глазами и темными волосами',
+                'Коренастый дварф с рыжей бородой, зелеными глазами и рыжими волосами',
+                'Мощный дварф с седой бородой, голубыми глазами и светлыми волосами'
+            ],
+            'gnome' => [
+                'Маленький гном с острыми чертами, рыжими волосами и ярко-голубыми глазами',
+                'Курносый гном с кудрявыми волосами, зелеными глазами и веснушками',
+                'Живой гном с острым взглядом, темными волосами и карими глазами'
+            ]
+        ];
+        
+        $raceAppearances = $appearances[$params['race']] ?? $appearances['human'];
+        return $raceAppearances[array_rand($raceAppearances)];
+    }
+    
+    /**
+     * Генерация профессии
+     */
+    private function generateProfession($params) {
+        $professions = [
+            'fighter' => ['Страж', 'Наемник', 'Охранник', 'Солдат', 'Главарь банды', 'Телохранитель'],
+            'wizard' => ['Исследователь', 'Учитель магии', 'Библиотекарь', 'Алхимик', 'Картограф', 'Хроникер'],
+            'rogue' => ['Вор', 'Шпион', 'Контрабандист', 'Охотник за головами', 'Карманник', 'Разведчик'],
+            'cleric' => ['Жрец', 'Монах', 'Проповедник', 'Целитель', 'Хранитель храма', 'Миссионер'],
+            'ranger' => ['Охотник', 'Следопыт', 'Лесник', 'Проводник', 'Торговец мехами', 'Пограничник'],
+            'barbarian' => ['Охотник', 'Воин племени', 'Защитник', 'Наемник', 'Главарь клана', 'Странник'],
+            'bard' => ['Музыкант', 'Поэт', 'Актер', 'Сказочник', 'Дипломат', 'Шпион'],
+            'druid' => ['Хранитель леса', 'Целитель', 'Проводник', 'Охотник', 'Мудрец', 'Защитник природы'],
+            'monk' => ['Монах', 'Учитель боевых искусств', 'Странник', 'Хранитель знаний', 'Аскет', 'Защитник'],
+            'paladin' => ['Рыцарь', 'Защитник веры', 'Страж порядка', 'Крестоносец', 'Командир', 'Святой воин'],
+            'sorcerer' => ['Аристократ', 'Странник', 'Отшельник', 'Торговец', 'Искатель приключений', 'Мистик'],
+            'warlock' => ['Исследователь', 'Колдун', 'Мистик', 'Отшельник', 'Торговец', 'Странник']
+        ];
+        
+        $classProfessions = $professions[$params['class']] ?? ['Странник'];
+        return $classProfessions[array_rand($classProfessions)];
+    }
+    
+    /**
+     * Генерация заклинаний для магических классов
+     */
+    private function generateSpells($class, $level) {
+        $spells = [];
+        
+        // Заговоры (0 уровень)
+        $cantrips = $this->getCantrips($class);
+        if ($cantrips) {
+            $spells['cantrips'] = array_slice($cantrips, 0, min(3, count($cantrips)));
+        }
+        
+        // Заклинания 1-го уровня
+        if ($level >= 1) {
+            $level1Spells = $this->getSpellsByLevel($class, 1);
+            if ($level1Spells) {
+                $spells['level_1'] = array_slice($level1Spells, 0, min(4, count($level1Spells)));
+            }
+        }
+        
+        // Заклинания 2-го уровня
+        if ($level >= 3) {
+            $level2Spells = $this->getSpellsByLevel($class, 2);
+            if ($level2Spells) {
+                $spells['level_2'] = array_slice($level2Spells, 0, min(2, count($level2Spells)));
+            }
+        }
+        
+        // Заклинания 3-го уровня
+        if ($level >= 5) {
+            $level3Spells = $this->getSpellsByLevel($class, 3);
+            if ($level3Spells) {
+                $spells['level_3'] = array_slice($level3Spells, 0, min(2, count($level3Spells)));
+            }
+        }
+        
+        return $spells;
+    }
+    
+    /**
+     * Получение заговоров для класса
+     */
+    private function getCantrips($class) {
+        $cantrips = [
+            'wizard' => ['Огненный снаряд', 'Луч холода', 'Электрическая дуга', 'Магическая рука', 'Свет', 'Сообщение'],
+            'cleric' => ['Священное пламя', 'Слово', 'Свет', 'Спасительная благодать', 'Сопротивление'],
+            'bard' => ['Висс', 'Свет', 'Сообщение', 'Престидижитация', 'Дружба с животными'],
+            'druid' => ['Луч холода', 'Свет', 'Дружба с животными', 'Сопротивление', 'Шип'],
+            'sorcerer' => ['Огненный снаряд', 'Луч холода', 'Электрическая дуга', 'Свет', 'Престидижитация'],
+            'warlock' => ['Элдричский взрыв', 'Свет', 'Престидижитация', 'Сообщение', 'Слово'],
+            'paladin' => ['Священное пламя', 'Свет', 'Сопротивление'],
+            'ranger' => ['Дружба с животными', 'Свет', 'Сопротивление']
+        ];
+        
+        return $cantrips[$class] ?? [];
+    }
+    
+    /**
+     * Получение заклинаний по уровню
+     */
+    private function getSpellsByLevel($class, $spellLevel) {
+        $spells = [
+            'wizard' => [
+                1 => ['Волшебная стрела', 'Огненный шар', 'Ледяной шторм', 'Молния', 'Невидимость', 'Телепортация'],
+                2 => ['Волшебная стрела', 'Огненный шар', 'Ледяной шторм', 'Молния', 'Невидимость'],
+                3 => ['Огненный шар', 'Ледяной шторм', 'Молния', 'Невидимость', 'Телепортация']
+            ],
+            'cleric' => [
+                1 => ['Лечение ран', 'Благословение', 'Проклятие', 'Защита от зла и добра', 'Священное пламя'],
+                2 => ['Лечение ран', 'Благословение', 'Проклятие', 'Защита от зла и добра'],
+                3 => ['Лечение ран', 'Благословение', 'Проклятие', 'Защита от зла и добра']
+            ],
+            'bard' => [
+                1 => ['Очарование личности', 'Невидимость', 'Лечение ран', 'Благословение', 'Проклятие'],
+                2 => ['Очарование личности', 'Невидимость', 'Лечение ран'],
+                3 => ['Очарование личности', 'Невидимость', 'Лечение ран']
+            ],
+            'druid' => [
+                1 => ['Лечение ран', 'Дружба с животными', 'Вызов элементаля', 'Превращение', 'Шип'],
+                2 => ['Лечение ран', 'Дружба с животными', 'Вызов элементаля'],
+                3 => ['Лечение ран', 'Дружба с животными', 'Вызов элементаля']
+            ],
+            'sorcerer' => [
+                1 => ['Огненный шар', 'Ледяной шторм', 'Молния', 'Невидимость', 'Телепортация'],
+                2 => ['Огненный шар', 'Ледяной шторм', 'Молния'],
+                3 => ['Огненный шар', 'Ледяной шторм', 'Молния']
+            ],
+            'warlock' => [
+                1 => ['Элдричский взрыв', 'Невидимость', 'Проклятие', 'Защита от зла и добра'],
+                2 => ['Элдричский взрыв', 'Невидимость', 'Проклятие'],
+                3 => ['Элдричский взрыв', 'Невидимость', 'Проклятие']
+            ]
+        ];
+        
+        return $spells[$class][$spellLevel] ?? [];
     }
     
     /**
@@ -218,17 +433,22 @@ class DndApiWorking {
     }
     
     /**
-     * Генерация технических параметров
+     * Генерация технических параметров с учетом уровня
      */
     private function generateTechnicalParams($params, $abilities, $classInfo) {
         $level = $params['level'];
         $class = $params['class'];
         
-        // Базовые хиты
+        // Базовые хиты с учетом уровня
         $hitDie = $classInfo['hit_die'] ?? 8;
         $baseHP = $hitDie;
         $conMod = floor(($abilities['constitution'] - 10) / 2);
-        $hp = $baseHP + ($conMod * $level);
+        
+        // Расчет хитов по уровням
+        $hp = $baseHP + $conMod; // 1 уровень
+        for ($i = 2; $i <= $level; $i++) {
+            $hp += rand(1, $hitDie) + $conMod;
+        }
         
         // Класс доспеха (базовый)
         $ac = 10 + floor(($abilities['dexterity'] - 10) / 2);
@@ -236,15 +456,15 @@ class DndApiWorking {
         // Оружие
         $weapon = $this->getClassWeapon($class);
         
-        // Урон
-        $damage = $this->getWeaponDamage($weapon);
+        // Урон с учетом уровня
+        $damage = $this->getWeaponDamage($weapon, $level);
         
         // Модификаторы характеристик
         $abilityScores = [];
         foreach ($abilities as $ability => $score) {
             $modifier = floor(($score - 10) / 2);
             $modStr = $modifier >= 0 ? "+$modifier" : "$modifier";
-            $abilityScores[] = ucfirst($ability) . ": $score ($modStr)";
+            $abilityScores[] = $this->translateAbility($ability) . ": $score ($modStr)";
         }
         
         return [
@@ -256,6 +476,22 @@ class DndApiWorking {
             'Уровень: ' . $level,
             'Кость хитов: d' . $hitDie
         ];
+    }
+    
+    /**
+     * Перевод характеристик на русский
+     */
+    private function translateAbility($ability) {
+        $translations = [
+            'strength' => 'Сила',
+            'dexterity' => 'Ловкость',
+            'constitution' => 'Телосложение',
+            'intelligence' => 'Интеллект',
+            'wisdom' => 'Мудрость',
+            'charisma' => 'Харизма'
+        ];
+        
+        return $translations[$ability] ?? ucfirst($ability);
     }
     
     /**
@@ -281,10 +517,10 @@ class DndApiWorking {
     }
     
     /**
-     * Получение урона оружия
+     * Получение урона оружия с учетом уровня
      */
-    private function getWeaponDamage($weapon) {
-        $damage = [
+    private function getWeaponDamage($weapon, $level) {
+        $baseDamage = [
             'Топор' => '1d12 рубящий',
             'Меч' => '1d8 рубящий',
             'Лук' => '1d8 колющий',
@@ -295,7 +531,14 @@ class DndApiWorking {
             'Посох' => '1d6 дробящий'
         ];
         
-        return $damage[$weapon] ?? '1d4 дробящий';
+        $damage = $baseDamage[$weapon] ?? '1d4 дробящий';
+        
+        // Увеличиваем урон с уровнем (для воинов)
+        if ($level >= 5 && in_array($weapon, ['Топор', 'Меч', 'Рапира'])) {
+            $damage = str_replace('1d', '2d', $damage);
+        }
+        
+        return $damage;
     }
     
     /**
