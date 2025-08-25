@@ -2661,6 +2661,159 @@
         .section-content {
             padding: 15px;
         }
+        /* Расширенные настройки */
+        
+        .advanced-settings {
+            margin: 15px 0;
+        }
+        
+        .advanced-settings details {
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border-tertiary);
+            border-radius: 6px;
+            overflow: hidden;
+        }
+        
+        .advanced-settings summary {
+            background: var(--accent-secondary);
+            color: var(--text-primary);
+            padding: 10px 15px;
+            cursor: pointer;
+            font-weight: bold;
+            user-select: none;
+        }
+        
+        .advanced-settings summary:hover {
+            background: var(--accent-primary);
+        }
+        
+        .advanced-content {
+            padding: 15px;
+        }
+        /* Кнопки сохранения */
+        
+        .save-character-section,
+        .save-enemies-section {
+            margin-top: 20px;
+            text-align: center;
+        }
+        
+        .save-character-btn,
+        .save-enemies-btn {
+            background: var(--accent-primary);
+            color: var(--bg-secondary);
+            border: none;
+            border-radius: 6px;
+            padding: 12px 24px;
+            font-size: 1em;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+        
+        .save-character-btn:hover,
+        .save-enemies-btn:hover {
+            background: var(--accent-secondary);
+        }
+        /* Кнопки в инициативе */
+        
+        .notes-btn {
+            background: var(--accent-secondary);
+            color: var(--text-primary);
+            border: 1px solid var(--border-tertiary);
+            border-radius: 4px;
+            padding: 8px 12px;
+            margin: 5px;
+            cursor: pointer;
+            font-size: 0.9em;
+        }
+        
+        .notes-btn:hover {
+            background: var(--accent-primary);
+            color: var(--bg-secondary);
+        }
+        /* Выбор из заметок */
+        
+        .notes-selection {
+            max-width: 500px;
+            margin: 0 auto;
+        }
+        
+        .notes-title {
+            font-size: 1.2em;
+            font-weight: bold;
+            margin-bottom: 15px;
+            text-align: center;
+            color: var(--text-primary);
+        }
+        
+        .notes-list {
+            max-height: 300px;
+            overflow-y: auto;
+            border: 1px solid var(--border-tertiary);
+            border-radius: 6px;
+            background: var(--bg-secondary);
+        }
+        
+        .note-item {
+            padding: 12px;
+            border-bottom: 1px solid var(--border-tertiary);
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+        
+        .note-item:hover {
+            background: var(--bg-tertiary);
+        }
+        
+        .note-item:last-child {
+            border-bottom: none;
+        }
+        
+        .note-name {
+            font-weight: bold;
+            color: var(--text-primary);
+            margin-bottom: 5px;
+        }
+        
+        .note-initiative {
+            font-size: 0.9em;
+            color: var(--text-secondary);
+        }
+        
+        .notes-buttons {
+            margin-top: 15px;
+            text-align: center;
+        }
+        /* Заметки персонажей и противников */
+        
+        .character-note,
+        .enemy-note {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-tertiary);
+            border-radius: 6px;
+            padding: 12px;
+            margin-bottom: 10px;
+        }
+        
+        .character-note-title,
+        .enemy-note-title {
+            font-weight: bold;
+            color: var(--accent-primary);
+            margin-bottom: 8px;
+            font-size: 1.1em;
+        }
+        
+        .character-note-info,
+        .enemy-note-info {
+            font-size: 0.9em;
+            color: var(--text-secondary);
+        }
+        
+        .character-note-info div,
+        .enemy-note-info div {
+            margin-bottom: 3px;
+        }
     </style>
 </head>
 

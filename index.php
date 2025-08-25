@@ -110,7 +110,7 @@ if (isset($_GET['reset'])) {
 // --- Новый systemInstruction с усиленными требованиями ---
 $systemInstruction = "Ты — помощник мастера DnD. Твоя задача — сгенерировать NPC для быстрого и удобного вывода в игровом приложении. Каждый блок будет отображаться отдельно, поэтому не добавляй пояснений, не используй лишние слова, не пиши ничего кроме блоков.\nСтрого по шаблону, каждый блок с новой строки:\nИмя: ...\nКраткое описание: ...\nЧерта характера: ...\nСлабость: ...\nКороткая характеристика: Оружие: ... Урон: ... Хиты: ... Способность: ...\n\nВАЖНО: НЕ используй слово 'Описание' в начале блоков. Начинай блоки сразу с содержимого. НЕ дублируй информацию между блоками. Каждый блок должен содержать только релевантную информацию.
 
-ВАЖНО: Способность — это конкретный навык персонажа в D&D, например: 'Двойная атака', 'Исцеление ран', 'Скрытность', 'Божественная кара', 'Ярость', 'Вдохновение', 'Магическая защита', 'Элементальная магия', 'Боевой стиль', 'Связь с природой', 'Боевые искусства', 'Скрытные способности', 'Магическое исследование', 'Общение с животными', 'Магическая обработка', 'Магическое красноречие'. НЕ пиши описания, только название способности. ОБЯЗАТЕЛЬНО указывай способность для каждого класса кроме 'Без класса'.\nТехнические параметры (Оружие, Урон, Хиты, Способность) обязательны и всегда идут первым блоком. Если не можешь заполнить какой-то параметр — напиши ‘-'. Не добавляй ничего лишнего.";
+ВАЖНО: Способность — это конкретный навык персонажа в D&D, например: 'Двойная атака', 'Исцеление ран', 'Скрытность', 'Божественная кара', 'Ярость', 'Вдохновение', 'Магическая защита', 'Элементальная магия', 'Боевой стиль', 'Связь с природой', 'Боевые искусства', 'Скрытные способности', 'Магическое исследование', 'Общение с животными', 'Магическая обработка', 'Магическое красноречие'. НЕ пиши описания, только название способности. ОБЯЗАТЕЛЬНО указывай способность для каждого класса кроме 'Без класса'.\nТехнические параметры (Оружие, Урон, Хиты, Способность) обязательны и всегда идут первым блоком. Если не можешь заполнить какой-то параметр — напиши '-'. Не добавляй ничего лишнего.";
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['message']) && !isset($_POST['add_note']) && !isset($_POST['remove_note'])) {
     $userMessage = trim($_POST['message']);
     if ($userMessage !== '') {
@@ -357,22 +357,36 @@ function openCharacterModal() {
                     </div>
                     
                     <div class="form-group">
-                        <label for="character-alignment">Мировоззрение</label>
-                        <select id="character-alignment" name="alignment" required>
-                            <option value="lawful good">Законно-добрый</option>
-                            <option value="neutral good">Нейтрально-добрый</option>
-                            <option value="chaotic good">Хаотично-добрый</option>
-                            <option value="lawful neutral">Законно-нейтральный</option>
-                            <option value="neutral">Нейтральный</option>
-                            <option value="chaotic neutral">Хаотично-нейтральный</option>
-                            <option value="lawful evil">Законно-злой</option>
-                            <option value="neutral evil">Нейтрально-злой</option>
-                            <option value="chaotic evil">Хаотично-злой</option>
+                        <label for="character-gender">Пол персонажа</label>
+                        <select id="character-gender" name="gender">
+                            <option value="random">Случайный</option>
+                            <option value="male">Мужской</option>
+                            <option value="female">Женский</option>
                         </select>
                     </div>
                 </div>
                 
-
+                <div class="advanced-settings">
+                    <details>
+                        <summary>🔧 Расширенные настройки</summary>
+                        <div class="advanced-content">
+                            <div class="form-group">
+                                <label for="character-alignment">Мировоззрение</label>
+                                <select id="character-alignment" name="alignment">
+                                    <option value="neutral">Нейтральный</option>
+                                    <option value="lawful-good">Законно-добрый</option>
+                                    <option value="neutral-good">Нейтрально-добрый</option>
+                                    <option value="chaotic-good">Хаотично-добрый</option>
+                                    <option value="lawful-neutral">Законно-нейтральный</option>
+                                    <option value="chaotic-neutral">Хаотично-нейтральный</option>
+                                    <option value="lawful-evil">Законно-злой</option>
+                                    <option value="neutral-evil">Нейтрально-злой</option>
+                                    <option value="chaotic-evil">Хаотично-злой</option>
+                                </select>
+                            </div>
+                        </div>
+                    </details>
+                </div>
                 
                 <button type="submit" class="generate-btn">
                     <span class="btn-icon">⚔️</span>
@@ -405,19 +419,29 @@ function openCharacterModal() {
         })
         .then(response => response.json())
         .then(data => {
-            if (data.success && data.npc) {
-                resultDiv.innerHTML = formatCharacterFromApi(data.npc);
+            submitBtn.innerHTML = '<span class="btn-icon">⚔️</span><span class="btn-text">Создать персонажа</span>';
+            submitBtn.disabled = false;
+            
+            if (data.success) {
+                const character = data.npc;
+                resultDiv.innerHTML = formatCharacterFromApi(character);
+                
+                // Добавляем кнопку сохранения в заметки
+                resultDiv.innerHTML += `
+                    <div class="save-character-section">
+                        <button class="save-character-btn" onclick="saveCharacterToNotes('${character.name}', '${character.race}', '${character.class}', ${character.level}, ${character.initiative})">
+                            💾 Сохранить в заметки
+                        </button>
+                    </div>
+                `;
             } else {
                 resultDiv.innerHTML = '<div class="error">Ошибка: ' + (data.error || 'Неизвестная ошибка') + '</div>';
             }
         })
         .catch(error => {
-            console.error('Error:', error);
-            resultDiv.innerHTML = '<div class="error">Ошибка сети. Попробуйте ещё раз.</div>';
-        })
-        .finally(() => {
             submitBtn.innerHTML = '<span class="btn-icon">⚔️</span><span class="btn-text">Создать персонажа</span>';
             submitBtn.disabled = false;
+            resultDiv.innerHTML = '<div class="error">Ошибка сети: ' + error.message + '</div>';
         });
     });
 }
@@ -1174,11 +1198,15 @@ function addInitiativeEntry(type) {
     let diceButton = type === 'enemy' || type === 'other' ? 
         '<button class="dice-btn" onclick="rollInitiativeDice()">🎲 d20</button>' : '';
     
+    // Добавляем кнопку для добавления из заметок
+    let notesButton = '<button class="notes-btn" onclick="addFromNotes(\'' + type + '\')">📝 Из заметок</button>';
+    
     showModal('<div class="initiative-entry">' +
         '<div class="entry-title">' + title + '</div>' +
         '<input type="text" id="initiative-name" placeholder="Название (до 30 символов)" maxlength="30" class="initiative-input">' +
         '<input type="number" id="initiative-value" placeholder="Значение инициативы" class="initiative-input">' +
         diceButton +
+        notesButton +
         '<div class="entry-buttons">' +
             '<button class="save-btn" onclick="saveInitiativeEntry(\'' + type + '\')">Сохранить</button>' +
             '<button class="cancel-btn" onclick="openInitiativeModal()">Отмена</button>' +
@@ -1773,10 +1801,10 @@ function formatNpcBlocks(txt, forcedName = '') {
 function formatCharacterFromApi(character) {
     let out = '<div class="character-block">';
     
-    // Заголовок с именем
+    // Заголовок персонажа
     out += '<div class="character-header">';
-    out += '<h3>' + character.name + '</h3>';
-    out += '<div class="character-subtitle">' + character.race + ' - ' + character.class + ' (уровень ' + character.level + ')</div>';
+    out += '<h3>' + (character.name || 'Без имени') + '</h3>';
+    out += '<div class="character-subtitle">' + (character.race || 'Неизвестная раса') + ' - ' + (character.class || 'Неизвестный класс') + ' (уровень ' + (character.level || '?') + ')</div>';
     out += '</div>';
     
     // Основная информация
@@ -1784,6 +1812,7 @@ function formatCharacterFromApi(character) {
     out += '<div class="section-title">🏷️ Основная информация</div>';
     out += '<div class="section-content">';
     out += '<div class="info-grid">';
+    out += '<div class="info-item"><strong>Пол:</strong> ' + (character.gender || 'Не определен') + '</div>';
     out += '<div class="info-item"><strong>Мировоззрение:</strong> ' + (character.alignment || 'Не определено') + '</div>';
     out += '<div class="info-item"><strong>Профессия:</strong> ' + (character.occupation || 'Не определена') + '</div>';
     out += '</div>';
@@ -1799,6 +1828,7 @@ function formatCharacterFromApi(character) {
     out += '<div class="info-item"><strong>Скорость:</strong> ' + (character.speed || 'Не определена') + ' футов</div>';
     out += '<div class="info-item"><strong>Инициатива:</strong> ' + (character.initiative || 'Не определена') + '</div>';
     out += '<div class="info-item"><strong>Бонус мастерства:</strong> +' + (character.proficiency_bonus || 'Не определен') + '</div>';
+    out += '<div class="info-item"><strong>Урон:</strong> ' + (character.damage || 'Не определен') + '</div>';
     out += '</div>';
     out += '</div></div>';
     
@@ -1808,12 +1838,12 @@ function formatCharacterFromApi(character) {
         out += '<div class="section-title">📊 Характеристики</div>';
         out += '<div class="section-content">';
         out += '<div class="abilities-grid">';
-        out += '<div class="ability-item"><strong>СИЛ:</strong> ' + character.abilities.str + '</div>';
-        out += '<div class="ability-item"><strong>ЛОВ:</strong> ' + character.abilities.dex + '</div>';
-        out += '<div class="ability-item"><strong>ТЕЛ:</strong> ' + character.abilities.con + '</div>';
-        out += '<div class="ability-item"><strong>ИНТ:</strong> ' + character.abilities.int + '</div>';
-        out += '<div class="ability-item"><strong>МДР:</strong> ' + character.abilities.wis + '</div>';
-        out += '<div class="ability-item"><strong>ХАР:</strong> ' + character.abilities.cha + '</div>';
+        out += '<div class="ability-item">СИЛ: ' + (character.abilities.str || '?') + '</div>';
+        out += '<div class="ability-item">ЛОВ: ' + (character.abilities.dex || '?') + '</div>';
+        out += '<div class="ability-item">ТЕЛ: ' + (character.abilities.con || '?') + '</div>';
+        out += '<div class="ability-item">ИНТ: ' + (character.abilities.int || '?') + '</div>';
+        out += '<div class="ability-item">МДР: ' + (character.abilities.wis || '?') + '</div>';
+        out += '<div class="ability-item">ХАР: ' + (character.abilities.cha || '?') + '</div>';
         out += '</div>';
         out += '</div></div>';
     }
@@ -1824,8 +1854,8 @@ function formatCharacterFromApi(character) {
         out += '<div class="section-title">🛡️ Броски спасения</div>';
         out += '<div class="section-content">';
         out += '<div class="info-grid">';
-        character.saving_throws.forEach(save => {
-            out += '<div class="info-item"><strong>' + save.name + ':</strong> ' + (save.modifier >= 0 ? '+' : '') + save.modifier + '</div>';
+        character.saving_throws.forEach(throw_item => {
+            out += '<div class="info-item"><strong>' + (throw_item.name || 'Неизвестно') + ':</strong> ' + (throw_item.modifier >= 0 ? '+' : '') + (throw_item.modifier || '0') + '</div>';
         });
         out += '</div>';
         out += '</div></div>';
@@ -1834,7 +1864,7 @@ function formatCharacterFromApi(character) {
     // Владения
     if (character.proficiencies && character.proficiencies.length > 0) {
         out += '<div class="character-section">';
-        out += '<div class="section-title">🎯 Владения</div>';
+        out += '<div class="section-title">⚔️ Владения</div>';
         out += '<div class="section-content">';
         out += '<div class="proficiencies-list">';
         character.proficiencies.forEach(prof => {
@@ -1847,17 +1877,19 @@ function formatCharacterFromApi(character) {
     // Описание
     if (character.description) {
         out += '<div class="character-section">';
-        out += '<div class="section-title">📜 Описание</div>';
-        out += '<div class="section-content">' + character.description + '</div>';
-        out += '</div>';
+        out += '<div class="section-title">📝 Описание</div>';
+        out += '<div class="section-content">';
+        out += '<p>' + character.description + '</p>';
+        out += '</div></div>';
     }
     
     // Предыстория
     if (character.background) {
         out += '<div class="character-section">';
         out += '<div class="section-title">📖 Предыстория</div>';
-        out += '<div class="section-content">' + character.background + '</div>';
-        out += '</div>';
+        out += '<div class="section-content">';
+        out += '<p>' + character.background + '</p>';
+        out += '</div></div>';
     }
     
     // Заклинания
@@ -1893,14 +1925,13 @@ function formatCharacterFromApi(character) {
 // --- Форматирование противников от API системы ---
 function formatEnemiesFromApi(enemies) {
     let out = '<div class="enemies-container">';
-    
     enemies.forEach((enemy, index) => {
         out += '<div class="enemy-block">';
         
-        // Заголовок с именем и CR
+        // Заголовок противника
         out += '<div class="enemy-header">';
-        out += '<h3>' + enemy.name + '</h3>';
-        out += '<div class="enemy-cr">CR ' + enemy.challenge_rating + '</div>';
+        out += '<h3>' + (enemy.name || 'Без имени') + '</h3>';
+        out += '<div class="enemy-subtitle">CR ' + (enemy.challenge_rating || '?') + '</div>';
         out += '</div>';
         
         // Основная информация
@@ -1931,37 +1962,37 @@ function formatEnemiesFromApi(enemies) {
             out += '<div class="section-title">📊 Характеристики</div>';
             out += '<div class="section-content">';
             out += '<div class="abilities-grid">';
-            out += '<div class="ability-item"><strong>СИЛ:</strong> ' + enemy.abilities.str + '</div>';
-            out += '<div class="ability-item"><strong>ЛОВ:</strong> ' + enemy.abilities.dex + '</div>';
-            out += '<div class="ability-item"><strong>ТЕЛ:</strong> ' + enemy.abilities.con + '</div>';
-            out += '<div class="ability-item"><strong>ИНТ:</strong> ' + enemy.abilities.int + '</div>';
-            out += '<div class="ability-item"><strong>МДР:</strong> ' + enemy.abilities.wis + '</div>';
-            out += '<div class="ability-item"><strong>ХАР:</strong> ' + enemy.abilities.cha + '</div>';
+            out += '<div class="ability-item">СИЛ: ' + (enemy.abilities.str || '?') + '</div>';
+            out += '<div class="ability-item">ЛОВ: ' + (enemy.abilities.dex || '?') + '</div>';
+            out += '<div class="ability-item">ТЕЛ: ' + (enemy.abilities.con || '?') + '</div>';
+            out += '<div class="ability-item">ИНТ: ' + (enemy.abilities.int || '?') + '</div>';
+            out += '<div class="ability-item">МДР: ' + (enemy.abilities.wis || '?') + '</div>';
+            out += '<div class="ability-item">ХАР: ' + (enemy.abilities.cha || '?') + '</div>';
             out += '</div>';
             out += '</div></div>';
         }
         
         // Действия
-        if (enemy.actions && Object.keys(enemy.actions).length > 0) {
+        if (enemy.actions && enemy.actions.length > 0) {
             out += '<div class="enemy-section">';
             out += '<div class="section-title">⚔️ Действия</div>';
             out += '<div class="section-content">';
             out += '<ul class="actions-list">';
-            Object.entries(enemy.actions).forEach(([actionName, actionDesc]) => {
-                out += '<li><strong>' + actionName + ':</strong> ' + actionDesc + '</li>';
+            enemy.actions.forEach(action => {
+                out += '<li>' + (action.name || 'Неизвестное действие') + ': ' + (action.description || 'Нет описания') + '</li>';
             });
             out += '</ul>';
             out += '</div></div>';
         }
         
         // Особые способности
-        if (enemy.special_abilities && Object.keys(enemy.special_abilities).length > 0) {
+        if (enemy.special_abilities && enemy.special_abilities.length > 0) {
             out += '<div class="enemy-section">';
-            out += '<div class="section-title">✨ Особые способности</div>';
+            out += '<div class="section-title">🌟 Особые способности</div>';
             out += '<div class="section-content">';
             out += '<ul class="abilities-list">';
-            Object.entries(enemy.special_abilities).forEach(([abilityName, abilityDesc]) => {
-                out += '<li><strong>' + abilityName + ':</strong> ' + abilityDesc + '</li>';
+            enemy.special_abilities.forEach(ability => {
+                out += '<li>' + (ability.name || 'Неизвестная способность') + ': ' + (ability.description || 'Нет описания') + '</li>';
             });
             out += '</ul>';
             out += '</div></div>';
@@ -1970,18 +2001,27 @@ function formatEnemiesFromApi(enemies) {
         // Описание
         if (enemy.description) {
             out += '<div class="enemy-section">';
-            out += '<div class="section-title">📜 Описание</div>';
-            out += '<div class="section-content">' + enemy.description + '</div>';
-            out += '</div>';
+            out += '<div class="section-title">📝 Описание</div>';
+            out += '<div class="section-content">';
+            out += '<p>' + enemy.description + '</p>';
+            out += '</div></div>';
         }
         
         out += '</div>';
         
-        // Разделитель между противниками
         if (index < enemies.length - 1) {
             out += '<hr class="enemy-separator">';
         }
     });
+    
+    // Добавляем кнопку сохранения всех противников в заметки
+    out += `
+        <div class="save-enemies-section">
+            <button class="save-enemies-btn" onclick="saveAllEnemiesToNotes(${JSON.stringify(enemies)})">
+                💾 Сохранить всех в заметки
+            </button>
+        </div>
+    `;
     
     out += '</div>';
     return out;
@@ -2232,5 +2272,190 @@ document.querySelector('form').onsubmit = function(e) {
             toggleSection(headerElement);
         }
         
+        // --- Функция сохранения персонажа в заметки ---
+        function saveCharacterToNotes(name, race, class_name, level, initiative) {
+            const noteContent = `
+                <div class="character-note">
+                    <div class="character-note-title">Персонаж: ${name}</div>
+                    <div class="character-note-info">
+                        <div><strong>Раса:</strong> ${race}</div>
+                        <div><strong>Класс:</strong> ${class_name}</div>
+                        <div><strong>Уровень:</strong> ${level}</div>
+                        <div><strong>Инициатива:</strong> ${initiative}</div>
+                    </div>
+                </div>
+            `;
+            
+            fetch('', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/x-www-form-urlencoded'},
+                body: 'fast_action=save_note&content=' + encodeURIComponent(noteContent)
+            })
+            .then(r => r.text())
+            .then(() => {
+                alert('Персонаж сохранен в заметки!');
+            })
+            .catch(error => {
+                alert('Ошибка сохранения: ' + error.message);
+            });
+        }
 
+        // --- Функция сохранения противника в заметки ---
+        function saveEnemyToNotes(name, type, cr, initiative) {
+            const noteContent = `
+                <div class="enemy-note">
+                    <div class="enemy-note-title">Противник: ${name}</div>
+                    <div class="enemy-note-info">
+                        <div><strong>Тип:</strong> ${type}</div>
+                        <div><strong>CR:</strong> ${cr}</div>
+                        <div><strong>Инициатива:</strong> ${initiative}</div>
+                    </div>
+                </div>
+            `;
+            
+            fetch('', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/x-www-form-urlencoded'},
+                body: 'fast_action=save_note&content=' + encodeURIComponent(noteContent)
+            })
+            .then(r => r.text())
+            .then(() => {
+                alert('Противник сохранен в заметки!');
+            })
+            .catch(error => {
+                alert('Ошибка сохранения: ' + error.message);
+            });
+        }
+
+// --- Функция добавления из заметок ---
+function addFromNotes(type) {
+    // Получаем заметки из сессии
+    const notes = <?php echo json_encode($_SESSION['notes'] ?? []); ?>;
+    const characterNotes = [];
+    const enemyNotes = [];
+    
+    notes.forEach((note, index) => {
+        if (note.includes('character-note-title')) {
+            // Извлекаем информацию о персонаже
+            const nameMatch = note.match(/Персонаж:\s*([^<]+)/);
+            const raceMatch = note.match(/Раса:\s*([^<]+)/);
+            const classMatch = note.match(/Класс:\s*([^<]+)/);
+            const levelMatch = note.match(/Уровень:\s*(\d+)/);
+            const initiativeMatch = note.match(/Инициатива:\s*([^<]+)/);
+            
+            if (nameMatch) {
+                characterNotes.push({
+                    index: index,
+                    name: nameMatch[1].trim(),
+                    race: raceMatch ? raceMatch[1].trim() : '',
+                    class: classMatch ? classMatch[1].trim() : '',
+                    level: levelMatch ? levelMatch[1] : '',
+                    initiative: initiativeMatch ? initiativeMatch[1].trim() : '0'
+                });
+            }
+        } else if (note.includes('enemy-note-title')) {
+            // Извлекаем информацию о противнике
+            const nameMatch = note.match(/Противник:\s*([^<]+)/);
+            const typeMatch = note.match(/Тип:\s*([^<]+)/);
+            const crMatch = note.match(/CR:\s*([^<]+)/);
+            const initiativeMatch = note.match(/Инициатива:\s*([^<]+)/);
+            
+            if (nameMatch) {
+                enemyNotes.push({
+                    index: index,
+                    name: nameMatch[1].trim(),
+                    type: typeMatch ? typeMatch[1].trim() : '',
+                    cr: crMatch ? crMatch[1].trim() : '',
+                    initiative: initiativeMatch ? initiativeMatch[1].trim() : '0'
+                });
+            }
+        }
+    });
+    
+    const notesToShow = type === 'player' ? characterNotes : enemyNotes;
+    
+    if (notesToShow.length === 0) {
+        alert('В заметках нет ' + (type === 'player' ? 'персонажей' : 'противников') + ' для добавления');
+        return;
+    }
+    
+    let notesHtml = '<div class="notes-selection">';
+    notesHtml += '<div class="notes-title">Выберите ' + (type === 'player' ? 'персонажа' : 'противника') + ' из заметок:</div>';
+    notesHtml += '<div class="notes-list">';
+    
+    notesToShow.forEach(note => {
+        const displayName = type === 'player' ? 
+            `${note.name} (${note.race} ${note.class} ${note.level} ур.)` :
+            `${note.name} (${note.type} CR ${note.cr})`;
+        
+        notesHtml += `
+            <div class="note-item" onclick="selectFromNotes('${note.name}', '${note.initiative}', '${type}')">
+                <div class="note-name">${displayName}</div>
+                <div class="note-initiative">Инициатива: ${note.initiative}</div>
+            </div>
+        `;
+    });
+    
+    notesHtml += '</div>';
+    notesHtml += '<div class="notes-buttons">';
+    notesHtml += '<button class="cancel-btn" onclick="openInitiativeModal()">Отмена</button>';
+    notesHtml += '</div>';
+    notesHtml += '</div>';
+    
+    showModal(notesHtml);
+    document.getElementById('modal-save').style.display = 'none';
+}
+
+// --- Функция выбора из заметок ---
+function selectFromNotes(name, initiative, type) {
+    document.getElementById('initiative-name').value = name;
+    document.getElementById('initiative-value').value = initiative;
+    
+    // Возвращаемся к форме добавления инициативы
+    addInitiativeEntry(type);
+}
+
+// --- Функция сохранения всех противников в заметки ---
+function saveAllEnemiesToNotes(enemies) {
+    if (!enemies || enemies.length === 0) {
+        alert('Нет противников для сохранения');
+        return;
+    }
+    
+    let savedCount = 0;
+    const totalCount = enemies.length;
+    
+    enemies.forEach((enemy, index) => {
+        const noteContent = `
+            <div class="enemy-note">
+                <div class="enemy-note-title">Противник: ${enemy.name || 'Без имени'}</div>
+                <div class="enemy-note-info">
+                    <div><strong>Тип:</strong> ${enemy.type || 'Не определен'}</div>
+                    <div><strong>CR:</strong> ${enemy.challenge_rating || '?'}</div>
+                    <div><strong>Инициатива:</strong> ${enemy.initiative || '0'}</div>
+                </div>
+            </div>
+        `;
+        
+        fetch('', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/x-www-form-urlencoded'},
+            body: 'fast_action=save_note&content=' + encodeURIComponent(noteContent)
+        })
+        .then(r => r.text())
+        .then(() => {
+            savedCount++;
+            if (savedCount === totalCount) {
+                alert(`Сохранено ${savedCount} противников в заметки!`);
+            }
+        })
+        .catch(error => {
+            console.error('Ошибка сохранения противника:', error);
+            savedCount++;
+            if (savedCount === totalCount) {
+                alert(`Сохранено ${savedCount} из ${totalCount} противников в заметки`);
+            }
+        });
+    });
+}
 </script>

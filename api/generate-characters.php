@@ -31,14 +31,14 @@ class CharacterGenerator {
     /**
      * База имён для разных рас
      */
-    private function getNamesByRace($race) {
+    private function getNamesByRace($race, $gender = 'random') {
         $names = [
             'human' => [
                 'male' => ['Алексей', 'Дмитрий', 'Иван', 'Михаил', 'Сергей', 'Андрей', 'Владимир', 'Николай', 'Петр', 'Александр'],
                 'female' => ['Анна', 'Елена', 'Мария', 'Ольга', 'Татьяна', 'Ирина', 'Наталья', 'Светлана', 'Екатерина', 'Юлия']
             ],
             'elf' => [
-                'male' => ['Леголас', 'Элронд', 'Галадриэль', 'Арвен', 'Элронд', 'Глорфиндель', 'Келеборн', 'Эрестор', 'Линдон', 'Трандуил'],
+                'male' => ['Леголас', 'Элронд', 'Глорфиндель', 'Келеборн', 'Эрестор', 'Линдон', 'Трандуил', 'Халдир', 'Румил', 'Орофин'],
                 'female' => ['Арвен', 'Галадриэль', 'Элвинг', 'Нимродэль', 'Идриль', 'Аредэль', 'Лутиэн', 'Мелиан', 'Эарвен', 'Финдуилас']
             ],
             'dwarf' => [
@@ -77,7 +77,9 @@ class CharacterGenerator {
         
         $race = strtolower($race);
         if (isset($names[$race])) {
-            $gender = rand(0, 1) ? 'male' : 'female';
+            if ($gender === 'random') {
+                $gender = rand(0, 1) ? 'male' : 'female';
+            }
             $nameList = $names[$race][$gender];
             return $nameList[array_rand($nameList)];
         }
@@ -96,7 +98,21 @@ class CharacterGenerator {
         }
         
         $occupation = $this->occupations[array_rand($this->occupations)];
-        return $occupation['name_ru'] ?? 'Странник';
+        $name = $occupation['name_ru'] ?? 'Странник';
+        
+        // Очищаем от лишних символов и исправляем слипание слов
+        $name = preg_replace('/[^\p{L}\p{N}\s\-]/u', '', $name); // Убираем спецсимволы
+        $name = preg_replace('/\s+/', ' ', $name); // Убираем множественные пробелы
+        $name = preg_replace('/\d+/', '', $name); // Убираем цифры
+        $name = preg_replace('/\s+([А-ЯЁ])/u', ' $1', $name); // Добавляем пробелы перед заглавными буквами
+        $name = trim($name);
+        
+        // Если после очистки осталась пустая строка, возвращаем fallback
+        if (empty($name) || strlen($name) < 2) {
+            return 'Странник';
+        }
+        
+        return $name;
     }
     
     /**
@@ -107,6 +123,7 @@ class CharacterGenerator {
         $class = $params['class'] ?? 'fighter';
         $level = (int)($params['level'] ?? 1);
         $alignment = $params['alignment'] ?? 'neutral';
+        $gender = $params['gender'] ?? 'random';
         $use_ai = isset($params['use_ai']) && $params['use_ai'] === 'on';
         
         // Валидация параметров
@@ -147,11 +164,12 @@ class CharacterGenerator {
             
             // Рассчитываем параметры
             $character = [
-                'name' => $this->generateName($race),
+                'name' => $this->generateName($race, $gender),
                 'race' => $race_data['name'],
                 'class' => $class_data['name'],
                 'level' => $level,
                 'alignment' => $this->getAlignmentText($alignment),
+                'gender' => $this->getGenderText($gender),
                 'occupation' => $this->getRandomOccupation(),
                 'abilities' => $abilities,
                 'hit_points' => $this->calculateHP($class_data, $abilities['con'], $level),
@@ -159,6 +177,7 @@ class CharacterGenerator {
                 'speed' => $this->getSpeed($race_data),
                 'initiative' => $this->calculateInitiative($abilities['dex']),
                 'proficiency_bonus' => $this->calculateProficiencyBonus($level),
+                'damage' => $this->calculateDamage($class_data, $abilities),
                 'proficiencies' => $this->getProficiencies($class_data),
                 'spells' => $this->getSpells($class_data, $level, $abilities['int'], $abilities['wis'], $abilities['cha']),
                 'features' => $this->getFeatures($class_data, $level),
@@ -214,6 +233,31 @@ class CharacterGenerator {
                 'name' => 'Орк',
                 'ability_bonuses' => ['str' => 2, 'con' => 1],
                 'traits' => ['Темное зрение', 'Угрожающий', 'Мощная атака']
+            ],
+            'tiefling' => [
+                'name' => 'Тифлинг',
+                'ability_bonuses' => ['cha' => 2, 'int' => 1],
+                'traits' => ['Темное зрение', 'Устойчивость к огню', 'Адское наследие']
+            ],
+            'dragonborn' => [
+                'name' => 'Драконорожденный',
+                'ability_bonuses' => ['str' => 2, 'cha' => 1],
+                'traits' => ['Дыхание дракона', 'Устойчивость к урону', 'Драконье наследие']
+            ],
+            'gnome' => [
+                'name' => 'Гном',
+                'ability_bonuses' => ['int' => 2],
+                'traits' => ['Темное зрение', 'Гномья хитрость', 'Иллюзии']
+            ],
+            'half-elf' => [
+                'name' => 'Полуэльф',
+                'ability_bonuses' => ['cha' => 2, 'dex' => 1, 'int' => 1],
+                'traits' => ['Темное зрение', 'Универсальность', 'Эльфийское наследие']
+            ],
+            'half-orc' => [
+                'name' => 'Полуорк',
+                'ability_bonuses' => ['str' => 2, 'con' => 1],
+                'traits' => ['Темное зрение', 'Угрожающий', 'Мощная атака']
             ]
         ];
         
@@ -255,12 +299,67 @@ class CharacterGenerator {
                 'spellcasting' => true,
                 'spellcasting_ability' => 'wis'
             ],
+            'ranger' => [
+                'name' => 'Следопыт',
+                'hit_die' => 10,
+                'proficiencies' => ['Легкие доспехи', 'Средние доспехи', 'Щиты', 'Простое оружие', 'Воинское оружие'],
+                'features' => ['Любимый враг', 'Естественный исследователь'],
+                'spellcasting' => true,
+                'spellcasting_ability' => 'wis'
+            ],
+            'barbarian' => [
+                'name' => 'Варвар',
+                'hit_die' => 12,
+                'proficiencies' => ['Легкие доспехи', 'Средние доспехи', 'Щиты', 'Простое оружие', 'Воинское оружие'],
+                'features' => ['Ярость', 'Защита без доспехов'],
+                'spellcasting' => false
+            ],
+            'bard' => [
+                'name' => 'Бард',
+                'hit_die' => 8,
+                'proficiencies' => ['Легкие доспехи', 'Простое оружие', 'Ручные арбалеты', 'Длинные мечи'],
+                'features' => ['Вдохновение барда', 'Песнь отдыха'],
+                'spellcasting' => true,
+                'spellcasting_ability' => 'cha'
+            ],
+            'druid' => [
+                'name' => 'Друид',
+                'hit_die' => 8,
+                'proficiencies' => ['Легкие доспехи', 'Средние доспехи', 'Щиты', 'Простое оружие'],
+                'features' => ['Дикий облик', 'Друидский'],
+                'spellcasting' => true,
+                'spellcasting_ability' => 'wis'
+            ],
             'monk' => [
                 'name' => 'Монах',
                 'hit_die' => 8,
                 'proficiencies' => ['Простое оружие', 'Короткие мечи'],
                 'features' => ['Безоружная защита', 'Боевые искусства'],
                 'spellcasting' => false
+            ],
+            'paladin' => [
+                'name' => 'Паладин',
+                'hit_die' => 10,
+                'proficiencies' => ['Все доспехи', 'Щиты', 'Простое оружие', 'Воинское оружие'],
+                'features' => ['Божественное чувство', 'Божественное здоровье'],
+                'spellcasting' => true,
+                'spellcasting_ability' => 'cha'
+            ],
+            'sorcerer' => [
+                'name' => 'Сорсерер',
+                'hit_die' => 6,
+                'proficiencies' => ['Кинжалы', 'Посохи', 'Арбалеты'],
+                'features' => ['Магическое происхождение', 'Метамагия'],
+                'spellcasting' => true,
+                'spellcasting_ability' => 'cha'
+            ],
+            'warlock' => [
+                'name' => 'Колдун',
+                'hit_die' => 8,
+                'proficiencies' => ['Легкие доспехи', 'Простое оружие'],
+                'features' => ['Пакт с покровителем', 'Мистические арканумы'],
+                'spellcasting' => true,
+                'spellcasting_ability' => 'cha'
             ]
         ];
         
@@ -348,6 +447,15 @@ class CharacterGenerator {
         }
         
         return max(1, $base_hp + $additional_hp);
+    }
+    
+    /**
+     * Расчет урона
+     */
+    private function calculateDamage($class_data, $abilities) {
+        $damage_die = $class_data['hit_die'];
+        $damage_bonus = floor(($abilities['str'] - 10) / 2);
+        return $damage_die . ' + ' . $damage_bonus;
     }
     
     /**
@@ -489,8 +597,18 @@ class CharacterGenerator {
     /**
      * Генерация имени персонажа
      */
-    private function generateName($race) {
-        return $this->getNamesByRace($race);
+    private function generateName($race, $gender) {
+        if ($gender === 'random') {
+            $gender = rand(0, 1) ? 'male' : 'female';
+        }
+        return $this->getNamesByRace($race, $gender);
+    }
+
+    /**
+     * Получение текста пола
+     */
+    private function getGenderText($gender) {
+        return $gender === 'male' ? 'Мужчина' : 'Женщина';
     }
     
     /**
@@ -519,9 +637,11 @@ class CharacterGenerator {
         // Формируем полную информацию о персонаже для AI
         $characterInfo = "Персонаж: {$character['name']}, {$character['race']} {$character['class']} {$character['level']} уровня.\n";
         $characterInfo .= "Профессия: {$character['occupation']}\n";
+        $characterInfo .= "Пол: {$character['gender']}\n";
         $characterInfo .= "Мировоззрение: {$character['alignment']}\n";
         $characterInfo .= "Характеристики: СИЛ {$character['abilities']['str']}, ЛОВ {$character['abilities']['dex']}, ТЕЛ {$character['abilities']['con']}, ИНТ {$character['abilities']['int']}, МДР {$character['abilities']['wis']}, ХАР {$character['abilities']['cha']}\n";
         $characterInfo .= "Боевые параметры: Хиты {$character['hit_points']}, КД {$character['armor_class']}, Скорость {$character['speed']} футов, Инициатива {$character['initiative']}, Бонус мастерства +{$character['proficiency_bonus']}\n";
+        $characterInfo .= "Урон: {$character['damage']}\n";
         
         if (!empty($character['proficiencies'])) {
             $characterInfo .= "Владения: " . implode(', ', $character['proficiencies']) . "\n";
@@ -550,9 +670,11 @@ class CharacterGenerator {
         // Формируем полную информацию о персонаже для AI
         $characterInfo = "Персонаж: {$character['name']}, {$character['race']} {$character['class']} {$character['level']} уровня.\n";
         $characterInfo .= "Профессия: {$character['occupation']}\n";
+        $characterInfo .= "Пол: {$character['gender']}\n";
         $characterInfo .= "Мировоззрение: {$character['alignment']}\n";
         $characterInfo .= "Характеристики: СИЛ {$character['abilities']['str']}, ЛОВ {$character['abilities']['dex']}, ТЕЛ {$character['abilities']['con']}, ИНТ {$character['abilities']['int']}, МДР {$character['abilities']['wis']}, ХАР {$character['abilities']['cha']}\n";
         $characterInfo .= "Боевые параметры: Хиты {$character['hit_points']}, КД {$character['armor_class']}, Скорость {$character['speed']} футов, Инициатива {$character['initiative']}, Бонус мастерства +{$character['proficiency_bonus']}\n";
+        $characterInfo .= "Урон: {$character['damage']}\n";
         
         if (!empty($character['proficiencies'])) {
             $characterInfo .= "Владения: " . implode(', ', $character['proficiencies']) . "\n";
@@ -582,6 +704,11 @@ class CharacterGenerator {
             return null;
         }
         
+        // Проверяем доступность cURL
+        if (!function_exists('curl_init')) {
+            return null;
+        }
+        
         $data = [
             'model' => 'deepseek-chat',
             'messages' => [
@@ -600,9 +727,15 @@ class CharacterGenerator {
             'Content-Type: application/json',
             'Authorization: Bearer ' . $this->deepseek_api_key
         ]);
+        curl_setopt($ch, CURLOPT_TIMEOUT, 10);
         
         $response = curl_exec($ch);
+        $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
         curl_close($ch);
+        
+        if ($response === false || $httpCode !== 200) {
+            return null;
+        }
         
         $result = json_decode($response, true);
         
