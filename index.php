@@ -329,6 +329,18 @@ function openCharacterModal() {
                             <option value="gnome">Гном</option>
                             <option value="half-elf">Полуэльф</option>
                             <option value="half-orc">Полуорк</option>
+                            <option value="tabaxi">Табакси</option>
+                            <option value="aarakocra">Ааракокра</option>
+                            <option value="goblin">Гоблин</option>
+                            <option value="kenku">Кенку</option>
+                            <option value="lizardfolk">Ящеролюд</option>
+                            <option value="triton">Тритон</option>
+                            <option value="yuan-ti">Юань-ти</option>
+                            <option value="goliath">Голиаф</option>
+                            <option value="firbolg">Фирболг</option>
+                            <option value="bugbear">Багбир</option>
+                            <option value="hobgoblin">Хобгоблин</option>
+                            <option value="kobold">Кобольд</option>
                         </select>
                     </div>
                     
@@ -346,14 +358,31 @@ function openCharacterModal() {
                             <option value="druid">Друид</option>
                             <option value="monk">Монах</option>
                             <option value="paladin">Паладин</option>
-                            <option value="sorcerer">Сорсерер</option>
+                            <option value="sorcerer">Чародей</option>
                             <option value="warlock">Колдун</option>
+                            <option value="artificer">Изобретатель</option>
                         </select>
                     </div>
                     
                     <div class="form-group">
                         <label for="character-level">Уровень персонажа</label>
                         <input type="number" id="character-level" name="level" min="1" max="20" value="1" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="character-alignment">Мировоззрение</label>
+                        <select id="character-alignment" name="alignment">
+                            <option value="random">Случайное</option>
+                            <option value="lawful-good">Законно-добрый</option>
+                            <option value="neutral-good">Нейтрально-добрый</option>
+                            <option value="chaotic-good">Хаотично-добрый</option>
+                            <option value="lawful-neutral">Законно-нейтральный</option>
+                            <option value="neutral">Нейтральный</option>
+                            <option value="chaotic-neutral">Хаотично-нейтральный</option>
+                            <option value="lawful-evil">Законно-злой</option>
+                            <option value="neutral-evil">Нейтрально-злой</option>
+                            <option value="chaotic-evil">Хаотично-злой</option>
+                        </select>
                     </div>
                     
                     <div class="form-group">
@@ -364,28 +393,6 @@ function openCharacterModal() {
                             <option value="female">Женский</option>
                         </select>
                     </div>
-                </div>
-                
-                <div class="advanced-settings">
-                    <details>
-                        <summary>🔧 Расширенные настройки</summary>
-                        <div class="advanced-content">
-                            <div class="form-group">
-                                <label for="character-alignment">Мировоззрение</label>
-                                <select id="character-alignment" name="alignment">
-                                    <option value="neutral">Нейтральный</option>
-                                    <option value="lawful-good">Законно-добрый</option>
-                                    <option value="neutral-good">Нейтрально-добрый</option>
-                                    <option value="chaotic-good">Хаотично-добрый</option>
-                                    <option value="lawful-neutral">Законно-нейтральный</option>
-                                    <option value="chaotic-neutral">Хаотично-нейтральный</option>
-                                    <option value="lawful-evil">Законно-злой</option>
-                                    <option value="neutral-evil">Нейтрально-злой</option>
-                                    <option value="chaotic-evil">Хаотично-злой</option>
-                                </select>
-                            </div>
-                        </div>
-                    </details>
                 </div>
                 
                 <button type="submit" class="generate-btn">

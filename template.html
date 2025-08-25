@@ -2814,6 +2814,122 @@
         .enemy-note-info div {
             margin-bottom: 3px;
         }
+        /* Мобильная версия генерации персонажей */
+        
+        @media (max-width: 768px) {
+            .character-generator {
+                padding: 10px;
+            }
+            .generator-header h2 {
+                font-size: 1.5em;
+                margin-bottom: 5px;
+            }
+            .generator-subtitle {
+                font-size: 0.9em;
+                margin-bottom: 15px;
+            }
+            .character-form .form-grid {
+                display: flex;
+                flex-direction: column;
+                gap: 10px;
+            }
+            .character-form .form-group {
+                margin-bottom: 0;
+            }
+            .character-form label {
+                font-size: 0.9em;
+                margin-bottom: 5px;
+                display: block;
+            }
+            .character-form select,
+            .character-form input {
+                width: 100%;
+                padding: 12px;
+                font-size: 1em;
+                border-radius: 6px;
+                border: 1px solid var(--border-tertiary);
+                background: var(--bg-secondary);
+                color: var(--text-primary);
+            }
+            .generate-btn {
+                width: 100%;
+                margin-top: 15px;
+                padding: 15px;
+                font-size: 1.1em;
+            }
+            /* Результат генерации на мобильных */
+            .character-block {
+                margin-top: 15px;
+            }
+            .character-header h3 {
+                font-size: 1.3em;
+                margin-bottom: 5px;
+            }
+            .character-subtitle {
+                font-size: 0.9em;
+                margin-bottom: 10px;
+            }
+            .character-section {
+                margin-bottom: 10px;
+            }
+            .section-title {
+                padding: 8px 12px;
+                font-size: 1em;
+            }
+            .section-content {
+                padding: 10px;
+            }
+            .info-grid {
+                display: flex;
+                flex-direction: column;
+                gap: 8px;
+            }
+            .info-item {
+                padding: 8px;
+                font-size: 0.9em;
+            }
+            .abilities-grid {
+                display: grid;
+                grid-template-columns: repeat(3, 1fr);
+                gap: 8px;
+            }
+            .ability-item {
+                padding: 8px;
+                font-size: 0.9em;
+                text-align: center;
+            }
+            .proficiencies-list {
+                display: flex;
+                flex-wrap: wrap;
+                gap: 5px;
+            }
+            .proficiency-tag {
+                padding: 4px 8px;
+                font-size: 0.8em;
+            }
+            .spell-list,
+            .equipment-list {
+                padding-left: 15px;
+            }
+            .spell-list li,
+            .equipment-list li {
+                margin-bottom: 3px;
+                font-size: 0.9em;
+            }
+            .save-character-section {
+                margin-top: 15px;
+            }
+            .save-character-btn {
+                width: 100%;
+                padding: 12px;
+                font-size: 1em;
+            }
+        }
+        /* Убираем расширенные настройки из CSS */
+        
+        .advanced-settings {
+            display: none;
+        }
     </style>
 </head>
 
