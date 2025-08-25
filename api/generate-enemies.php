@@ -384,11 +384,18 @@ class EnemyGenerator {
     private function generateEnemyDescription($enemy) {
         $prompt = "Опиши противника {$enemy['name']} (CR {$enemy['challenge_rating']}, {$enemy['type']}). " .
                  "Включи основные характеристики, слабости и как лучше использовать этого противника. " .
-                 "Ответ должен быть кратким (2-3 предложения) и практичным для мастера D&D.";
+                 "Ответ должен быть кратким (2-3 предложения) и практичным для мастера D&D. " .
+                 "Не используй специальные символы, звездочки или скобки.";
         
         try {
             $response = $this->callDeepSeek($prompt);
-            return $response ?: 'Описание не определено';
+            if ($response) {
+                // Очищаем ответ от лишних символов
+                $response = str_replace(['*', '(', ')', '[', ']', '_'], '', $response);
+                $response = preg_replace('/\s+/', ' ', $response); // Убираем лишние пробелы
+                return trim($response);
+            }
+            return 'Описание не определено';
         } catch (Exception $e) {
             return 'Описание не определено';
         }

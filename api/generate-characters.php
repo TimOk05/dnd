@@ -8,9 +8,36 @@ require_once __DIR__ . '/../config.php';
 class CharacterGenerator {
     private $dnd5e_api_url = 'https://www.dnd5eapi.co/api';
     private $deepseek_api_key;
+    private $occupations = [];
     
     public function __construct() {
         $this->deepseek_api_key = getApiKey('deepseek');
+        $this->loadOccupations();
+    }
+    
+    /**
+     * Загрузка профессий из JSON файла
+     */
+    private function loadOccupations() {
+        $jsonFile = __DIR__ . '/../pdf/d100_unique_traders.json';
+        if (file_exists($jsonFile)) {
+            $jsonData = json_decode(file_get_contents($jsonFile), true);
+            if (isset($jsonData['data']['occupations'])) {
+                $this->occupations = $jsonData['data']['occupations'];
+            }
+        }
+    }
+    
+    /**
+     * Получение случайной профессии
+     */
+    private function getRandomOccupation() {
+        if (empty($this->occupations)) {
+            return 'Странник';
+        }
+        
+        $occupation = $this->occupations[array_rand($this->occupations)];
+        return $occupation['name_ru'] ?? 'Странник';
     }
     
     /**
@@ -66,13 +93,18 @@ class CharacterGenerator {
                 'class' => $class_data['name'],
                 'level' => $level,
                 'alignment' => $this->getAlignmentText($alignment),
+                'occupation' => $this->getRandomOccupation(),
                 'abilities' => $abilities,
                 'hit_points' => $this->calculateHP($class_data, $abilities['con'], $level),
                 'armor_class' => $this->calculateAC($class_data, $abilities['dex']),
+                'speed' => $this->getSpeed($race_data),
+                'initiative' => $this->calculateInitiative($abilities['dex']),
+                'proficiency_bonus' => $this->calculateProficiencyBonus($level),
                 'proficiencies' => $this->getProficiencies($class_data),
                 'spells' => $this->getSpells($class_data, $level, $abilities['int'], $abilities['wis'], $abilities['cha']),
                 'features' => $this->getFeatures($class_data, $level),
-                'equipment' => $this->getEquipment($class_data)
+                'equipment' => $this->getEquipment($class_data),
+                'saving_throws' => $this->getSavingThrows($class_data, $abilities)
             ];
             
             // Добавляем AI-описание если включено
@@ -275,6 +307,31 @@ class CharacterGenerator {
     }
     
     /**
+     * Получение скорости
+     */
+    private function getSpeed($race_data) {
+        $speed = 30; // Базовая скорость
+        if (isset($race_data['traits']) && in_array('Транс', $race_data['traits'])) {
+            $speed = 60; // Транс
+        }
+        return $speed;
+    }
+
+    /**
+     * Расчет инициативы
+     */
+    private function calculateInitiative($dex_modifier) {
+        return floor(($dex_modifier - 10) / 2);
+    }
+
+    /**
+     * Расчет бонуса мастерства
+     */
+    private function calculateProficiencyBonus($level) {
+        return floor(($level - 1) / 4) + 2;
+    }
+    
+    /**
      * Получение владений
      */
     private function getProficiencies($class_data) {
@@ -345,6 +402,29 @@ class CharacterGenerator {
         $equipment[] = '10 золотых монет';
         
         return $equipment;
+    }
+
+    /**
+     * Получение бросков способностей
+     */
+    private function getSavingThrows($class_data, $abilities) {
+        $saving_throws = [];
+        
+        if (isset($class_data['spellcasting']) && $class_data['spellcasting']) {
+            $spellcasting_ability = $class_data['spellcasting_ability'] ?? 'int';
+            $spellcasting_ability_score = $abilities[$spellcasting_ability] ?? 10;
+            $spellcasting_ability_modifier = floor(($spellcasting_ability_score - 10) / 2);
+            $saving_throws[] = ['name' => 'Заклинания', 'modifier' => $spellcasting_ability_modifier];
+        }
+
+        $saving_throws[] = ['name' => 'Сила', 'modifier' => floor(($abilities['str'] - 10) / 2)];
+        $saving_throws[] = ['name' => 'Ловкость', 'modifier' => floor(($abilities['dex'] - 10) / 2)];
+        $saving_throws[] = ['name' => 'Телосложение', 'modifier' => floor(($abilities['con'] - 10) / 2)];
+        $saving_throws[] = ['name' => 'Интеллект', 'modifier' => floor(($abilities['int'] - 10) / 2)];
+        $saving_throws[] = ['name' => 'Мудрость', 'modifier' => floor(($abilities['wis'] - 10) / 2)];
+        $saving_throws[] = ['name' => 'Харизма', 'modifier' => floor(($abilities['cha'] - 10) / 2)];
+
+        return $saving_throws;
     }
     
     /**

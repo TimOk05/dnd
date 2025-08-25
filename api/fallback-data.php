@@ -186,13 +186,13 @@ class FallbackData {
             [
                 'index' => 'goblin',
                 'name' => 'Гоблин',
-                'type' => 'humanoid',
-                'size' => 'small',
-                'alignment' => 'neutral evil',
+                'type' => 'гуманоид',
+                'size' => 'маленький',
+                'alignment' => 'нейтрально-злой',
                 'challenge_rating' => '1/4',
                 'hit_points' => 7,
                 'armor_class' => 15,
-                'speed' => '30 ft',
+                'speed' => '30 футов',
                 'abilities' => [
                     'str' => 8, 'dex' => 14, 'con' => 10, 'int' => 10, 'wis' => 8, 'cha' => 8
                 ],
@@ -204,13 +204,13 @@ class FallbackData {
             [
                 'index' => 'kobold',
                 'name' => 'Кобольд',
-                'type' => 'humanoid',
-                'size' => 'small',
-                'alignment' => 'lawful evil',
+                'type' => 'гуманоид',
+                'size' => 'маленький',
+                'alignment' => 'законно-злой',
                 'challenge_rating' => '1/8',
                 'hit_points' => 5,
                 'armor_class' => 12,
-                'speed' => '30 ft',
+                'speed' => '30 футов',
                 'abilities' => [
                     'str' => 7, 'dex' => 15, 'con' => 9, 'int' => 8, 'wis' => 7, 'cha' => 8
                 ],
@@ -222,13 +222,13 @@ class FallbackData {
             [
                 'index' => 'bandit',
                 'name' => 'Бандит',
-                'type' => 'humanoid',
-                'size' => 'medium',
-                'alignment' => 'any non-lawful',
+                'type' => 'гуманоид',
+                'size' => 'средний',
+                'alignment' => 'любое не-законное',
                 'challenge_rating' => '1/8',
                 'hit_points' => 11,
                 'armor_class' => 12,
-                'speed' => '30 ft',
+                'speed' => '30 футов',
                 'abilities' => [
                     'str' => 12, 'dex' => 12, 'con' => 12, 'int' => 10, 'wis' => 10, 'cha' => 10
                 ],
@@ -240,13 +240,13 @@ class FallbackData {
             [
                 'index' => 'cultist',
                 'name' => 'Культист',
-                'type' => 'humanoid',
-                'size' => 'medium',
-                'alignment' => 'any non-good',
+                'type' => 'гуманоид',
+                'size' => 'средний',
+                'alignment' => 'любое не-доброе',
                 'challenge_rating' => '1/8',
                 'hit_points' => 9,
                 'armor_class' => 12,
-                'speed' => '30 ft',
+                'speed' => '30 футов',
                 'abilities' => [
                     'str' => 11, 'dex' => 12, 'con' => 10, 'int' => 10, 'wis' => 11, 'cha' => 10
                 ],
@@ -258,13 +258,13 @@ class FallbackData {
             [
                 'index' => 'giant_rat',
                 'name' => 'Гигантская крыса',
-                'type' => 'beast',
-                'size' => 'small',
-                'alignment' => 'unaligned',
+                'type' => 'зверь',
+                'size' => 'маленький',
+                'alignment' => 'неопределенный',
                 'challenge_rating' => '1/8',
                 'hit_points' => 7,
                 'armor_class' => 12,
-                'speed' => '30 ft',
+                'speed' => '30 футов',
                 'abilities' => [
                     'str' => 7, 'dex' => 15, 'con' => 11, 'int' => 2, 'wis' => 10, 'cha' => 4
                 ],
@@ -275,13 +275,13 @@ class FallbackData {
             [
                 'index' => 'giant_spider',
                 'name' => 'Гигантский паук',
-                'type' => 'beast',
-                'size' => 'large',
-                'alignment' => 'unaligned',
+                'type' => 'зверь',
+                'size' => 'большой',
+                'alignment' => 'неопределенный',
                 'challenge_rating' => '1/4',
                 'hit_points' => 26,
                 'armor_class' => 14,
-                'speed' => '30 ft, climb 30 ft',
+                'speed' => '30 футов, лазание 30 футов',
                 'abilities' => [
                     'str' => 14, 'dex' => 16, 'con' => 12, 'int' => 2, 'wis' => 11, 'cha' => 4
                 ],
@@ -292,13 +292,13 @@ class FallbackData {
             [
                 'index' => 'wolf',
                 'name' => 'Волк',
-                'type' => 'beast',
-                'size' => 'medium',
-                'alignment' => 'unaligned',
+                'type' => 'зверь',
+                'size' => 'средний',
+                'alignment' => 'неопределенный',
                 'challenge_rating' => '1/4',
                 'hit_points' => 11,
                 'armor_class' => 13,
-                'speed' => '40 ft',
+                'speed' => '40 футов',
                 'abilities' => [
                     'str' => 12, 'dex' => 15, 'con' => 12, 'int' => 3, 'wis' => 12, 'cha' => 6
                 ],
@@ -309,13 +309,13 @@ class FallbackData {
             [
                 'index' => 'zombie',
                 'name' => 'Зомби',
-                'type' => 'undead',
-                'size' => 'medium',
-                'alignment' => 'neutral evil',
+                'type' => 'нежить',
+                'size' => 'средний',
+                'alignment' => 'нейтрально-злой',
                 'challenge_rating' => '1/4',
                 'hit_points' => 22,
                 'armor_class' => 8,
-                'speed' => '20 ft',
+                'speed' => '20 футов',
                 'abilities' => [
                     'str' => 13, 'dex' => 6, 'con' => 16, 'int' => 3, 'wis' => 6, 'cha' => 5
                 ],
@@ -326,13 +326,13 @@ class FallbackData {
             [
                 'index' => 'skeleton',
                 'name' => 'Скелет',
-                'type' => 'undead',
-                'size' => 'medium',
-                'alignment' => 'lawful evil',
+                'type' => 'нежить',
+                'size' => 'средний',
+                'alignment' => 'законно-злой',
                 'challenge_rating' => '1/4',
                 'hit_points' => 13,
                 'armor_class' => 13,
-                'speed' => '30 ft',
+                'speed' => '30 футов',
                 'abilities' => [
                     'str' => 10, 'dex' => 14, 'con' => 15, 'int' => 6, 'wis' => 8, 'cha' => 5
                 ],
@@ -346,13 +346,13 @@ class FallbackData {
             [
                 'index' => 'orc',
                 'name' => 'Орк',
-                'type' => 'humanoid',
-                'size' => 'medium',
-                'alignment' => 'chaotic evil',
+                'type' => 'гуманоид',
+                'size' => 'средний',
+                'alignment' => 'хаотично-злой',
                 'challenge_rating' => '1/2',
                 'hit_points' => 15,
                 'armor_class' => 13,
-                'speed' => '30 ft',
+                'speed' => '30 футов',
                 'abilities' => [
                     'str' => 16, 'dex' => 12, 'con' => 16, 'int' => 7, 'wis' => 11, 'cha' => 10
                 ],
@@ -364,13 +364,13 @@ class FallbackData {
             [
                 'index' => 'hobgoblin',
                 'name' => 'Хобгоблин',
-                'type' => 'humanoid',
-                'size' => 'medium',
-                'alignment' => 'lawful evil',
+                'type' => 'гуманоид',
+                'size' => 'средний',
+                'alignment' => 'законно-злой',
                 'challenge_rating' => '1/2',
                 'hit_points' => 11,
                 'armor_class' => 18,
-                'speed' => '30 ft',
+                'speed' => '30 футов',
                 'abilities' => [
                     'str' => 13, 'dex' => 12, 'con' => 12, 'int' => 10, 'wis' => 10, 'cha' => 9
                 ],
@@ -382,13 +382,13 @@ class FallbackData {
             [
                 'index' => 'bugbear',
                 'name' => 'Багбир',
-                'type' => 'humanoid',
-                'size' => 'medium',
-                'alignment' => 'chaotic evil',
+                'type' => 'гуманоид',
+                'size' => 'средний',
+                'alignment' => 'хаотично-злой',
                 'challenge_rating' => '1',
                 'hit_points' => 27,
                 'armor_class' => 16,
-                'speed' => '30 ft',
+                'speed' => '30 футов',
                 'abilities' => [
                     'str' => 15, 'dex' => 14, 'con' => 13, 'int' => 8, 'wis' => 11, 'cha' => 9
                 ],
@@ -400,13 +400,13 @@ class FallbackData {
             [
                 'index' => 'ogre',
                 'name' => 'Огр',
-                'type' => 'giant',
-                'size' => 'large',
-                'alignment' => 'chaotic evil',
+                'type' => 'великан',
+                'size' => 'большой',
+                'alignment' => 'хаотично-злой',
                 'challenge_rating' => '2',
                 'hit_points' => 59,
                 'armor_class' => 11,
-                'speed' => '40 ft',
+                'speed' => '40 футов',
                 'abilities' => [
                     'str' => 19, 'dex' => 8, 'con' => 16, 'int' => 5, 'wis' => 7, 'cha' => 7
                 ],
@@ -418,13 +418,13 @@ class FallbackData {
             [
                 'index' => 'minotaur',
                 'name' => 'Минотавр',
-                'type' => 'monstrosity',
-                'size' => 'large',
-                'alignment' => 'chaotic evil',
+                'type' => 'чудовище',
+                'size' => 'большой',
+                'alignment' => 'хаотично-злой',
                 'challenge_rating' => '3',
                 'hit_points' => 76,
                 'armor_class' => 14,
-                'speed' => '40 ft',
+                'speed' => '40 футов',
                 'abilities' => [
                     'str' => 18, 'dex' => 11, 'con' => 16, 'int' => 6, 'wis' => 16, 'cha' => 9
                 ],
@@ -438,13 +438,13 @@ class FallbackData {
             [
                 'index' => 'troll',
                 'name' => 'Тролль',
-                'type' => 'giant',
-                'size' => 'large',
-                'alignment' => 'chaotic evil',
+                'type' => 'великан',
+                'size' => 'большой',
+                'alignment' => 'хаотично-злой',
                 'challenge_rating' => '5',
                 'hit_points' => 84,
                 'armor_class' => 15,
-                'speed' => '30 ft',
+                'speed' => '30 футов',
                 'abilities' => [
                     'str' => 18, 'dex' => 13, 'con' => 20, 'int' => 7, 'wis' => 9, 'cha' => 7
                 ],
@@ -460,13 +460,13 @@ class FallbackData {
             [
                 'index' => 'young_dragon',
                 'name' => 'Молодой красный дракон',
-                'type' => 'dragon',
-                'size' => 'large',
-                'alignment' => 'chaotic evil',
+                'type' => 'дракон',
+                'size' => 'большой',
+                'alignment' => 'хаотично-злой',
                 'challenge_rating' => '7',
                 'hit_points' => 178,
                 'armor_class' => 18,
-                'speed' => '40 ft, fly 80 ft',
+                'speed' => '40 футов, полет 80 футов',
                 'abilities' => [
                     'str' => 23, 'dex' => 10, 'con' => 21, 'int' => 14, 'wis' => 11, 'cha' => 19
                 ],
@@ -479,13 +479,13 @@ class FallbackData {
             [
                 'index' => 'mind_flayer',
                 'name' => 'Умыслитель',
-                'type' => 'aberration',
-                'size' => 'medium',
-                'alignment' => 'lawful evil',
+                'type' => 'аберрация',
+                'size' => 'средний',
+                'alignment' => 'законно-злой',
                 'challenge_rating' => '7',
                 'hit_points' => 71,
                 'armor_class' => 15,
-                'speed' => '30 ft',
+                'speed' => '30 футов',
                 'abilities' => [
                     'str' => 11, 'dex' => 12, 'con' => 12, 'int' => 19, 'wis' => 17, 'cha' => 17
                 ],
@@ -502,13 +502,13 @@ class FallbackData {
             [
                 'index' => 'vampire',
                 'name' => 'Вампир',
-                'type' => 'undead',
-                'size' => 'medium',
-                'alignment' => 'lawful evil',
+                'type' => 'нежить',
+                'size' => 'средний',
+                'alignment' => 'законно-злой',
                 'challenge_rating' => '13',
                 'hit_points' => 144,
                 'armor_class' => 16,
-                'speed' => '30 ft',
+                'speed' => '30 футов',
                 'abilities' => [
                     'str' => 18, 'dex' => 18, 'con' => 18, 'int' => 17, 'wis' => 15, 'cha' => 18
                 ],
@@ -524,13 +524,13 @@ class FallbackData {
             [
                 'index' => 'beholder',
                 'name' => 'Бехолдер',
-                'type' => 'aberration',
-                'size' => 'large',
-                'alignment' => 'lawful evil',
+                'type' => 'аберрация',
+                'size' => 'большой',
+                'alignment' => 'законно-злой',
                 'challenge_rating' => '13',
                 'hit_points' => 180,
                 'armor_class' => 18,
-                'speed' => '0 ft, fly 20 ft',
+                'speed' => '0 футов, полет 20 футов',
                 'abilities' => [
                     'str' => 10, 'dex' => 14, 'con' => 18, 'int' => 17, 'wis' => 15, 'cha' => 17
                 ],

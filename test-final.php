@@ -63,6 +63,9 @@ try {
         echo "Количество: " . count($enemies['enemies']) . "<br>\n";
         foreach ($enemies['enemies'] as $enemy) {
             echo "- " . $enemy['name'] . " (CR: " . $enemy['challenge_rating'] . ")<br>\n";
+            echo "  Тип: " . $enemy['type'] . "<br>\n";
+            echo "  Размер: " . $enemy['size'] . "<br>\n";
+            echo "  Мировоззрение: " . $enemy['alignment'] . "<br>\n";
         }
     } else {
         echo "✗ Ошибка генерации противников: " . $enemies['error'] . "<br>\n";
@@ -89,7 +92,12 @@ try {
         echo "Раса: " . $character['npc']['race'] . "<br>\n";
         echo "Класс: " . $character['npc']['class'] . "<br>\n";
         echo "Уровень: " . $character['npc']['level'] . "<br>\n";
+        echo "Профессия: " . $character['npc']['occupation'] . "<br>\n";
         echo "Хиты: " . $character['npc']['hit_points'] . "<br>\n";
+        echo "КД: " . $character['npc']['armor_class'] . "<br>\n";
+        echo "Скорость: " . $character['npc']['speed'] . " футов<br>\n";
+        echo "Инициатива: " . $character['npc']['initiative'] . "<br>\n";
+        echo "Бонус мастерства: +" . $character['npc']['proficiency_bonus'] . "<br>\n";
     } else {
         echo "✗ Ошибка генерации персонажа: " . $character['error'] . "<br>\n";
     }
