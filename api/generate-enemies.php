@@ -1,6 +1,10 @@
 <?php
-header('Content-Type: application/json');
-require_once '../config.php';
+// Убираем заголовки для использования в тестах
+if (php_sapi_name() !== 'cli') {
+    header('Content-Type: application/json');
+}
+require_once __DIR__ . '/../config.php';
+require_once __DIR__ . '/fallback-data.php';
 
 class EnemyGenerator {
     private $dnd5e_api_url = 'https://www.dnd5eapi.co/api';
@@ -19,6 +23,16 @@ class EnemyGenerator {
         $enemy_type = $params['enemy_type'] ?? '';
         $environment = $params['environment'] ?? '';
         $use_ai = isset($params['use_ai']) && $params['use_ai'] === 'on';
+        
+        // Валидация параметров
+        if ($count < 1 || $count > 10) {
+            throw new Exception('Количество противников должно быть от 1 до 10');
+        }
+        
+        $valid_threat_levels = ['easy', 'medium', 'hard', 'deadly'];
+        if (!in_array($threat_level, $valid_threat_levels)) {
+            throw new Exception('Неверный уровень угрозы');
+        }
         
         // Определяем CR на основе уровня угрозы
         $cr_range = $this->getCRRange($threat_level);
@@ -77,12 +91,24 @@ class EnemyGenerator {
         // Используем fallback данные для надежности
         $fallback_monsters = $this->getFallbackMonsters();
         
+        if (empty($fallback_monsters)) {
+            throw new Exception('База данных монстров недоступна');
+        }
+        
         // Фильтруем монстров по CR и типу
         $filtered_monsters = $this->filterFallbackMonsters($fallback_monsters, $cr_range, $enemy_type, $environment);
         
         if (empty($filtered_monsters)) {
-            // Если не найдено подходящих, берем случайного монстра
-            $filtered_monsters = $fallback_monsters;
+            // Если не найдено подходящих, берем случайного монстра из подходящего CR
+            $filtered_monsters = array_filter($fallback_monsters, function($monster) use ($cr_range) {
+                $cr = $this->parseCR($monster['challenge_rating'] ?? '0');
+                return $cr >= $cr_range['min'] && $cr <= $cr_range['max'];
+            });
+            
+            if (empty($filtered_monsters)) {
+                // Если все еще нет подходящих, берем любого монстра
+                $filtered_monsters = $fallback_monsters;
+            }
         }
         
         // Выбираем случайного монстра
@@ -92,26 +118,25 @@ class EnemyGenerator {
         $monster_details = $this->getFallbackMonsterDetails($monster['index']);
         
         if (!$monster_details) {
-            throw new Exception('Не удалось получить информацию о монстре');
+            throw new Exception('Не удалось получить информацию о монстре: ' . ($monster['name'] ?? 'Unknown'));
         }
         
         // Формируем результат
         $enemy = [
             'name' => $monster_details['name'],
-            'challenge_rating' => $monster_details['challenge_rating'],
-            'type' => $monster_details['type'],
-            'size' => $monster_details['size'],
-            'alignment' => $monster_details['alignment'],
-            'environment' => $this->getEnvironment($monster_details),
-            'description' => $monster_details['desc'] ?? '',
-            'abilities' => $monster_details['stats'],
-            'combat_stats' => $this->extractCombatStats($monster_details),
-            'actions' => $this->extractActions($monster_details)
+            'type' => $monster_details['type'] ?? 'Unknown',
+            'challenge_rating' => $monster_details['challenge_rating'] ?? '0',
+            'hit_points' => $monster_details['hit_points'] ?? 0,
+            'armor_class' => $monster_details['armor_class'] ?? 10,
+            'speed' => $monster_details['speed'] ?? '30 ft',
+            'abilities' => $monster_details['abilities'] ?? [],
+            'actions' => $monster_details['actions'] ?? [],
+            'special_abilities' => $monster_details['special_abilities'] ?? []
         ];
         
-        // Добавляем AI-описание тактики если включено
+        // Добавляем AI-описание если включено
         if ($use_ai) {
-            $enemy['tactics'] = $this->generateTactics($enemy);
+            $enemy['description'] = $this->generateEnemyDescription($enemy);
         }
         
         return $enemy;
@@ -133,44 +158,10 @@ class EnemyGenerator {
     }
     
     /**
-     * Fallback список монстров
+     * Получение fallback данных монстров
      */
     private function getFallbackMonsters() {
-        return [
-            // Легкие противники (CR 1/8 - 1/2)
-            ['index' => 'bandit', 'name' => 'Бандит', 'cr' => 1/8],
-            ['index' => 'cultist', 'name' => 'Культист', 'cr' => 1/8],
-            ['index' => 'goblin', 'name' => 'Гоблин', 'cr' => 1/4],
-            ['index' => 'kobold', 'name' => 'Кобольд', 'cr' => 1/8],
-            ['index' => 'rat', 'name' => 'Гигантская крыса', 'cr' => 1/8],
-            ['index' => 'spider', 'name' => 'Гигантский паук', 'cr' => 1/4],
-            ['index' => 'wolf', 'name' => 'Волк', 'cr' => 1/4],
-            ['index' => 'zombie', 'name' => 'Зомби', 'cr' => 1/4],
-            ['index' => 'skeleton', 'name' => 'Скелет', 'cr' => 1/4],
-            
-            // Средние противники (CR 1-3)
-            ['index' => 'orc', 'name' => 'Орк', 'cr' => 1/2],
-            ['index' => 'hobgoblin', 'name' => 'Хобгоблин', 'cr' => 1/2],
-            ['index' => 'bugbear', 'name' => 'Багбир', 'cr' => 1],
-            ['index' => 'ogre', 'name' => 'Огр', 'cr' => 2],
-            ['index' => 'troll', 'name' => 'Тролль', 'cr' => 5],
-            ['index' => 'minotaur', 'name' => 'Минотавр', 'cr' => 3],
-            
-            // Сложные противники (CR 4-8)
-            ['index' => 'young_dragon', 'name' => 'Молодой дракон', 'cr' => 7],
-            ['index' => 'mind_flayer', 'name' => 'Умыслитель', 'cr' => 7],
-            ['index' => 'vampire', 'name' => 'Вампир', 'cr' => 13],
-            ['index' => 'beholder', 'name' => 'Бехолдер', 'cr' => 13],
-            ['index' => 'giant', 'name' => 'Великан', 'cr' => 9],
-            ['index' => 'dragon', 'name' => 'Молодой дракон', 'cr' => 7],
-            ['index' => 'lich', 'name' => 'Лич', 'cr' => 21],
-            ['index' => 'balor', 'name' => 'Баалор', 'cr' => 19],
-            ['index' => 'pit_fiend', 'name' => 'Адский дьявол', 'cr' => 20],
-            ['index' => 'solar', 'name' => 'Солар', 'cr' => 21],
-            ['index' => 'empyrean', 'name' => 'Эмпирей', 'cr' => 23],
-            ['index' => 'kraken', 'name' => 'Кракен', 'cr' => 23],
-            ['index' => 'tarrasque', 'name' => 'Тарраск', 'cr' => 30]
-        ];
+        return FallbackData::getMonsters();
     }
     
     /**
@@ -180,23 +171,19 @@ class EnemyGenerator {
         $filtered = [];
         
         foreach ($monsters as $monster) {
-            $details = $this->getFallbackMonsterDetails($monster['index']);
-            
-            if (!$details) continue;
-            
             // Проверяем CR
-            $cr = $this->parseCR($details['challenge_rating']);
+            $cr = $this->parseCR($monster['challenge_rating']);
             if (!$this->checkCRRange($cr, $cr_range)) {
                 continue;
             }
             
             // Проверяем тип (если указан)
-            if ($enemy_type && $enemy_type !== '' && strpos(strtolower($details['type']), strtolower($enemy_type)) === false) {
+            if ($enemy_type && $enemy_type !== '' && strpos(strtolower($monster['type']), strtolower($enemy_type)) === false) {
                 continue;
             }
             
             // Проверяем среду (если указана)
-            if ($environment && $environment !== '' && !$this->checkEnvironment($details, $environment)) {
+            if ($environment && $environment !== '' && !$this->checkEnvironment($monster, $environment)) {
                 continue;
             }
             
@@ -213,24 +200,19 @@ class EnemyGenerator {
         $filtered = [];
         
         foreach ($monsters as $monster) {
-            // Получаем детали монстра для фильтрации
-            $details = $this->getMonsterDetails($monster['index']);
-            
-            if (!$details) continue;
-            
             // Проверяем CR
-            $cr = $this->parseCR($details['challenge_rating']);
+            $cr = $this->parseCR($monster['challenge_rating']);
             if (!$this->checkCRRange($cr, $cr_range)) {
                 continue;
             }
             
             // Проверяем тип (если указан)
-            if ($enemy_type && $enemy_type !== '' && strpos(strtolower($details['type']), strtolower($enemy_type)) === false) {
+            if ($enemy_type && $enemy_type !== '' && strpos(strtolower($monster['type']), strtolower($enemy_type)) === false) {
                 continue;
             }
             
             // Проверяем среду (если указана)
-            if ($environment && $environment !== '' && !$this->checkEnvironment($details, $environment)) {
+            if ($environment && $environment !== '' && !$this->checkEnvironment($monster, $environment)) {
                 continue;
             }
             
@@ -243,615 +225,35 @@ class EnemyGenerator {
     /**
      * Получение детальной информации о монстре
      */
-    private function getMonsterDetails($monster_index) {
-        $url = $this->dnd5e_api_url . '/monsters/' . $monster_index;
-        $response = $this->makeRequest($url);
+    private function getFallbackMonsterDetails($monsterIndex) {
+        $monsters = FallbackData::getMonsters();
         
-        if ($response) {
-            return $response;
+        foreach ($monsters as $monster) {
+            if ($monster['index'] === $monsterIndex) {
+                return $monster;
+            }
         }
         
-        // Fallback: возвращаем базовые данные если API недоступен
-        return $this->getFallbackMonsterDetails($monster_index);
+        return null;
     }
     
     /**
-     * Fallback данные монстров
-     */
-    private function getFallbackMonsterDetails($monster_index) {
-        $fallback_data = [
-            'goblin' => [
-                'name' => 'Гоблин',
-                'challenge_rating' => '1/4',
-                'type' => 'humanoid',
-                'size' => 'Маленький',
-                'alignment' => 'Нейтрально-злой',
-                'desc' => 'Маленькое зеленокожее существо с острыми ушами и желтыми глазами.',
-                'stats' => ['str' => 8, 'dex' => 14, 'con' => 10, 'int' => 10, 'wis' => 8, 'cha' => 8],
-                'armor_class' => [['value' => 15]],
-                'hit_points' => ['average' => 7],
-                'speed' => ['walk' => '30'],
-                'actions' => [
-                    ['name' => 'Короткий меч', 'desc' => 'Рукопашная атака оружием: +4 к попаданию, досягаемость 5 футов, одна цель. Попадание: 5 (1d6 + 2) колющего урона.']
-                ]
-            ],
-            'orc' => [
-                'name' => 'Орк',
-                'challenge_rating' => '1/2',
-                'type' => 'humanoid',
-                'size' => 'Средний',
-                'alignment' => 'Хаотично-злой',
-                'desc' => 'Крупное мускулистое существо с зеленой кожей и клыками.',
-                'stats' => ['str' => 16, 'dex' => 12, 'con' => 16, 'int' => 7, 'wis' => 11, 'cha' => 10],
-                'armor_class' => [['value' => 13]],
-                'hit_points' => ['average' => 15],
-                'speed' => ['walk' => '30'],
-                'actions' => [
-                    ['name' => 'Грейсворд', 'desc' => 'Рукопашная атака оружием: +5 к попаданию, досягаемость 5 футов, одна цель. Попадание: 9 (1d12 + 3) рубящего урона.']
-                ]
-            ],
-            'wolf' => [
-                'name' => 'Волк',
-                'challenge_rating' => '1/4',
-                'type' => 'beast',
-                'size' => 'Средний',
-                'alignment' => 'Без мировоззрения',
-                'desc' => 'Дикий волк с серой шерстью и острыми клыками.',
-                'stats' => ['str' => 12, 'dex' => 15, 'con' => 12, 'int' => 3, 'wis' => 12, 'cha' => 6],
-                'armor_class' => [['value' => 13]],
-                'hit_points' => ['average' => 11],
-                'speed' => ['walk' => '40'],
-                'actions' => [
-                    ['name' => 'Укус', 'desc' => 'Атака оружием ближнего боя: +4 к попаданию, досягаемость 5 футов, одна цель. Попадание: 7 (2d4 + 2) колющего урона.']
-                ]
-            ],
-            'bandit' => [
-                'name' => 'Бандит',
-                'challenge_rating' => '1/8',
-                'type' => 'humanoid',
-                'size' => 'Средний',
-                'alignment' => 'Любое не-законное',
-                'desc' => 'Обычный разбойник с кинжалом и луком.',
-                'stats' => ['str' => 12, 'dex' => 12, 'con' => 12, 'int' => 10, 'wis' => 10, 'cha' => 10],
-                'armor_class' => [['value' => 12]],
-                'hit_points' => ['average' => 11],
-                'speed' => ['walk' => '30'],
-                'actions' => [
-                    ['name' => 'Кинжал', 'desc' => 'Рукопашная атака оружием: +3 к попаданию, досягаемость 5 футов, одна цель. Попадание: 3 (1d4 + 1) колющего урона.']
-                ]
-            ],
-            'cultist' => [
-                'name' => 'Культист',
-                'challenge_rating' => '1/8',
-                'type' => 'humanoid',
-                'size' => 'Средний',
-                'alignment' => 'Любое не-доброе',
-                'desc' => 'Последователь темного культа с кинжалом.',
-                'stats' => ['str' => 11, 'dex' => 12, 'con' => 10, 'int' => 10, 'wis' => 8, 'cha' => 8],
-                'armor_class' => [['value' => 12]],
-                'hit_points' => ['average' => 9],
-                'speed' => ['walk' => '30'],
-                'actions' => [
-                    ['name' => 'Кинжал', 'desc' => 'Рукопашная атака оружием: +3 к попаданию, досягаемость 5 футов, одна цель. Попадание: 3 (1d4 + 1) колющего урона.']
-                ]
-            ],
-            'skeleton' => [
-                'name' => 'Скелет',
-                'challenge_rating' => '1/4',
-                'type' => 'undead',
-                'size' => 'Средний',
-                'alignment' => 'Законно-злой',
-                'desc' => 'Анимированный скелет с коротким мечом.',
-                'stats' => ['str' => 10, 'dex' => 14, 'con' => 15, 'int' => 6, 'wis' => 8, 'cha' => 5],
-                'armor_class' => [['value' => 13]],
-                'hit_points' => ['average' => 13],
-                'speed' => ['walk' => '30'],
-                'actions' => [
-                    ['name' => 'Короткий меч', 'desc' => 'Рукопашная атака оружием: +4 к попаданию, досягаемость 5 футов, одна цель. Попадание: 5 (1d6 + 2) колющего урона.']
-                ]
-            ],
-            'zombie' => [
-                'name' => 'Зомби',
-                'challenge_rating' => '1/4',
-                'type' => 'undead',
-                'size' => 'Средний',
-                'alignment' => 'Нейтрально-злой',
-                'desc' => 'Медлительный зомби с дубиной.',
-                'stats' => ['str' => 13, 'dex' => 6, 'con' => 16, 'int' => 3, 'wis' => 6, 'cha' => 5],
-                'armor_class' => [['value' => 8]],
-                'hit_points' => ['average' => 22],
-                'speed' => ['walk' => '20'],
-                'actions' => [
-                    ['name' => 'Дубина', 'desc' => 'Рукопашная атака оружием: +3 к попаданию, досягаемость 5 футов, одна цель. Попадание: 3 (1d6) дробящего урона.']
-                ]
-            ],
-            'troll' => [
-                'name' => 'Тролль',
-                'challenge_rating' => '5',
-                'type' => 'giant',
-                'size' => 'Большой',
-                'alignment' => 'Хаотично-злой',
-                'desc' => 'Мощное регенерирующее существо с длинными когтями.',
-                'stats' => ['str' => 18, 'dex' => 13, 'con' => 20, 'int' => 7, 'wis' => 9, 'cha' => 7],
-                'armor_class' => [['value' => 15]],
-                'hit_points' => ['average' => 84],
-                'speed' => ['walk' => '30'],
-                'actions' => [
-                    ['name' => 'Когти', 'desc' => 'Рукопашная атака оружием: +7 к попаданию, досягаемость 5 футов, одна цель. Попадание: 11 (2d6 + 4) рубящего урона.']
-                ]
-            ],
-            'ogre' => [
-                'name' => 'Огр',
-                'challenge_rating' => '2',
-                'type' => 'giant',
-                'size' => 'Большой',
-                'alignment' => 'Хаотично-злой',
-                'desc' => 'Огромное тупое существо с дубиной.',
-                'stats' => ['str' => 19, 'dex' => 8, 'con' => 16, 'int' => 5, 'wis' => 7, 'cha' => 7],
-                'armor_class' => [['value' => 11]],
-                'hit_points' => ['average' => 59],
-                'speed' => ['walk' => '40'],
-                'actions' => [
-                    ['name' => 'Дубина', 'desc' => 'Рукопашная атака оружием: +6 к попаданию, досягаемость 5 футов, одна цель. Попадание: 13 (2d8 + 4) дробящего урона.']
-                ]
-            ],
-            'dragon' => [
-                'name' => 'Молодой дракон',
-                'challenge_rating' => '10',
-                'type' => 'dragon',
-                'size' => 'Большой',
-                'alignment' => 'Любое',
-                'desc' => 'Молодой, но уже опасный дракон с чешуей и крыльями.',
-                'stats' => ['str' => 19, 'dex' => 14, 'con' => 17, 'int' => 12, 'wis' => 11, 'cha' => 15],
-                'armor_class' => [['value' => 18]],
-                'hit_points' => ['average' => 136],
-                'speed' => ['walk' => '40', 'fly' => '80'],
-                'actions' => [
-                    ['name' => 'Укус', 'desc' => 'Рукопашная атака оружием: +7 к попаданию, досягаемость 10 футов, одна цель. Попадание: 15 (2d10 + 4) колющего урона.']
-                ]
-            ],
-            'vampire' => [
-                'name' => 'Вампир',
-                'challenge_rating' => '13',
-                'type' => 'undead',
-                'size' => 'Средний',
-                'alignment' => 'Любое злое',
-                'desc' => 'Бессмертное существо с острыми клыками и способностью к регенерации.',
-                'stats' => ['str' => 16, 'dex' => 18, 'con' => 18, 'int' => 17, 'wis' => 15, 'cha' => 18],
-                'armor_class' => [['value' => 16]],
-                'hit_points' => ['average' => 144],
-                'speed' => ['walk' => '30'],
-                'actions' => [
-                    ['name' => 'Укус', 'desc' => 'Рукопашная атака оружием: +9 к попаданию, досягаемость 5 футов, одна цель. Попадание: 8 (1d6 + 5) колющего урона плюс 10 (3d6) некротического урона.']
-                ]
-            ],
-            'beholder' => [
-                'name' => 'Бехолдер',
-                'challenge_rating' => '13',
-                'type' => 'aberration',
-                'size' => 'Большой',
-                'alignment' => 'Любое злое',
-                'desc' => 'Плавающий глаз с множеством щупалец и магическими способностями.',
-                'stats' => ['str' => 10, 'dex' => 14, 'con' => 18, 'int' => 17, 'wis' => 15, 'cha' => 17],
-                'armor_class' => [['value' => 18]],
-                'hit_points' => ['average' => 180],
-                'speed' => ['fly' => '20'],
-                'actions' => [
-                    ['name' => 'Центральный глаз', 'desc' => 'Луч антимагии: +5 к попаданию, досягаемость 150 футов, одна цель. Попадание: 27 (5d10) урона силовым полем.']
-                ]
-            ],
-            'lich' => [
-                'name' => 'Лич',
-                'challenge_rating' => '21',
-                'type' => 'undead',
-                'size' => 'Средний',
-                'alignment' => 'Любое злое',
-                'desc' => 'Бессмертный некромант с огромной магической силой.',
-                'stats' => ['str' => 11, 'dex' => 16, 'con' => 16, 'int' => 20, 'wis' => 14, 'cha' => 16],
-                'armor_class' => [['value' => 17]],
-                'hit_points' => ['average' => 135],
-                'speed' => ['walk' => '30'],
-                'actions' => [
-                    ['name' => 'Парализующий прикосновение', 'desc' => 'Рукопашная атака заклинанием: +12 к попаданию, досягаемость 5 футов, одна цель. Попадание: 10 (3d6) некротического урона.']
-                ]
-            ],
-            'balor' => [
-                'name' => 'Баалор',
-                'challenge_rating' => '19',
-                'type' => 'fiend',
-                'size' => 'Огромный',
-                'alignment' => 'Хаотично-злой',
-                'desc' => 'Могущественный демон с огненным мечом и кнутом.',
-                'stats' => ['str' => 26, 'dex' => 15, 'con' => 22, 'int' => 18, 'wis' => 16, 'cha' => 20],
-                'armor_class' => [['value' => 19]],
-                'hit_points' => ['average' => 262],
-                'speed' => ['walk' => '40', 'fly' => '80'],
-                'actions' => [
-                    ['name' => 'Огненный меч', 'desc' => 'Рукопашная атака оружием: +14 к попаданию, досягаемость 10 футов, одна цель. Попадание: 21 (3d8 + 8) рубящего урона плюс 10 (3d6) огненного урона.']
-                ]
-            ],
-            'pit_fiend' => [
-                'name' => 'Адский дьявол',
-                'challenge_rating' => '20',
-                'type' => 'fiend',
-                'size' => 'Огромный',
-                'alignment' => 'Законно-злой',
-                'desc' => 'Могущественный дьявол с магическими способностями.',
-                'stats' => ['str' => 26, 'dex' => 14, 'con' => 24, 'int' => 22, 'wis' => 18, 'cha' => 24],
-                'armor_class' => [['value' => 19]],
-                'hit_points' => ['average' => 300],
-                'speed' => ['walk' => '30', 'fly' => '60'],
-                'actions' => [
-                    ['name' => 'Кулак', 'desc' => 'Рукопашная атака оружием: +14 к попаданию, досягаемость 10 футов, одна цель. Попадание: 20 (2d8 + 11) дробящего урона плюс 10 (3d6) огненного урона.']
-                ]
-            ],
-            'solar' => [
-                'name' => 'Солар',
-                'challenge_rating' => '21',
-                'type' => 'celestial',
-                'size' => 'Огромный',
-                'alignment' => 'Законно-добрый',
-                'desc' => 'Могущественный ангел с божественными способностями.',
-                'stats' => ['str' => 26, 'dex' => 22, 'con' => 26, 'int' => 25, 'wis' => 25, 'cha' => 30],
-                'armor_class' => [['value' => 21]],
-                'hit_points' => ['average' => 243],
-                'speed' => ['walk' => '50', 'fly' => '150'],
-                'actions' => [
-                    ['name' => 'Меч', 'desc' => 'Рукопашная атака оружием: +15 к попаданию, досягаемость 10 футов, одна цель. Попадание: 22 (3d8 + 9) рубящего урона плюс 27 (5d10) лучистого урона.']
-                ]
-            ],
-            'empyrean' => [
-                'name' => 'Эмпирей',
-                'challenge_rating' => '23',
-                'type' => 'celestial',
-                'size' => 'Огромный',
-                'alignment' => 'Любое доброе',
-                'desc' => 'Божественное существо с огромной силой.',
-                'stats' => ['str' => 30, 'dex' => 21, 'con' => 30, 'int' => 21, 'wis' => 22, 'cha' => 27],
-                'armor_class' => [['value' => 22]],
-                'hit_points' => ['average' => 313],
-                'speed' => ['walk' => '50', 'fly' => '50'],
-                'actions' => [
-                    ['name' => 'Кулак', 'desc' => 'Рукопашная атака оружием: +17 к попаданию, досягаемость 10 футов, одна цель. Попадание: 23 (3d8 + 10) дробящего урона плюс 14 (4d6) лучистого урона.']
-                ]
-            ],
-            'kraken' => [
-                'name' => 'Кракен',
-                'challenge_rating' => '23',
-                'type' => 'monstrosity',
-                'size' => 'Гигантский',
-                'alignment' => 'Хаотично-злой',
-                'desc' => 'Огромное морское чудовище с множеством щупалец.',
-                'stats' => ['str' => 30, 'dex' => 11, 'con' => 25, 'int' => 22, 'wis' => 18, 'cha' => 20],
-                'armor_class' => [['value' => 18]],
-                'hit_points' => ['average' => 472],
-                'speed' => ['walk' => '20', 'swim' => '60'],
-                'actions' => [
-                    ['name' => 'Щупальце', 'desc' => 'Рукопашная атака оружием: +18 к попаданию, досягаемость 30 футов, одна цель. Попадание: 20 (3d6 + 10) дробящего урона.']
-                ]
-            ],
-            'tarrasque' => [
-                'name' => 'Тарраск',
-                'challenge_rating' => '30',
-                'type' => 'monstrosity',
-                'size' => 'Гигантский',
-                'alignment' => 'Без мировоззрения',
-                'desc' => 'Самое могущественное существо в мире, разрушитель всего.',
-                'stats' => ['str' => 30, 'dex' => 11, 'con' => 30, 'int' => 3, 'wis' => 11, 'cha' => 11],
-                'armor_class' => [['value' => 25]],
-                'hit_points' => ['average' => 676],
-                'speed' => ['walk' => '40'],
-                'actions' => [
-                    ['name' => 'Укус', 'desc' => 'Рукопашная атака оружием: +19 к попаданию, досягаемость 10 футов, одна цель. Попадание: 36 (4d12 + 10) колющего урона.']
-                ]
-            ],
-            'kobold' => [
-                'name' => 'Кобольд',
-                'challenge_rating' => '1/8',
-                'type' => 'humanoid',
-                'size' => 'Маленький',
-                'alignment' => 'Законно-злой',
-                'desc' => 'Маленькое чешуйчатое существо с рогами и хвостом.',
-                'stats' => ['str' => 7, 'dex' => 15, 'con' => 9, 'int' => 8, 'wis' => 7, 'cha' => 8],
-                'armor_class' => [['value' => 12]],
-                'hit_points' => ['average' => 5],
-                'speed' => ['walk' => '30'],
-                'actions' => [
-                    ['name' => 'Кинжал', 'desc' => 'Рукопашная атака оружием: +4 к попаданию, досягаемость 5 футов, одна цель. Попадание: 4 (1d4 + 2) колющего урона.']
-                ]
-            ],
-            'rat' => [
-                'name' => 'Гигантская крыса',
-                'challenge_rating' => '1/8',
-                'type' => 'beast',
-                'size' => 'Маленький',
-                'alignment' => 'Без мировоззрения',
-                'desc' => 'Огромная крыса размером с собаку.',
-                'stats' => ['str' => 7, 'dex' => 15, 'con' => 11, 'int' => 2, 'wis' => 10, 'cha' => 4],
-                'armor_class' => [['value' => 12]],
-                'hit_points' => ['average' => 7],
-                'speed' => ['walk' => '30'],
-                'actions' => [
-                    ['name' => 'Укус', 'desc' => 'Атака оружием ближнего боя: +4 к попаданию, досягаемость 5 футов, одна цель. Попадание: 4 (1d4 + 2) колющего урона.']
-                ]
-            ],
-            'spider' => [
-                'name' => 'Гигантский паук',
-                'challenge_rating' => '1',
-                'type' => 'beast',
-                'size' => 'Большой',
-                'alignment' => 'Без мировоззрения',
-                'desc' => 'Огромный паук с ядовитыми клыками.',
-                'stats' => ['str' => 14, 'dex' => 16, 'con' => 12, 'int' => 2, 'wis' => 11, 'cha' => 4],
-                'armor_class' => [['value' => 14]],
-                'hit_points' => ['average' => 26],
-                'speed' => ['walk' => '30', 'climb' => '30'],
-                'actions' => [
-                    ['name' => 'Укус', 'desc' => 'Атака оружием ближнего боя: +5 к попаданию, досягаемость 5 футов, одна цель. Попадание: 7 (1d8 + 3) колющего урона плюс 9 (2d8) ядовитого урона.']
-                ]
-            ],
-            'hobgoblin' => [
-                'name' => 'Хобгоблин',
-                'challenge_rating' => '1/2',
-                'type' => 'humanoid',
-                'size' => 'Средний',
-                'alignment' => 'Законно-злой',
-                'desc' => 'Дисциплинированный воин-гоблиноид с длинным мечом.',
-                'stats' => ['str' => 13, 'dex' => 12, 'con' => 12, 'int' => 10, 'wis' => 10, 'cha' => 9],
-                'armor_class' => [['value' => 18]],
-                'hit_points' => ['average' => 11],
-                'speed' => ['walk' => '30'],
-                'actions' => [
-                    ['name' => 'Длинный меч', 'desc' => 'Рукопашная атака оружием: +3 к попаданию, досягаемость 5 футов, одна цель. Попадание: 5 (1d8 + 1) рубящего урона.']
-                ]
-            ],
-            'bugbear' => [
-                'name' => 'Багбир',
-                'challenge_rating' => '1',
-                'type' => 'humanoid',
-                'size' => 'Средний',
-                'alignment' => 'Хаотично-злой',
-                'desc' => 'Крупный волосатый гоблиноид с утренней звездой.',
-                'stats' => ['str' => 15, 'dex' => 14, 'con' => 13, 'int' => 8, 'wis' => 11, 'cha' => 9],
-                'armor_class' => [['value' => 16]],
-                'hit_points' => ['average' => 27],
-                'speed' => ['walk' => '30'],
-                'actions' => [
-                    ['name' => 'Утренняя звезда', 'desc' => 'Рукопашная атака оружием: +4 к попаданию, досягаемость 5 футов, одна цель. Попадание: 11 (2d8 + 2) дробящего урона.']
-                ]
-            ],
-            'gnoll' => [
-                'name' => 'Гнолл',
-                'challenge_rating' => '1/2',
-                'type' => 'humanoid',
-                'size' => 'Средний',
-                'alignment' => 'Хаотично-злой',
-                'desc' => 'Гиенообразное существо с копьем.',
-                'stats' => ['str' => 14, 'dex' => 12, 'con' => 11, 'int' => 6, 'wis' => 10, 'cha' => 7],
-                'armor_class' => [['value' => 15]],
-                'hit_points' => ['average' => 22],
-                'speed' => ['walk' => '30'],
-                'actions' => [
-                    ['name' => 'Копье', 'desc' => 'Рукопашная атака оружием: +4 к попаданию, досягаемость 5 футов, одна цель. Попадание: 5 (1d6 + 2) колющего урона.']
-                ]
-            ],
-            'bear' => [
-                'name' => 'Медведь',
-                'challenge_rating' => '1',
-                'type' => 'beast',
-                'size' => 'Большой',
-                'alignment' => 'Без мировоззрения',
-                'desc' => 'Мощный бурый медведь с острыми когтями.',
-                'stats' => ['str' => 19, 'dex' => 10, 'con' => 16, 'int' => 2, 'wis' => 13, 'cha' => 7],
-                'armor_class' => [['value' => 11]],
-                'hit_points' => ['average' => 34],
-                'speed' => ['walk' => '40'],
-                'actions' => [
-                    ['name' => 'Когти', 'desc' => 'Рукопашная атака оружием: +6 к попаданию, досягаемость 5 футов, одна цель. Попадание: 11 (2d6 + 4) рубящего урона.']
-                ]
-            ],
-            'tiger' => [
-                'name' => 'Тигр',
-                'challenge_rating' => '1',
-                'type' => 'beast',
-                'size' => 'Большой',
-                'alignment' => 'Без мировоззрения',
-                'desc' => 'Полосатый хищник с острыми клыками.',
-                'stats' => ['str' => 17, 'dex' => 15, 'con' => 14, 'int' => 3, 'wis' => 12, 'cha' => 8],
-                'armor_class' => [['value' => 12]],
-                'hit_points' => ['average' => 37],
-                'speed' => ['walk' => '40'],
-                'actions' => [
-                    ['name' => 'Укус', 'desc' => 'Атака оружием ближнего боя: +5 к попаданию, досягаемость 5 футов, одна цель. Попадание: 8 (1d10 + 3) колющего урона.']
-                ]
-            ],
-            'ghoul' => [
-                'name' => 'Гуль',
-                'challenge_rating' => '1',
-                'type' => 'undead',
-                'size' => 'Средний',
-                'alignment' => 'Хаотично-злой',
-                'desc' => 'Нежить, питающаяся плотью мертвых.',
-                'stats' => ['str' => 13, 'dex' => 15, 'con' => 10, 'int' => 7, 'wis' => 10, 'cha' => 6],
-                'armor_class' => [['value' => 12]],
-                'hit_points' => ['average' => 22],
-                'speed' => ['walk' => '30'],
-                'actions' => [
-                    ['name' => 'Когти', 'desc' => 'Рукопашная атака оружием: +4 к попаданию, досягаемость 5 футов, одна цель. Попадание: 7 (2d4 + 2) рубящего урона.']
-                ]
-            ],
-            'wight' => [
-                'name' => 'Вайт',
-                'challenge_rating' => '3',
-                'type' => 'undead',
-                'size' => 'Средний',
-                'alignment' => 'Нейтрально-злой',
-                'desc' => 'Нежить, высасывающая жизненную силу.',
-                'stats' => ['str' => 15, 'dex' => 14, 'con' => 16, 'int' => 10, 'wis' => 13, 'cha' => 15],
-                'armor_class' => [['value' => 14]],
-                'hit_points' => ['average' => 45],
-                'speed' => ['walk' => '30'],
-                'actions' => [
-                    ['name' => 'Длинный меч', 'desc' => 'Рукопашная атака оружием: +4 к попаданию, досягаемость 5 футов, одна цель. Попадание: 6 (1d8 + 2) рубящего урона плюс 10 (3d6) некротического урона.']
-                ]
-            ],
-            'minotaur' => [
-                'name' => 'Минотавр',
-                'challenge_rating' => '3',
-                'type' => 'monstrosity',
-                'size' => 'Большой',
-                'alignment' => 'Хаотично-злой',
-                'desc' => 'Существо с телом человека и головой быка.',
-                'stats' => ['str' => 18, 'dex' => 11, 'con' => 16, 'int' => 6, 'wis' => 16, 'cha' => 9],
-                'armor_class' => [['value' => 14]],
-                'hit_points' => ['average' => 76],
-                'speed' => ['walk' => '40'],
-                'actions' => [
-                    ['name' => 'Боевой топор', 'desc' => 'Рукопашная атака оружием: +6 к попаданию, досягаемость 5 футов, одна цель. Попадание: 17 (2d12 + 4) рубящего урона.']
-                ]
-            ],
-            'cyclops' => [
-                'name' => 'Циклоп',
-                'challenge_rating' => '6',
-                'type' => 'giant',
-                'size' => 'Огромный',
-                'alignment' => 'Хаотично-нейтральный',
-                'desc' => 'Одноглазый великан с дубиной.',
-                'stats' => ['str' => 22, 'dex' => 11, 'con' => 20, 'int' => 8, 'wis' => 6, 'cha' => 10],
-                'armor_class' => [['value' => 14]],
-                'hit_points' => ['average' => 138],
-                'speed' => ['walk' => '30'],
-                'actions' => [
-                    ['name' => 'Дубина', 'desc' => 'Рукопашная атака оружием: +9 к попаданию, досягаемость 10 футов, одна цель. Попадание: 19 (3d8 + 6) дробящего урона.']
-                ]
-            ],
-            'wyvern' => [
-                'name' => 'Виверна',
-                'challenge_rating' => '6',
-                'type' => 'dragon',
-                'size' => 'Большой',
-                'alignment' => 'Нейтрально-злой',
-                'desc' => 'Драконоподобное существо с ядовитым хвостом.',
-                'stats' => ['str' => 19, 'dex' => 10, 'con' => 16, 'int' => 5, 'wis' => 12, 'cha' => 6],
-                'armor_class' => [['value' => 13]],
-                'hit_points' => ['average' => 110],
-                'speed' => ['walk' => '20', 'fly' => '80'],
-                'actions' => [
-                    ['name' => 'Укус', 'desc' => 'Атака оружием ближнего боя: +7 к попаданию, досягаемость 10 футов, одна цель. Попадание: 11 (2d6 + 4) колющего урона.']
-                ]
-            ],
-            'manticore' => [
-                'name' => 'Мантикора',
-                'challenge_rating' => '3',
-                'type' => 'monstrosity',
-                'size' => 'Большой',
-                'alignment' => 'Законно-злой',
-                'desc' => 'Существо с телом льва, крыльями и хвостом скорпиона.',
-                'stats' => ['str' => 17, 'dex' => 16, 'con' => 17, 'int' => 7, 'wis' => 12, 'cha' => 8],
-                'armor_class' => [['value' => 14]],
-                'hit_points' => ['average' => 68],
-                'speed' => ['walk' => '30', 'fly' => '50'],
-                'actions' => [
-                    ['name' => 'Когти', 'desc' => 'Рукопашная атака оружием: +5 к попаданию, досягаемость 5 футов, одна цель. Попадание: 8 (1d8 + 4) рубящего урона.']
-                ]
-            ],
-            'vampire' => [
-                'name' => 'Вампир',
-                'challenge_rating' => '13',
-                'type' => 'undead',
-                'size' => 'Средний',
-                'alignment' => 'Законно-злой',
-                'desc' => 'Бессмертное существо, питающееся кровью.',
-                'stats' => ['str' => 18, 'dex' => 18, 'con' => 18, 'int' => 17, 'wis' => 15, 'cha' => 18],
-                'armor_class' => [['value' => 16]],
-                'hit_points' => ['average' => 144],
-                'speed' => ['walk' => '30'],
-                'actions' => [
-                    ['name' => 'Укус', 'desc' => 'Атака оружием ближнего боя: +9 к попаданию, досягаемость 5 футов, одна цель. Попадание: 8 (1d6 + 5) колющего урона плюс 10 (3d6) некротического урона.']
-                ]
-            ],
-            'wraith' => [
-                'name' => 'Призрак',
-                'challenge_rating' => '5',
-                'type' => 'undead',
-                'size' => 'Средний',
-                'alignment' => 'Нейтрально-злой',
-                'desc' => 'Призрачное существо из теневого плана.',
-                'stats' => ['str' => 6, 'dex' => 16, 'con' => 16, 'int' => 12, 'wis' => 14, 'cha' => 15],
-                'armor_class' => [['value' => 13]],
-                'hit_points' => ['average' => 67],
-                'speed' => ['walk' => '0', 'fly' => '60'],
-                'actions' => [
-                    ['name' => 'Life Drain', 'desc' => 'Атака оружием ближнего боя: +6 к попаданию, досягаемость 5 футов, одна цель. Попадание: 21 (4d8 + 3) некротического урона.']
-                ]
-            ],
-            'giant' => [
-                'name' => 'Гигант',
-                'challenge_rating' => '9',
-                'type' => 'giant',
-                'size' => 'Огромный',
-                'alignment' => 'Хаотично-нейтральный',
-                'desc' => 'Огромное человекообразное существо.',
-                'stats' => ['str' => 25, 'dex' => 8, 'con' => 20, 'int' => 10, 'wis' => 12, 'cha' => 9],
-                'armor_class' => [['value' => 15]],
-                'hit_points' => ['average' => 138],
-                'speed' => ['walk' => '40'],
-                'actions' => [
-                    ['name' => 'Дубина', 'desc' => 'Рукопашная атака оружием: +12 к попаданию, досягаемость 15 футов, одна цель. Попадание: 21 (3d8 + 7) дробящего урона.']
-                ]
-            ],
-            'beholder' => [
-                'name' => 'Наблюдатель',
-                'challenge_rating' => '13',
-                'type' => 'aberration',
-                'size' => 'Большой',
-                'alignment' => 'Законно-злой',
-                'desc' => 'Сферическое существо с множеством глаз на стеблях.',
-                'stats' => ['str' => 10, 'dex' => 14, 'con' => 18, 'int' => 17, 'wis' => 15, 'cha' => 17],
-                'armor_class' => [['value' => 18]],
-                'hit_points' => ['average' => 180],
-                'speed' => ['walk' => '0', 'fly' => '20'],
-                'actions' => [
-                    ['name' => 'Eye Ray', 'desc' => 'Атака заклинанием: +8 к попаданию, досягаемость 120 футов, одна цель. Попадание: 27 (5d10) урона различного типа.']
-                ]
-            ],
-            'lich' => [
-                'name' => 'Лич',
-                'challenge_rating' => '21',
-                'type' => 'undead',
-                'size' => 'Средний',
-                'alignment' => 'Любое злое',
-                'desc' => 'Бессмертный некромант с огромной магической силой.',
-                'stats' => ['str' => 11, 'dex' => 16, 'con' => 16, 'int' => 20, 'wis' => 14, 'cha' => 16],
-                'armor_class' => [['value' => 17]],
-                'hit_points' => ['average' => 135],
-                'speed' => ['walk' => '30'],
-                'actions' => [
-                    ['name' => 'Disrupt Life', 'desc' => 'Каждый живой в радиусе 20 футов должен пройти спасбросок Телосложения. При провале получает 21 (6d6) некротического урона.']
-                ]
-            ]
-        ];
-        
-        return $fallback_data[$monster_index] ?? $fallback_data['goblin'];
-    }
-    
-    /**
-     * Парсинг CR в числовое значение
+     * Парсинг Challenge Rating в числовое значение
      */
     private function parseCR($cr_string) {
         if (is_numeric($cr_string)) {
             return (float)$cr_string;
         }
         
-        // Обработка специальных случаев
-        $cr_map = [
-            '0' => 0,
-            '1/8' => 0.125,
-            '1/4' => 0.25,
-            '1/2' => 0.5
-        ];
+        // Обработка дробных CR (например, "1/8", "1/4", "1/2")
+        if (strpos($cr_string, '/') !== false) {
+            $parts = explode('/', $cr_string);
+            if (count($parts) === 2 && is_numeric($parts[0]) && is_numeric($parts[1])) {
+                return (float)$parts[0] / (float)$parts[1];
+            }
+        }
         
-        return $cr_map[$cr_string] ?? 1;
+        return 0;
     }
     
     /**
@@ -973,6 +375,22 @@ class EnemyGenerator {
             return $response ?: 'Тактика не определена';
         } catch (Exception $e) {
             return 'Тактика не определена';
+        }
+    }
+
+    /**
+     * Генерация описания противника с помощью AI
+     */
+    private function generateEnemyDescription($enemy) {
+        $prompt = "Опиши противника {$enemy['name']} (CR {$enemy['challenge_rating']}, {$enemy['type']}). " .
+                 "Включи основные характеристики, слабости и как лучше использовать этого противника. " .
+                 "Ответ должен быть кратким (2-3 предложения) и практичным для мастера D&D.";
+        
+        try {
+            $response = $this->callDeepSeek($prompt);
+            return $response ?: 'Описание не определено';
+        } catch (Exception $e) {
+            return 'Описание не определено';
         }
     }
     

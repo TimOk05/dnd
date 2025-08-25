@@ -4,6 +4,8 @@
  * Использует только реальные внешние API
  */
 
+require_once __DIR__ . '/fallback-data.php';
+
 class DndApiWorking {
     private $dnd5e_api_url = 'https://www.dnd5eapi.co/api';
     private $open5e_api_url = 'https://open5e.com/api';
@@ -278,35 +280,47 @@ class DndApiWorking {
     }
     
     /**
-     * Получение информации о расе из API
+     * Получение информации о расе
      */
-    public function getRaceInfo($raceName) {
-        $url = $this->dnd5e_api_url . '/races/' . strtolower($raceName);
+    public function getRaceInfo($race) {
+        // Сначала пытаемся получить из API
+        $url = $this->dnd5e_api_url . '/races/' . strtolower($race);
         $response = $this->makeRequest($url);
         
-        if (!$response) {
-            // Fallback на альтернативный API
-            $url = $this->open5e_api_url . '/races/' . strtolower($raceName) . '/';
-            $response = $this->makeRequest($url);
+        if ($response) {
+            return $response;
         }
         
-        return $response;
+        // Fallback: используем локальные данные
+        $fallbackRaces = FallbackData::getRaces();
+        if (isset($fallbackRaces[$race])) {
+            return $fallbackRaces[$race];
+        }
+        
+        // Если раса не найдена, возвращаем человека
+        return $fallbackRaces['human'];
     }
     
     /**
-     * Получение информации о классе из API
+     * Получение информации о классе
      */
-    public function getClassInfo($className) {
-        $url = $this->dnd5e_api_url . '/classes/' . strtolower($className);
+    public function getClassInfo($class) {
+        // Сначала пытаемся получить из API
+        $url = $this->dnd5e_api_url . '/classes/' . strtolower($class);
         $response = $this->makeRequest($url);
         
-        if (!$response) {
-            // Fallback на альтернативный API
-            $url = $this->open5e_api_url . '/classes/' . strtolower($className) . '/';
-            $response = $this->makeRequest($url);
+        if ($response) {
+            return $response;
         }
         
-        return $response;
+        // Fallback: используем локальные данные
+        $fallbackClasses = FallbackData::getClasses();
+        if (isset($fallbackClasses[$class])) {
+            return $fallbackClasses[$class];
+        }
+        
+        // Если класс не найден, возвращаем воина
+        return $fallbackClasses['fighter'];
     }
     
     /**
@@ -583,13 +597,40 @@ class DndApiWorking {
      * Выполнение HTTP запроса
      */
     private function makeRequest($url, $method = 'GET', $data = null) {
+        // Проверяем, доступен ли cURL
+        if (!function_exists('curl_init')) {
+            // Fallback: используем file_get_contents для GET запросов
+            if ($method === 'GET') {
+                $context = stream_context_create([
+                    'http' => [
+                        'method' => 'GET',
+                        'header' => [
+                            'Content-Type: application/json',
+                            'User-Agent: DnD-Copilot/1.0'
+                        ],
+                        'timeout' => 30
+                    ]
+                ]);
+                
+                $response = @file_get_contents($url, false, $context);
+                if ($response === false) {
+                    return null; // Возвращаем null для использования fallback данных
+                }
+                
+                return json_decode($response, true);
+            } else {
+                // Для POST запросов возвращаем null, чтобы использовать локальные данные
+                return null;
+            }
+        }
+        
+        // Используем cURL если доступен
         $ch = curl_init();
         
         curl_setopt($ch, CURLOPT_URL, $url);
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-        curl_setopt($ch, CURLOPT_TIMEOUT, 10);
+        curl_setopt($ch, CURLOPT_TIMEOUT, 30);
         curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
-        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
         curl_setopt($ch, CURLOPT_HTTPHEADER, [
             'Content-Type: application/json',
             'User-Agent: DnD-Copilot/1.0'
@@ -607,13 +648,11 @@ class DndApiWorking {
         curl_close($ch);
         
         if ($error) {
-            error_log("DnD API Error: $error");
-            return null;
+            return null; // Возвращаем null для использования fallback данных
         }
         
         if ($httpCode !== 200) {
-            error_log("DnD API HTTP Error: $httpCode for URL: $url");
-            return null;
+            return null; // Возвращаем null для использования fallback данных
         }
         
         return json_decode($response, true);

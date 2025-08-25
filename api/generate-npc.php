@@ -1,7 +1,7 @@
 <?php
 session_start();
 require_once '../users.php';
-require_once 'dnd-api.php';
+require_once 'dnd-api-working.php';
 
 // Проверяем авторизацию
 if (!isLoggedIn()) {
@@ -17,8 +17,8 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     exit;
 }
 
-// Инициализируем менеджер D&D API
-$dndApi = new DndApiManager();
+// Инициализируем рабочий менеджер D&D API
+$dndApi = new DndApiWorking();
 
 // Получаем параметры запроса
 $race = $_POST['race'] ?? 'human';
@@ -68,8 +68,17 @@ try {
     ]);
     
     if (!$npcData) {
-        echo json_encode(['error' => 'Failed to generate NPC']);
+        echo json_encode(['error' => 'Failed to generate NPC - API returned empty data']);
         exit;
+    }
+    
+    // Проверяем обязательные поля
+    $requiredFields = ['name', 'race', 'class', 'level', 'abilities'];
+    foreach ($requiredFields as $field) {
+        if (!isset($npcData[$field]) || empty($npcData[$field])) {
+            echo json_encode(['error' => "Generated NPC is missing required field: $field"]);
+            exit;
+        }
     }
     
     // Форматируем результат для отображения
@@ -88,6 +97,6 @@ try {
     
 } catch (Exception $e) {
     error_log("NPC Generation Error: " . $e->getMessage());
-    echo json_encode(['error' => 'Internal server error']);
+    echo json_encode(['error' => 'Internal server error: ' . $e->getMessage()]);
 }
 ?>

@@ -1,6 +1,9 @@
 <?php
-header('Content-Type: application/json');
-require_once '../config.php';
+// Убираем заголовки для использования в тестах
+if (php_sapi_name() !== 'cli') {
+    header('Content-Type: application/json');
+}
+require_once __DIR__ . '/../config.php';
 
 class CharacterGenerator {
     private $dnd5e_api_url = 'https://www.dnd5eapi.co/api';
@@ -20,6 +23,21 @@ class CharacterGenerator {
         $alignment = $params['alignment'] ?? 'neutral';
         $use_ai = isset($params['use_ai']) && $params['use_ai'] === 'on';
         
+        // Валидация параметров
+        if ($level < 1 || $level > 20) {
+            throw new Exception('Уровень персонажа должен быть от 1 до 20');
+        }
+        
+        $valid_races = ['human', 'elf', 'dwarf', 'halfling', 'orc', 'tiefling', 'dragonborn', 'gnome', 'half-elf', 'half-orc'];
+        if (!in_array($race, $valid_races)) {
+            throw new Exception('Неверная раса персонажа');
+        }
+        
+        $valid_classes = ['fighter', 'wizard', 'rogue', 'cleric', 'ranger', 'barbarian', 'bard', 'druid', 'monk', 'paladin', 'sorcerer', 'warlock'];
+        if (!in_array($class, $valid_classes)) {
+            throw new Exception('Неверный класс персонажа');
+        }
+        
         try {
             // Получаем данные расы
             $race_data = $this->getRaceData($race);
@@ -35,6 +53,11 @@ class CharacterGenerator {
             
             // Генерируем характеристики
             $abilities = $this->generateAbilities($race_data);
+            
+            // Проверяем корректность характеристик
+            if (!$this->validateAbilities($abilities)) {
+                throw new Exception('Ошибка генерации характеристик персонажа');
+            }
             
             // Рассчитываем параметры
             $character = [
@@ -185,6 +208,29 @@ class CharacterGenerator {
         sort($rolls);
         array_shift($rolls); // Убираем минимальный
         return array_sum($rolls);
+    }
+    
+    /**
+     * Проверка корректности характеристик
+     */
+    private function validateAbilities($abilities) {
+        $required_abilities = ['str', 'dex', 'con', 'int', 'wis', 'cha'];
+        
+        // Проверяем наличие всех характеристик
+        foreach ($required_abilities as $ability) {
+            if (!isset($abilities[$ability])) {
+                return false;
+            }
+        }
+        
+        // Проверяем, что все характеристики находятся в диапазоне 8-18
+        foreach ($abilities as $ability) {
+            if ($ability < 8 || $ability > 18) {
+                return false;
+            }
+        }
+        
+        return true;
     }
     
     /**

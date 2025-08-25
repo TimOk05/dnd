@@ -4,6 +4,9 @@ ini_set('display_errors', 1);
 ini_set('display_startup_errors', 1);
 error_reporting(E_ALL);
 
+// Подключаем конфигурацию
+require_once '../config.php';
+
 header('Content-Type: application/json');
 header('Access-Control-Allow-Origin: *');
 header('Access-Control-Allow-Methods: POST, OPTIONS');
@@ -38,10 +41,10 @@ try {
     }
 
     // Получаем API ключ - замените на ваш реальный ключ
-    $apiKey = 'sk-your-deepseek-api-key-here'; // ЗАМЕНИТЕ НА ВАШ РЕАЛЬНЫЙ API КЛЮЧ
+    $apiKey = getApiKey('deepseek'); // Используем функцию из config.php
 
     if (empty($apiKey) || $apiKey === 'sk-your-deepseek-api-key-here') {
-        throw new Exception('API key not configured - please update the API key in deepseek.php');
+        throw new Exception('API key not configured - please update the API key in config.php');
     }
 
     // Загружаем данные из PDF файлов и их описаний
