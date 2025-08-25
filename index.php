@@ -178,22 +178,41 @@ foreach ($_SESSION['chat'] as $msg) {
 // --- Генерация блока заметок ---
 $notesBlock = '';
 foreach ($_SESSION['notes'] as $i => $note) {
-    // Ищем имя NPC в заметке
-    $plain = strip_tags(str_replace(['<br>', "\n"], "\n", $note));
-    $lines = array_filter(array_map('trim', explode("\n", $plain)));
     $nameLine = '';
     
-    // Сначала ищем в специальном заголовке NPC
-    if (preg_match('/<div class="npc-name-header">([^<]+)<\/div>/iu', $note, $matches)) {
+    // Ищем имя в заголовках персонажей и противников
+    if (preg_match('/<div class="character-note-title">([^<]+)<\/div>/iu', $note, $matches)) {
+        $nameLine = trim($matches[1]);
+    } elseif (preg_match('/<div class="enemy-note-title">([^<]+)<\/div>/iu', $note, $matches)) {
+        $nameLine = trim($matches[1]);
+    } elseif (preg_match('/<div class="npc-name-header">([^<]+)<\/div>/iu', $note, $matches)) {
+        $nameLine = trim($matches[1]);
+    } elseif (preg_match('/<div class="npc-modern-header">([^<]+)<\/div>/iu', $note, $matches)) {
         $nameLine = trim($matches[1]);
     } else {
-        // Ищем имя в заголовке NPC
-        if (preg_match('/<div class="npc-modern-header">([^<]+)<\/div>/iu', $note, $matches)) {
-            $nameLine = trim($matches[1]);
-        } else {
-            // Ищем строку с именем по разным вариантам
+        // Для старых заметок ищем строку с именем по разным вариантам
+        $plain = strip_tags(str_replace(['<br>', "\n"], "\n", $note));
+        $lines = array_filter(array_map('trim', explode("\n", $plain)));
+        
+        foreach ($lines as $line) {
+            if (preg_match('/^(Имя|Name|Имя NPC|Имя персонажа)\s*:/iu', $line)) {
+                $nameLine = $line;
+                break;
+            }
+        }
+        
+        // Если нашли имя, извлекаем только имя без префикса
+        if ($nameLine) {
+            if (preg_match('/^(Имя|Name|Имя NPC|Имя персонажа)\s*:\s*(.+)$/iu', $nameLine, $matches)) {
+                $nameLine = trim($matches[2]);
+            }
+        }
+        
+        // Если это не NPC заметка, ищем первое значимое слово
+        if (!$nameLine) {
             foreach ($lines as $line) {
-                if (preg_match('/^(Имя|Name|Имя NPC|Имя персонажа)\s*:/iu', $line)) {
+                $line = trim($line);
+                if ($line && !preg_match('/^(описание|внешность|черты|способность|оружие|урон|хиты|класс|раса|уровень|профессия)/iu', $line)) {
                     $nameLine = $line;
                     break;
                 }
@@ -201,65 +220,18 @@ foreach ($_SESSION['notes'] as $i => $note) {
         }
     }
     
-    // Если нашли имя, извлекаем только имя без префикса
+    // Очищаем имя - убираем лишние символы
     if ($nameLine) {
-        if (preg_match('/^(Имя|Name|Имя NPC|Имя персонажа)\s*:\s*(.+)$/iu', $nameLine, $matches)) {
-            $nameLine = trim($matches[2]);
-        }
-        // Убираем лишние слова из имени
-        $nameLine = preg_replace('/^описание\s+/i', '', $nameLine);
-        $nameLine = preg_replace('/^\s*—\s*/', '', $nameLine);
-        $nameLine = preg_replace('/^npc\s+/i', '', $nameLine);
-    }
-    
-    // Если это не NPC заметка, ищем первое значимое слово
-    if (!$nameLine) {
-        foreach ($lines as $line) {
-            $line = trim($line);
-            if ($line && !preg_match('/^(описание|внешность|черты|способность|оружие|урон|хиты|класс|раса|уровень|профессия)/iu', $line)) {
-                $nameLine = $line;
-                break;
-            }
-        }
-    }
-    
-    // Очищаем имя - берем только первое слово с большой буквы
-    if ($nameLine) {
-        $words = preg_split('/\s+/', $nameLine);
-        if (count($words) > 1) {
-            // Берем только первое слово как имя
-            $nameLine = $words[0];
-        }
-        // Убираем лишние символы, оставляем только буквы
-        $nameLine = preg_replace('/[^\wа-яё]/ui', '', $nameLine);
+        $nameLine = preg_replace('/[^\wа-яё\s]/ui', '', $nameLine);
         $nameLine = trim($nameLine);
-    }
-    
-    $previewSrc = $nameLine ?: (count($lines) ? $lines[0] : '(нет данных)');
-    // Убираем лишние слова из превью
-    $previewSrc = preg_replace('/^описание\s+/i', '', $previewSrc);
-    $previewSrc = preg_replace('/^\s*—\s*/', '', $previewSrc);
-    $previewSrc = preg_replace('/^npc\s+/i', '', $previewSrc);
-    
-    // Очищаем превью - берем только первое слово если это имя
-    if ($nameLine) {
-        $words = preg_split('/\s+/', $previewSrc);
-        if (count($words) > 1) {
-            $preview = $words[0];
-        } else {
-            $preview = $previewSrc;
-        }
-    } else {
-        // Обрезаем превью до 30 символов или 3 слов
-        $words = preg_split('/\s+/', $previewSrc);
-        if (count($words) > 3) {
-            $preview = implode(' ', array_slice($words, 0, 3)) . '…';
-        } else if (mb_strlen($previewSrc) > 30) {
-            $preview = mb_substr($previewSrc, 0, 30) . '…';
-        } else {
-            $preview = $previewSrc;
+        
+        // Если имя слишком длинное, обрезаем
+        if (mb_strlen($nameLine) > 20) {
+            $nameLine = mb_substr($nameLine, 0, 20) . '…';
         }
     }
+    
+    $preview = $nameLine ?: '(нет данных)';
     $notesBlock .= '<div class="note-item" onclick="expandNote(' . $i . ')">' . htmlspecialchars($preview, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8') . '<button class="note-remove" onclick="event.stopPropagation();removeNote(' . $i . ')">×</button></div>';
 }
 
@@ -436,9 +408,9 @@ function openCharacterModal() {
                 // Добавляем кнопку сохранения в заметки
                 resultDiv.innerHTML += `
                     <div class="save-character-section">
-                        <button class="save-character-btn" onclick="saveCharacterToNotes('${character.name}', '${character.race}', '${character.class}', ${character.level}, ${character.initiative})">
-                            💾 Сохранить в заметки
-                        </button>
+                                        <button class="save-character-btn" onclick="saveCharacterToNotes(${JSON.stringify(character).replace(/"/g, '&quot;')})">
+                    💾 Сохранить в заметки
+                </button>
                     </div>
                 `;
             } else {
@@ -2280,15 +2252,35 @@ document.querySelector('form').onsubmit = function(e) {
         }
         
         // --- Функция сохранения персонажа в заметки ---
-        function saveCharacterToNotes(name, race, class_name, level, initiative) {
+        function saveCharacterToNotes(characterData) {
+            // Создаем полное содержимое заметки с именем персонажа как заголовком
             const noteContent = `
                 <div class="character-note">
-                    <div class="character-note-title">Персонаж: ${name}</div>
+                    <div class="character-note-title">${characterData.name}</div>
                     <div class="character-note-info">
-                        <div><strong>Раса:</strong> ${race}</div>
-                        <div><strong>Класс:</strong> ${class_name}</div>
-                        <div><strong>Уровень:</strong> ${level}</div>
-                        <div><strong>Инициатива:</strong> ${initiative}</div>
+                        <div><strong>Раса:</strong> ${characterData.race}</div>
+                        <div><strong>Класс:</strong> ${characterData.class}</div>
+                        <div><strong>Уровень:</strong> ${characterData.level}</div>
+                        <div><strong>Пол:</strong> ${characterData.gender || 'Не указан'}</div>
+                        <div><strong>Мировоззрение:</strong> ${characterData.alignment || 'Не указано'}</div>
+                        <div><strong>Профессия:</strong> ${characterData.occupation || 'Не указана'}</div>
+                        <div><strong>Хиты:</strong> ${characterData.hit_points || 'Не указаны'}</div>
+                        <div><strong>КД:</strong> ${characterData.armor_class || 'Не указан'}</div>
+                        <div><strong>Скорость:</strong> ${characterData.speed || 'Не указана'} футов</div>
+                        <div><strong>Инициатива:</strong> ${characterData.initiative || '0'}</div>
+                        <div><strong>Урон:</strong> ${characterData.damage || 'Не указан'}</div>
+                        <div><strong>Бонус мастерства:</strong> +${characterData.proficiency_bonus || '0'}</div>
+                        <div><strong>Характеристики:</strong></div>
+                        <div style="margin-left: 20px;">
+                            <div>СИЛ: ${characterData.abilities?.str || '0'}</div>
+                            <div>ЛОВ: ${characterData.abilities?.dex || '0'}</div>
+                            <div>ТЕЛ: ${characterData.abilities?.con || '0'}</div>
+                            <div>ИНТ: ${characterData.abilities?.int || '0'}</div>
+                            <div>МДР: ${characterData.abilities?.wis || '0'}</div>
+                            <div>ХАР: ${characterData.abilities?.cha || '0'}</div>
+                        </div>
+                        ${characterData.description ? `<div><strong>Описание:</strong> ${characterData.description}</div>` : ''}
+                        ${characterData.background ? `<div><strong>Предыстория:</strong> ${characterData.background}</div>` : ''}
                     </div>
                 </div>
             `;
@@ -2296,11 +2288,11 @@ document.querySelector('form').onsubmit = function(e) {
             fetch('', {
                 method: 'POST',
                 headers: {'Content-Type': 'application/x-www-form-urlencoded'},
-                body: 'fast_action=save_note&content=' + encodeURIComponent(noteContent)
+                body: 'fast_action=save_note&content=' + encodeURIComponent(noteContent) + '&title=' + encodeURIComponent(characterData.name)
             })
             .then(r => r.text())
             .then(() => {
-                alert('Персонаж сохранен в заметки!');
+                alert('Персонаж ' + characterData.name + ' сохранен в заметки!');
             })
             .catch(error => {
                 alert('Ошибка сохранения: ' + error.message);
@@ -2308,14 +2300,32 @@ document.querySelector('form').onsubmit = function(e) {
         }
 
         // --- Функция сохранения противника в заметки ---
-        function saveEnemyToNotes(name, type, cr, initiative) {
+        function saveEnemyToNotes(enemyData) {
+            // Создаем полное содержимое заметки с именем противника как заголовком
             const noteContent = `
                 <div class="enemy-note">
-                    <div class="enemy-note-title">Противник: ${name}</div>
+                    <div class="enemy-note-title">${enemyData.name}</div>
                     <div class="enemy-note-info">
-                        <div><strong>Тип:</strong> ${type}</div>
-                        <div><strong>CR:</strong> ${cr}</div>
-                        <div><strong>Инициатива:</strong> ${initiative}</div>
+                        <div><strong>Тип:</strong> ${enemyData.type || 'Не указан'}</div>
+                        <div><strong>Размер:</strong> ${enemyData.size || 'Не указан'}</div>
+                        <div><strong>Мировоззрение:</strong> ${enemyData.alignment || 'Не указано'}</div>
+                        <div><strong>CR:</strong> ${enemyData.challenge_rating || 'Не указан'}</div>
+                        <div><strong>Хиты:</strong> ${enemyData.hit_points || 'Не указаны'}</div>
+                        <div><strong>КД:</strong> ${enemyData.armor_class || 'Не указан'}</div>
+                        <div><strong>Скорость:</strong> ${enemyData.speed || 'Не указана'}</div>
+                        <div><strong>Инициатива:</strong> ${enemyData.initiative || '0'}</div>
+                        <div><strong>Характеристики:</strong></div>
+                        <div style="margin-left: 20px;">
+                            <div>СИЛ: ${enemyData.abilities?.str || '0'}</div>
+                            <div>ЛОВ: ${enemyData.abilities?.dex || '0'}</div>
+                            <div>ТЕЛ: ${enemyData.abilities?.con || '0'}</div>
+                            <div>ИНТ: ${enemyData.abilities?.int || '0'}</div>
+                            <div>МДР: ${enemyData.abilities?.wis || '0'}</div>
+                            <div>ХАР: ${enemyData.abilities?.cha || '0'}</div>
+                        </div>
+                        ${enemyData.actions ? `<div><strong>Действия:</strong> ${Object.entries(enemyData.actions).map(([key, value]) => `${key}: ${value}`).join(', ')}</div>` : ''}
+                        ${enemyData.special_abilities ? `<div><strong>Особые способности:</strong> ${Object.entries(enemyData.special_abilities).map(([key, value]) => `${key}: ${value}`).join(', ')}</div>` : ''}
+                        ${enemyData.description ? `<div><strong>Описание:</strong> ${enemyData.description}</div>` : ''}
                     </div>
                 </div>
             `;
@@ -2323,11 +2333,11 @@ document.querySelector('form').onsubmit = function(e) {
             fetch('', {
                 method: 'POST',
                 headers: {'Content-Type': 'application/x-www-form-urlencoded'},
-                body: 'fast_action=save_note&content=' + encodeURIComponent(noteContent)
+                body: 'fast_action=save_note&content=' + encodeURIComponent(noteContent) + '&title=' + encodeURIComponent(enemyData.name)
             })
             .then(r => r.text())
             .then(() => {
-                alert('Противник сохранен в заметки!');
+                alert('Противник ' + enemyData.name + ' сохранен в заметки!');
             })
             .catch(error => {
                 alert('Ошибка сохранения: ' + error.message);
@@ -2343,8 +2353,8 @@ function addFromNotes(type) {
     
     notes.forEach((note, index) => {
         if (note.includes('character-note-title')) {
-            // Извлекаем информацию о персонаже
-            const nameMatch = note.match(/Персонаж:\s*([^<]+)/);
+            // Извлекаем информацию о персонаже из нового формата
+            const nameMatch = note.match(/<div class="character-note-title">([^<]+)<\/div>/);
             const raceMatch = note.match(/Раса:\s*([^<]+)/);
             const classMatch = note.match(/Класс:\s*([^<]+)/);
             const levelMatch = note.match(/Уровень:\s*(\d+)/);
@@ -2361,8 +2371,8 @@ function addFromNotes(type) {
                 });
             }
         } else if (note.includes('enemy-note-title')) {
-            // Извлекаем информацию о противнике
-            const nameMatch = note.match(/Противник:\s*([^<]+)/);
+            // Извлекаем информацию о противнике из нового формата
+            const nameMatch = note.match(/<div class="enemy-note-title">([^<]+)<\/div>/);
             const typeMatch = note.match(/Тип:\s*([^<]+)/);
             const crMatch = note.match(/CR:\s*([^<]+)/);
             const initiativeMatch = note.match(/Инициатива:\s*([^<]+)/);
@@ -2396,7 +2406,7 @@ function addFromNotes(type) {
             `${note.name} (${note.type} CR ${note.cr})`;
         
         notesHtml += `
-            <div class="note-item" onclick="selectFromNotes('${note.name}', '${note.initiative}', '${type}')">
+            <div class="note-item" onclick="selectFromNotes('${note.name.replace(/'/g, "\\'")}', '${note.initiative}', '${type}')">
                 <div class="note-name">${displayName}</div>
                 <div class="note-initiative">Инициатива: ${note.initiative}</div>
             </div>
@@ -2415,11 +2425,30 @@ function addFromNotes(type) {
 
 // --- Функция выбора из заметок ---
 function selectFromNotes(name, initiative, type) {
-    document.getElementById('initiative-name').value = name;
-    document.getElementById('initiative-value').value = initiative;
+    // Проверяем, существует ли форма инициативы
+    const nameField = document.getElementById('initiative-name');
+    const valueField = document.getElementById('initiative-value');
     
-    // Возвращаемся к форме добавления инициативы
-    addInitiativeEntry(type);
+    if (nameField && valueField) {
+        nameField.value = name;
+        valueField.value = initiative;
+        
+        // Возвращаемся к форме добавления инициативы
+        addInitiativeEntry(type);
+    } else {
+        // Если форма не открыта, открываем её и заполняем
+        addInitiativeEntry(type);
+        
+        // Небольшая задержка для открытия формы
+        setTimeout(() => {
+            const nameField = document.getElementById('initiative-name');
+            const valueField = document.getElementById('initiative-value');
+            if (nameField && valueField) {
+                nameField.value = name;
+                valueField.value = initiative;
+            }
+        }, 100);
+    }
 }
 
 // --- Функция сохранения всех противников в заметки ---
@@ -2433,36 +2462,15 @@ function saveAllEnemiesToNotes(enemies) {
     const totalCount = enemies.length;
     
     enemies.forEach((enemy, index) => {
-        const noteContent = `
-            <div class="enemy-note">
-                <div class="enemy-note-title">Противник: ${enemy.name || 'Без имени'}</div>
-                <div class="enemy-note-info">
-                    <div><strong>Тип:</strong> ${enemy.type || 'Не определен'}</div>
-                    <div><strong>CR:</strong> ${enemy.challenge_rating || '?'}</div>
-                    <div><strong>Инициатива:</strong> ${enemy.initiative || '0'}</div>
-                </div>
-            </div>
-        `;
+        // Используем новую функцию saveEnemyToNotes для каждого противника
+        saveEnemyToNotes(enemy);
+        savedCount++;
         
-        fetch('', {
-            method: 'POST',
-            headers: {'Content-Type': 'application/x-www-form-urlencoded'},
-            body: 'fast_action=save_note&content=' + encodeURIComponent(noteContent)
-        })
-        .then(r => r.text())
-        .then(() => {
-            savedCount++;
-            if (savedCount === totalCount) {
+        if (savedCount === totalCount) {
+            setTimeout(() => {
                 alert(`Сохранено ${savedCount} противников в заметки!`);
-            }
-        })
-        .catch(error => {
-            console.error('Ошибка сохранения противника:', error);
-            savedCount++;
-            if (savedCount === totalCount) {
-                alert(`Сохранено ${savedCount} из ${totalCount} противников в заметки`);
-            }
-        });
+            }, 100);
+        }
     });
 }
 </script>
