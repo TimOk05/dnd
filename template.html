@@ -2565,6 +2565,102 @@
                 transform: scale(0.95);
             }
         }
+        /* Стили для отображения характеристик */
+        
+        .abilities-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 8px;
+            margin: 10px 0;
+        }
+        
+        .ability-item {
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border-tertiary);
+            border-radius: 6px;
+            padding: 8px;
+            text-align: center;
+            font-weight: bold;
+        }
+        
+        .info-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 10px;
+            margin: 10px 0;
+        }
+        
+        .info-item {
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border-tertiary);
+            border-radius: 6px;
+            padding: 10px;
+        }
+        
+        .proficiencies-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+            margin: 10px 0;
+        }
+        
+        .proficiency-tag {
+            background: var(--accent-primary);
+            color: var(--bg-secondary);
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 0.85em;
+            font-weight: bold;
+        }
+        
+        .spell-list,
+        .equipment-list,
+        .actions-list,
+        .abilities-list {
+            list-style: none;
+            padding: 0;
+            margin: 10px 0;
+        }
+        
+        .spell-list li,
+        .equipment-list li,
+        .actions-list li,
+        .abilities-list li {
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border-tertiary);
+            border-radius: 6px;
+            padding: 8px 12px;
+            margin-bottom: 6px;
+        }
+        
+        .enemy-separator {
+            border: none;
+            height: 2px;
+            background: var(--border-primary);
+            margin: 20px 0;
+            opacity: 0.5;
+        }
+        
+        .character-section,
+        .enemy-section {
+            margin-bottom: 15px;
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-tertiary);
+            border-radius: 8px;
+            overflow: hidden;
+        }
+        
+        .section-title {
+            background: var(--accent-primary);
+            color: var(--bg-secondary);
+            padding: 10px 15px;
+            font-weight: bold;
+            font-size: 1.1em;
+        }
+        
+        .section-content {
+            padding: 15px;
+        }
     </style>
 </head>
 
