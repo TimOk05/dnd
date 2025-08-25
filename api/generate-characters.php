@@ -29,6 +29,65 @@ class CharacterGenerator {
     }
     
     /**
+     * База имён для разных рас
+     */
+    private function getNamesByRace($race) {
+        $names = [
+            'human' => [
+                'male' => ['Алексей', 'Дмитрий', 'Иван', 'Михаил', 'Сергей', 'Андрей', 'Владимир', 'Николай', 'Петр', 'Александр'],
+                'female' => ['Анна', 'Елена', 'Мария', 'Ольга', 'Татьяна', 'Ирина', 'Наталья', 'Светлана', 'Екатерина', 'Юлия']
+            ],
+            'elf' => [
+                'male' => ['Леголас', 'Элронд', 'Галадриэль', 'Арвен', 'Элронд', 'Глорфиндель', 'Келеборн', 'Эрестор', 'Линдон', 'Трандуил'],
+                'female' => ['Арвен', 'Галадриэль', 'Элвинг', 'Нимродэль', 'Идриль', 'Аредэль', 'Лутиэн', 'Мелиан', 'Эарвен', 'Финдуилас']
+            ],
+            'dwarf' => [
+                'male' => ['Торин', 'Балин', 'Двалин', 'Глоин', 'Оин', 'Бифур', 'Бофур', 'Бомбур', 'Дори', 'Нори'],
+                'female' => ['Дис', 'Фрида', 'Хельга', 'Ингрид', 'Сигрид', 'Астрид', 'Брунхильда', 'Гудрун', 'Хильда', 'Ранхильда']
+            ],
+            'orc' => [
+                'male' => ['Гром', 'Железный Кулак', 'Кровавый Топор', 'Черный Зуб', 'Жестокий', 'Разрушитель', 'Гор', 'Мог', 'Трог', 'Зог'],
+                'female' => ['Кровавая Сестра', 'Железная Дева', 'Черная Вдова', 'Громовая', 'Разрушительница', 'Горга', 'Мога', 'Трога', 'Зога', 'Рога']
+            ],
+            'halfling' => [
+                'male' => ['Бильбо', 'Фродо', 'Сэм', 'Пиппин', 'Мерри', 'Том', 'Дик', 'Гарри', 'Боб', 'Роб'],
+                'female' => ['Рози', 'Примула', 'Белладонна', 'Пимпернель', 'Пенни', 'Дейзи', 'Поппи', 'Вайолет', 'Ирис', 'Лили']
+            ],
+            'tiefling' => [
+                'male' => ['Азариус', 'Малфеус', 'Зериус', 'Каликс', 'Нокс', 'Векс', 'Рекс', 'Лекс', 'Пекс', 'Текс'],
+                'female' => ['Лилит', 'Морган', 'Рейвен', 'Шедоу', 'Ночная', 'Темная', 'Кровавая', 'Огненная', 'Демоническая', 'Адская']
+            ],
+            'dragonborn' => [
+                'male' => ['Дракс', 'Вулькан', 'Игнис', 'Фламбер', 'Эмбер', 'Блейз', 'Файр', 'Смоук', 'Эш', 'Чар'],
+                'female' => ['Эмбер', 'Флейм', 'Спарк', 'Блейз', 'Файр', 'Смоук', 'Эш', 'Чар', 'Киндл', 'Берн']
+            ],
+            'gnome' => [
+                'male' => ['Гимли', 'Бимли', 'Димли', 'Фимли', 'Кимли', 'Лимли', 'Мимли', 'Нимли', 'Пимли', 'Римли'],
+                'female' => ['Глими', 'Блими', 'Длими', 'Флими', 'Клими', 'Ллими', 'Млими', 'Нлими', 'Плими', 'Рлими']
+            ],
+            'half-elf' => [
+                'male' => ['Элрон', 'Алдрион', 'Калиан', 'Эларион', 'Таларион', 'Маларион', 'Саларион', 'Валарион', 'Фаларион', 'Галарион'],
+                'female' => ['Элара', 'Алдрия', 'Калия', 'Элария', 'Талария', 'Малария', 'Салария', 'Валария', 'Фалария', 'Галария']
+            ],
+            'half-orc' => [
+                'male' => ['Гром', 'Железный Кулак', 'Кровавый Топор', 'Черный Зуб', 'Жестокий', 'Разрушитель', 'Гор', 'Мог', 'Трог', 'Зог'],
+                'female' => ['Кровавая Сестра', 'Железная Дева', 'Черная Вдова', 'Громовая', 'Разрушительница', 'Горга', 'Мога', 'Трога', 'Зога', 'Рога']
+            ]
+        ];
+        
+        $race = strtolower($race);
+        if (isset($names[$race])) {
+            $gender = rand(0, 1) ? 'male' : 'female';
+            $nameList = $names[$race][$gender];
+            return $nameList[array_rand($nameList)];
+        }
+        
+        // Fallback имена
+        $fallbackNames = ['Алексей', 'Анна', 'Дмитрий', 'Елена', 'Иван', 'Мария', 'Михаил', 'Ольга', 'Сергей', 'Татьяна'];
+        return $fallbackNames[array_rand($fallbackNames)];
+    }
+    
+    /**
      * Получение случайной профессии
      */
     private function getRandomOccupation() {
@@ -88,7 +147,7 @@ class CharacterGenerator {
             
             // Рассчитываем параметры
             $character = [
-                'name' => $this->generateName($race_data['name']),
+                'name' => $this->generateName($race),
                 'race' => $race_data['name'],
                 'class' => $class_data['name'],
                 'level' => $level,
@@ -428,19 +487,10 @@ class CharacterGenerator {
     }
     
     /**
-     * Генерация имени
+     * Генерация имени персонажа
      */
-    private function generateName($race_name) {
-        $names = [
-            'Человек' => ['Алексей', 'Мария', 'Дмитрий', 'Анна', 'Сергей'],
-            'Эльф' => ['Леголас', 'Галадриэль', 'Элронд', 'Арвен', 'Трандуил'],
-            'Дварф' => ['Гимли', 'Торин', 'Балин', 'Двалин', 'Бомбур'],
-            'Полурослик' => ['Бильбо', 'Фродо', 'Сэм', 'Пиппин', 'Мерри'],
-            'Орк' => ['Гром', 'Клык', 'Топор', 'Кровь', 'Сталь']
-        ];
-        
-        $race_names = $names[$race_name] ?? $names['Человек'];
-        return $race_names[array_rand($race_names)];
+    private function generateName($race) {
+        return $this->getNamesByRace($race);
     }
     
     /**
@@ -466,8 +516,23 @@ class CharacterGenerator {
      * Генерация описания с помощью AI
      */
     private function generateDescription($character) {
-        $prompt = "Опиши внешность и характер персонажа: {$character['name']}, {$character['race']} {$character['class']} {$character['level']} уровня. " .
-                 "Включи детали внешности, особенности поведения и характерные черты. " .
+        // Формируем полную информацию о персонаже для AI
+        $characterInfo = "Персонаж: {$character['name']}, {$character['race']} {$character['class']} {$character['level']} уровня.\n";
+        $characterInfo .= "Профессия: {$character['occupation']}\n";
+        $characterInfo .= "Мировоззрение: {$character['alignment']}\n";
+        $characterInfo .= "Характеристики: СИЛ {$character['abilities']['str']}, ЛОВ {$character['abilities']['dex']}, ТЕЛ {$character['abilities']['con']}, ИНТ {$character['abilities']['int']}, МДР {$character['abilities']['wis']}, ХАР {$character['abilities']['cha']}\n";
+        $characterInfo .= "Боевые параметры: Хиты {$character['hit_points']}, КД {$character['armor_class']}, Скорость {$character['speed']} футов, Инициатива {$character['initiative']}, Бонус мастерства +{$character['proficiency_bonus']}\n";
+        
+        if (!empty($character['proficiencies'])) {
+            $characterInfo .= "Владения: " . implode(', ', $character['proficiencies']) . "\n";
+        }
+        
+        if (!empty($character['spells'])) {
+            $characterInfo .= "Заклинания: " . implode(', ', $character['spells']) . "\n";
+        }
+        
+        $prompt = "Опиши внешность и характер персонажа на основе его полных данных:\n\n" . $characterInfo . "\n" .
+                 "Включи детали внешности, особенности поведения и характерные черты, связанные с его расой, классом, профессией и характеристиками. " .
                  "Ответ должен быть кратким (2-3 предложения) и атмосферным.";
         
         try {
@@ -482,8 +547,23 @@ class CharacterGenerator {
      * Генерация предыстории с помощью AI
      */
     private function generateBackground($character) {
-        $prompt = "Создай краткую предысторию для персонажа: {$character['name']}, {$character['race']} {$character['class']} {$character['level']} уровня. " .
-                 "Включи мотивацию, ключевое событие из прошлого и цель персонажа. " .
+        // Формируем полную информацию о персонаже для AI
+        $characterInfo = "Персонаж: {$character['name']}, {$character['race']} {$character['class']} {$character['level']} уровня.\n";
+        $characterInfo .= "Профессия: {$character['occupation']}\n";
+        $characterInfo .= "Мировоззрение: {$character['alignment']}\n";
+        $characterInfo .= "Характеристики: СИЛ {$character['abilities']['str']}, ЛОВ {$character['abilities']['dex']}, ТЕЛ {$character['abilities']['con']}, ИНТ {$character['abilities']['int']}, МДР {$character['abilities']['wis']}, ХАР {$character['abilities']['cha']}\n";
+        $characterInfo .= "Боевые параметры: Хиты {$character['hit_points']}, КД {$character['armor_class']}, Скорость {$character['speed']} футов, Инициатива {$character['initiative']}, Бонус мастерства +{$character['proficiency_bonus']}\n";
+        
+        if (!empty($character['proficiencies'])) {
+            $characterInfo .= "Владения: " . implode(', ', $character['proficiencies']) . "\n";
+        }
+        
+        if (!empty($character['spells'])) {
+            $characterInfo .= "Заклинания: " . implode(', ', $character['spells']) . "\n";
+        }
+        
+        $prompt = "Создай краткую предысторию персонажа на основе его полных данных:\n\n" . $characterInfo . "\n" .
+                 "Включи мотивацию, ключевое событие из прошлого и цель персонажа, связанные с его расой, классом, профессией и характеристиками. " .
                  "Ответ должен быть кратким (2-3 предложения) и интересным.";
         
         try {
