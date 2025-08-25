@@ -182,6 +182,7 @@ class FallbackData {
      */
     public static function getMonsters() {
         return [
+            // Легкие противники (CR 1/8 - 1/2)
             [
                 'index' => 'goblin',
                 'name' => 'Гоблин',
@@ -201,6 +202,148 @@ class FallbackData {
                 ]
             ],
             [
+                'index' => 'kobold',
+                'name' => 'Кобольд',
+                'type' => 'humanoid',
+                'size' => 'small',
+                'alignment' => 'lawful evil',
+                'challenge_rating' => '1/8',
+                'hit_points' => 5,
+                'armor_class' => 12,
+                'speed' => '30 ft',
+                'abilities' => [
+                    'str' => 7, 'dex' => 15, 'con' => 9, 'int' => 8, 'wis' => 7, 'cha' => 8
+                ],
+                'actions' => [
+                    'dagger' => 'Колющая атака: +4 к попаданию, 4 (1d4+2) колющего урона',
+                    'sling' => 'Дальняя атака: +4 к попаданию, 4 (1d4+2) дробящего урона'
+                ]
+            ],
+            [
+                'index' => 'bandit',
+                'name' => 'Бандит',
+                'type' => 'humanoid',
+                'size' => 'medium',
+                'alignment' => 'any non-lawful',
+                'challenge_rating' => '1/8',
+                'hit_points' => 11,
+                'armor_class' => 12,
+                'speed' => '30 ft',
+                'abilities' => [
+                    'str' => 12, 'dex' => 12, 'con' => 12, 'int' => 10, 'wis' => 10, 'cha' => 10
+                ],
+                'actions' => [
+                    'scimitar' => 'Рубящая атака: +3 к попаданию, 4 (1d6+1) рубящего урона',
+                    'light_crossbow' => 'Дальняя атака: +3 к попаданию, 5 (1d8+1) колющего урона'
+                ]
+            ],
+            [
+                'index' => 'cultist',
+                'name' => 'Культист',
+                'type' => 'humanoid',
+                'size' => 'medium',
+                'alignment' => 'any non-good',
+                'challenge_rating' => '1/8',
+                'hit_points' => 9,
+                'armor_class' => 12,
+                'speed' => '30 ft',
+                'abilities' => [
+                    'str' => 11, 'dex' => 12, 'con' => 10, 'int' => 10, 'wis' => 11, 'cha' => 10
+                ],
+                'actions' => [
+                    'scimitar' => 'Рубящая атака: +3 к попаданию, 4 (1d6+1) рубящего урона',
+                    'darkness' => 'Заклинание: Создает область магической тьмы'
+                ]
+            ],
+            [
+                'index' => 'giant_rat',
+                'name' => 'Гигантская крыса',
+                'type' => 'beast',
+                'size' => 'small',
+                'alignment' => 'unaligned',
+                'challenge_rating' => '1/8',
+                'hit_points' => 7,
+                'armor_class' => 12,
+                'speed' => '30 ft',
+                'abilities' => [
+                    'str' => 7, 'dex' => 15, 'con' => 11, 'int' => 2, 'wis' => 10, 'cha' => 4
+                ],
+                'actions' => [
+                    'bite' => 'Колющая атака: +4 к попаданию, 4 (1d4+2) колющего урона'
+                ]
+            ],
+            [
+                'index' => 'giant_spider',
+                'name' => 'Гигантский паук',
+                'type' => 'beast',
+                'size' => 'large',
+                'alignment' => 'unaligned',
+                'challenge_rating' => '1/4',
+                'hit_points' => 26,
+                'armor_class' => 14,
+                'speed' => '30 ft, climb 30 ft',
+                'abilities' => [
+                    'str' => 14, 'dex' => 16, 'con' => 12, 'int' => 2, 'wis' => 11, 'cha' => 4
+                ],
+                'actions' => [
+                    'bite' => 'Колющая атака: +5 к попаданию, 6 (1d8+2) колющего урона + яд'
+                ]
+            ],
+            [
+                'index' => 'wolf',
+                'name' => 'Волк',
+                'type' => 'beast',
+                'size' => 'medium',
+                'alignment' => 'unaligned',
+                'challenge_rating' => '1/4',
+                'hit_points' => 11,
+                'armor_class' => 13,
+                'speed' => '40 ft',
+                'abilities' => [
+                    'str' => 12, 'dex' => 15, 'con' => 12, 'int' => 3, 'wis' => 12, 'cha' => 6
+                ],
+                'actions' => [
+                    'bite' => 'Колющая атака: +4 к попаданию, 7 (2d4+2) колющего урона'
+                ]
+            ],
+            [
+                'index' => 'zombie',
+                'name' => 'Зомби',
+                'type' => 'undead',
+                'size' => 'medium',
+                'alignment' => 'neutral evil',
+                'challenge_rating' => '1/4',
+                'hit_points' => 22,
+                'armor_class' => 8,
+                'speed' => '20 ft',
+                'abilities' => [
+                    'str' => 13, 'dex' => 6, 'con' => 16, 'int' => 3, 'wis' => 6, 'cha' => 5
+                ],
+                'actions' => [
+                    'slam' => 'Дробящая атака: +3 к попаданию, 3 (1d6) дробящего урона'
+                ]
+            ],
+            [
+                'index' => 'skeleton',
+                'name' => 'Скелет',
+                'type' => 'undead',
+                'size' => 'medium',
+                'alignment' => 'lawful evil',
+                'challenge_rating' => '1/4',
+                'hit_points' => 13,
+                'armor_class' => 13,
+                'speed' => '30 ft',
+                'abilities' => [
+                    'str' => 10, 'dex' => 14, 'con' => 15, 'int' => 6, 'wis' => 8, 'cha' => 5
+                ],
+                'actions' => [
+                    'shortsword' => 'Колющая атака: +4 к попаданию, 5 (1d6+2) колющего урона',
+                    'shortbow' => 'Дальняя атака: +4 к попаданию, 5 (1d6+2) колющего урона'
+                ]
+            ],
+            
+            // Средние противники (CR 1/2 - 3)
+            [
                 'index' => 'orc',
                 'name' => 'Орк',
                 'type' => 'humanoid',
@@ -218,6 +361,80 @@ class FallbackData {
                     'javelin' => 'Дальняя атака: +5 к попаданию, 6 (1d6+3) колющего урона'
                 ]
             ],
+            [
+                'index' => 'hobgoblin',
+                'name' => 'Хобгоблин',
+                'type' => 'humanoid',
+                'size' => 'medium',
+                'alignment' => 'lawful evil',
+                'challenge_rating' => '1/2',
+                'hit_points' => 11,
+                'armor_class' => 18,
+                'speed' => '30 ft',
+                'abilities' => [
+                    'str' => 13, 'dex' => 12, 'con' => 12, 'int' => 10, 'wis' => 10, 'cha' => 9
+                ],
+                'actions' => [
+                    'longsword' => 'Рубящая атака: +3 к попаданию, 5 (1d8+1) рубящего урона',
+                    'longbow' => 'Дальняя атака: +3 к попаданию, 5 (1d8+1) колющего урона'
+                ]
+            ],
+            [
+                'index' => 'bugbear',
+                'name' => 'Багбир',
+                'type' => 'humanoid',
+                'size' => 'medium',
+                'alignment' => 'chaotic evil',
+                'challenge_rating' => '1',
+                'hit_points' => 27,
+                'armor_class' => 16,
+                'speed' => '30 ft',
+                'abilities' => [
+                    'str' => 15, 'dex' => 14, 'con' => 13, 'int' => 8, 'wis' => 11, 'cha' => 9
+                ],
+                'actions' => [
+                    'morningstar' => 'Колющая атака: +4 к попаданию, 11 (2d8+2) колющего урона',
+                    'javelin' => 'Дальняя атака: +4 к попаданию, 9 (2d6+2) колющего урона'
+                ]
+            ],
+            [
+                'index' => 'ogre',
+                'name' => 'Огр',
+                'type' => 'giant',
+                'size' => 'large',
+                'alignment' => 'chaotic evil',
+                'challenge_rating' => '2',
+                'hit_points' => 59,
+                'armor_class' => 11,
+                'speed' => '40 ft',
+                'abilities' => [
+                    'str' => 19, 'dex' => 8, 'con' => 16, 'int' => 5, 'wis' => 7, 'cha' => 7
+                ],
+                'actions' => [
+                    'greatclub' => 'Дробящая атака: +6 к попаданию, 13 (2d8+4) дробящего урона',
+                    'javelin' => 'Дальняя атака: +6 к попаданию, 11 (2d6+4) колющего урона'
+                ]
+            ],
+            [
+                'index' => 'minotaur',
+                'name' => 'Минотавр',
+                'type' => 'monstrosity',
+                'size' => 'large',
+                'alignment' => 'chaotic evil',
+                'challenge_rating' => '3',
+                'hit_points' => 76,
+                'armor_class' => 14,
+                'speed' => '40 ft',
+                'abilities' => [
+                    'str' => 18, 'dex' => 11, 'con' => 16, 'int' => 6, 'wis' => 16, 'cha' => 9
+                ],
+                'actions' => [
+                    'greataxe' => 'Рубящая атака: +6 к попаданию, 17 (2d12+4) рубящего урона',
+                    'gore' => 'Колющая атака: +6 к попаданию, 13 (2d8+4) колющего урона'
+                ]
+            ],
+            
+            // Сложные противники (CR 5-10)
             [
                 'index' => 'troll',
                 'name' => 'Тролль',
@@ -238,6 +455,92 @@ class FallbackData {
                 ],
                 'special_abilities' => [
                     'regeneration' => 'Тролль восстанавливает 10 хитов в начале своего хода'
+                ]
+            ],
+            [
+                'index' => 'young_dragon',
+                'name' => 'Молодой красный дракон',
+                'type' => 'dragon',
+                'size' => 'large',
+                'alignment' => 'chaotic evil',
+                'challenge_rating' => '7',
+                'hit_points' => 178,
+                'armor_class' => 18,
+                'speed' => '40 ft, fly 80 ft',
+                'abilities' => [
+                    'str' => 23, 'dex' => 10, 'con' => 21, 'int' => 14, 'wis' => 11, 'cha' => 19
+                ],
+                'actions' => [
+                    'bite' => 'Колющая атака: +10 к попаданию, 17 (2d10+6) колющего урона',
+                    'claw' => 'Рубящая атака: +10 к попаданию, 13 (2d6+6) рубящего урона',
+                    'fire_breath' => 'Конус огня: 45 (10d8) огненного урона'
+                ]
+            ],
+            [
+                'index' => 'mind_flayer',
+                'name' => 'Умыслитель',
+                'type' => 'aberration',
+                'size' => 'medium',
+                'alignment' => 'lawful evil',
+                'challenge_rating' => '7',
+                'hit_points' => 71,
+                'armor_class' => 15,
+                'speed' => '30 ft',
+                'abilities' => [
+                    'str' => 11, 'dex' => 12, 'con' => 12, 'int' => 19, 'wis' => 17, 'cha' => 17
+                ],
+                'actions' => [
+                    'tentacles' => 'Колющая атака: +7 к попаданию, 15 (2d10+4) колющего урона',
+                    'extract_brain' => 'Специальная атака: мгновенная смерть при успехе'
+                ],
+                'special_abilities' => [
+                    'mind_blast' => 'Конус психической энергии: 22 (5d8) психического урона'
+                ]
+            ],
+            
+            // Очень сложные противники (CR 13+)
+            [
+                'index' => 'vampire',
+                'name' => 'Вампир',
+                'type' => 'undead',
+                'size' => 'medium',
+                'alignment' => 'lawful evil',
+                'challenge_rating' => '13',
+                'hit_points' => 144,
+                'armor_class' => 16,
+                'speed' => '30 ft',
+                'abilities' => [
+                    'str' => 18, 'dex' => 18, 'con' => 18, 'int' => 17, 'wis' => 15, 'cha' => 18
+                ],
+                'actions' => [
+                    'unarmed_strike' => 'Дробящая атака: +9 к попаданию, 8 (1d8+4) дробящего урона',
+                    'bite' => 'Колющая атака: +9 к попаданию, 8 (1d8+4) колющего урона + кровососание'
+                ],
+                'special_abilities' => [
+                    'shapechanger' => 'Может превращаться в летучую мышь или туман',
+                    'regeneration' => 'Восстанавливает 20 хитов в начале хода'
+                ]
+            ],
+            [
+                'index' => 'beholder',
+                'name' => 'Бехолдер',
+                'type' => 'aberration',
+                'size' => 'large',
+                'alignment' => 'lawful evil',
+                'challenge_rating' => '13',
+                'hit_points' => 180,
+                'armor_class' => 18,
+                'speed' => '0 ft, fly 20 ft',
+                'abilities' => [
+                    'str' => 10, 'dex' => 14, 'con' => 18, 'int' => 17, 'wis' => 15, 'cha' => 17
+                ],
+                'actions' => [
+                    'eye_rays' => '10 различных лучей с разными эффектами',
+                    'central_eye' => 'Луч антимагии: подавляет магию в конусе'
+                ],
+                'special_abilities' => [
+                    'levitate' => 'Постоянно левитирует',
+                    'all_around_vision' => 'Не может быть застигнут врасплох'
                 ]
             ]
         ];

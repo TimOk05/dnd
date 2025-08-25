@@ -190,9 +190,18 @@ class CharacterGenerator {
         ];
         
         // Применяем бонусы расы
-        foreach ($race_data['ability_bonuses'] as $ability => $bonus) {
-            $abilities[$ability] += $bonus;
+        if (isset($race_data['ability_bonuses'])) {
+            foreach ($race_data['ability_bonuses'] as $ability => $bonus) {
+                if (isset($abilities[$ability])) {
+                    $abilities[$ability] += $bonus;
+                    // Ограничиваем максимальное значение 20
+                    $abilities[$ability] = min(20, $abilities[$ability]);
+                }
+            }
         }
+        
+        // Логируем для отладки
+        error_log("Generated abilities: " . json_encode($abilities));
         
         return $abilities;
     }
@@ -219,13 +228,15 @@ class CharacterGenerator {
         // Проверяем наличие всех характеристик
         foreach ($required_abilities as $ability) {
             if (!isset($abilities[$ability])) {
+                error_log("Missing ability: $ability");
                 return false;
             }
         }
         
-        // Проверяем, что все характеристики находятся в диапазоне 8-18
-        foreach ($abilities as $ability) {
-            if ($ability < 8 || $ability > 18) {
+        // Проверяем, что все характеристики находятся в разумном диапазоне 3-20
+        foreach ($abilities as $ability_name => $ability_value) {
+            if ($ability_value < 3 || $ability_value > 20) {
+                error_log("Invalid ability value for $ability_name: $ability_value");
                 return false;
             }
         }
