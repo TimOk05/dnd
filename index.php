@@ -2353,10 +2353,8 @@ function updateNotesInstantly() {
     const notesBlock = document.getElementById('notes-block');
     if (!notesBlock) return;
     
-    // Плавно скрываем блок заметок
+    // Мерцание - быстро скрываем и показываем
     notesBlock.style.opacity = '0';
-    notesBlock.style.transform = 'translateY(-10px)';
-    notesBlock.style.transition = 'all 0.3s ease';
     
     // Запрашиваем обновленные заметки
     fetch('', {
@@ -2378,27 +2376,17 @@ function updateNotesInstantly() {
             tempDiv.innerHTML = html;
             const newNoteItems = tempDiv.querySelectorAll('.note-item');
             
-            // Добавляем новые заметки с анимацией
-            newNoteItems.forEach((item, index) => {
+            // Добавляем новые заметки
+            newNoteItems.forEach((item) => {
                 const clonedItem = item.cloneNode(true);
-                clonedItem.style.opacity = '0';
-                clonedItem.style.transform = 'translateY(20px)';
                 notesBlock.appendChild(clonedItem);
-                
-                // Анимация появления
-                setTimeout(() => {
-                    clonedItem.style.transition = 'all 0.3s ease';
-                    clonedItem.style.opacity = '1';
-                    clonedItem.style.transform = 'translateY(0)';
-                }, index * 50);
             });
         }
         
         // Показываем блок заметок обратно
         setTimeout(() => {
             notesBlock.style.opacity = '1';
-            notesBlock.style.transform = 'translateY(0)';
-        }, newNoteItems.length * 50 + 100);
+        }, 100);
         
         // Обновляем данные в памяти
         fetch('', {
