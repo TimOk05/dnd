@@ -73,9 +73,9 @@ if ($userCreatedAt !== 'Неизвестно') {
             --bg-primary: #0a0a0a;
             --bg-secondary: #1a0a0a;
             --bg-tertiary: #2a0a0a;
-            --text-primary: #ff4444;
-            --text-secondary: #ff6666;
-            --text-tertiary: #ff8888;
+            --text-primary: #ffffff;
+            --text-secondary: #ffcccc;
+            --text-tertiary: #ffaaaa;
             --accent-primary: #ff3333;
             --accent-secondary: #cc2222;
             --border-primary: #ff0000;

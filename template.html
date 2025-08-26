@@ -57,12 +57,12 @@
             --bg-quaternary: #3a0a0a;
             --bg-quinary: #4a0a0a;
             --bg-senary: #5a0a0a;
-            --text-primary: #ff4444;
-            --text-secondary: #ff6666;
-            --text-tertiary: #ff8888;
-            --text-quaternary: #ffaaaa;
-            --text-quinary: #ffcccc;
-            --text-senary: #ffeeee;
+            --text-primary: #ffffff;
+            --text-secondary: #ffcccc;
+            --text-tertiary: #ffaaaa;
+            --text-quaternary: #ff8888;
+            --text-quinary: #ff6666;
+            --text-senary: #ff4444;
             --border-primary: #ff0000;
             --border-secondary: #cc0000;
             --border-tertiary: #990000;
@@ -147,7 +147,7 @@
         [data-theme="dark"] .admin-link {
             color: #ffffff !important;
             font-weight: 700 !important;
-            text-shadow: 2px 2px 4px rgba(255, 0, 0, 0.8) !important;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.8) !important;
             background: linear-gradient(135deg, #ff3333, #cc0000) !important;
             border: 2px solid #ff0000 !important;
             box-shadow: 0 4px 15px rgba(255, 0, 0, 0.4) !important;
@@ -160,7 +160,7 @@
         [data-theme="dark"] .logout-btn:hover,
         [data-theme="dark"] .stats-link:hover,
         [data-theme="dark"] .admin-link:hover {
-            text-shadow: 2px 2px 6px rgba(255, 0, 0, 1) !important;
+            text-shadow: 2px 2px 6px rgba(0, 0, 0, 1) !important;
             background: linear-gradient(135deg, #ff4444, #ff0000) !important;
             box-shadow: 0 6px 20px rgba(255, 0, 0, 0.6) !important;
             transform: translateY(-2px) !important;
@@ -241,10 +241,15 @@
             font-size: 2.2em;
             text-align: center;
             margin-bottom: 0.2em;
-            color: var(--text-tertiary);
+            color: var(--text-primary);
             letter-spacing: 2px;
             text-shadow: 0 2px 0 rgba(255, 255, 255, 0.5), 0 0 8px rgba(166, 124, 82, 0.7);
             transition: all 0.3s ease;
+        }
+        
+        [data-theme="dark"] h1 {
+            color: #ffffff;
+            text-shadow: 0 2px 0 rgba(255, 0, 0, 0.3), 0 0 8px rgba(255, 0, 0, 0.5), 2px 2px 4px rgba(0, 0, 0, 0.8);
         }
         
         .fast-bar {
@@ -322,6 +327,13 @@
             transition: all 0.3s ease;
         }
         
+        [data-theme="dark"] .chat-box {
+            background: rgba(26, 10, 10, 0.9);
+            border: 1.5px solid #ff0000;
+            color: #ffffff;
+            box-shadow: 0 1px 4px rgba(255, 0, 0, 0.3), 0 0 10px rgba(255, 0, 0, 0.1);
+        }
+        
         .msg {
             margin-bottom: 10px;
             line-height: 1.5;
@@ -335,6 +347,14 @@
         .assistant {
             text-align: left;
             color: var(--text-quinary);
+        }
+        
+        [data-theme="dark"] .user {
+            color: #ffcccc;
+        }
+        
+        [data-theme="dark"] .assistant {
+            color: #ffaaaa;
         }
         
         .msg b {
@@ -361,6 +381,21 @@
             outline: none;
             box-shadow: 0 1px 4px var(--shadow-tertiary);
             transition: all 0.3s ease;
+        }
+        
+        [data-theme="dark"] input[type=text],
+        [data-theme="dark"] input[type=number] {
+            background: rgba(26, 10, 10, 0.9);
+            border: 2px solid #ff0000;
+            color: #ffffff;
+            box-shadow: 0 1px 4px rgba(255, 0, 0, 0.3);
+        }
+        
+        [data-theme="dark"] input[type=text]:focus,
+        [data-theme="dark"] input[type=number]:focus {
+            border: 2px solid #ff4444;
+            background: rgba(42, 10, 10, 0.9);
+            box-shadow: 0 2px 8px rgba(255, 0, 0, 0.5);
         }
         
         input[type=text]:focus,
@@ -418,6 +453,13 @@
             min-height: 30px;
             font-size: 1em;
             transition: all 0.3s ease;
+        }
+        
+        [data-theme="dark"] .notes-block {
+            background: rgba(26, 10, 10, 0.9);
+            border: 1.5px solid #ff0000;
+            color: #ffffff;
+            box-shadow: 0 1px 4px rgba(255, 0, 0, 0.3), 0 0 10px rgba(255, 0, 0, 0.1);
         }
         
         .notes-block b {
