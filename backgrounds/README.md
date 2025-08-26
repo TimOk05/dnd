@@ -30,12 +30,12 @@ Realistic medieval battle background, light theme, photorealistic style, knights
 
 ### Промпт для ChatGPT/DALL-E:
 ```
-Создай реалистичный фон сражения для D&D приложения в темной теме. Стиль: фотореалистичный, фэнтези. Элементы: темный лорд в черных доспехах с огненными прожилками, искры, огонь, дым, темная магия, светящиеся руны на доспехах, пламя меча. Цвета: глубокий черный, темно-синий, фиолетовый, оранжевый огонь, красные искры. Эффекты: огненные прожилки на доспехах, искры, дым, магическое свечение. Размер: 1920x1080, формат: PNG с прозрачностью.
+Создай реалистичный фон сражения для D&D приложения в темной теме. Стиль: фотореалистичный, фэнтези, адский. Элементы: темный лорд в черных доспехах с огненными прожилками, лавовые потоки, искры, огонь, дым, темная магия, светящиеся руны на доспехах, пламя меча, лавовые подтеки. Цвета: глубокий черный, кроваво-красный, оранжевый огонь, красные искры, лавовые оттенки. Эффекты: огненные прожилки на доспехах, искры, дым, магическое свечение, лавовые потоки. Размер: 1920x1080, формат: PNG с прозрачностью.
 ```
 
 ### Альтернативный промпт:
 ```
-Realistic dark lord battle background, dark theme, photorealistic style, dark lord in black armor with fiery veins, sparks, fire, smoke, dark magic, glowing runes on armor, flaming sword. Colors: deep black, dark blue, purple, orange fire, red sparks. Effects: fiery veins on armor, sparks, smoke, magical glow. 1920x1080, PNG format.
+Realistic hellish battle background, dark theme, photorealistic style, dark lord in black armor with fiery veins, lava streams, sparks, fire, smoke, dark magic, glowing runes on armor, flaming sword, lava flows. Colors: deep black, blood red, orange fire, red sparks, lava tones. Effects: fiery veins on armor, sparks, smoke, magical glow, lava streams. 1920x1080, PNG format.
 ```
 
 
@@ -80,6 +80,16 @@ realistic medieval battle background, light theme, photorealistic style, knights
 ### Для Stable Diffusion:
 ```
 realistic medieval battle background, light theme, photorealistic style, knights in realistic armor, flying dust, poor visibility, fog, sunlight through dust clouds, swords, shields, spears, beige cream light brown golden white mist, dust blur, light rays, atmospheric perspective, 1920x1080, PNG, high quality, detailed
+```
+
+### Для Midjourney (Темная тема):
+```
+realistic hellish battle background, dark theme, photorealistic style, dark lord in black armor with fiery veins, lava streams, sparks, fire, smoke, dark magic, glowing runes on armor, flaming sword, lava flows, deep black, blood red, orange fire, red sparks, lava tones, 1920x1080, PNG --ar 16:9 --style raw
+```
+
+### Для Stable Diffusion (Темная тема):
+```
+realistic hellish battle background, dark theme, photorealistic style, dark lord in black armor with fiery veins, lava streams, sparks, fire, smoke, dark magic, glowing runes on armor, flaming sword, lava flows, deep black, blood red, orange fire, red sparks, lava tones, 1920x1080, PNG, high quality, detailed
 ```
 
 ---

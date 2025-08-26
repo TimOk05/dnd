@@ -70,16 +70,16 @@ if ($userCreatedAt !== 'Неизвестно') {
         }
         
         [data-theme="dark"] {
-            --bg-primary: #1a1a2e;
-            --bg-secondary: #252540;
-            --bg-tertiary: #2d2d4a;
-            --text-primary: #e8e8e8;
-            --text-secondary: #d1d1d1;
-            --text-tertiary: #b8a9c9;
-            --accent-primary: #8b5cf6;
-            --accent-secondary: #7c3aed;
-            --border-primary: #7209b7;
-            --shadow-primary: #0004;
+            --bg-primary: #0a0a0a;
+            --bg-secondary: #1a0a0a;
+            --bg-tertiary: #2a0a0a;
+            --text-primary: #ff4444;
+            --text-secondary: #ff6666;
+            --text-tertiary: #ff8888;
+            --accent-primary: #ff3333;
+            --accent-secondary: #cc2222;
+            --border-primary: #ff0000;
+            --shadow-primary: rgba(255, 0, 0, 0.3);
         }
         
 

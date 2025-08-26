@@ -51,31 +51,90 @@
         /* Тёмная тема */
         
         [data-theme="dark"] {
-            --bg-primary: #1a1a2e;
-            --bg-secondary: #252540;
-            --bg-tertiary: #2d2d4a;
-            --bg-quaternary: #353560;
-            --bg-quinary: #5a4a8a;
-            --bg-senary: #7a2ac7;
-            --text-primary: #e8e8e8;
-            --text-secondary: #d1d1d1;
-            --text-tertiary: #b8a9c9;
-            --text-quaternary: #c7b3d3;
-            --text-quinary: #a8d5ba;
-            --text-senary: #b8c5d1;
-            --border-primary: #7209b7;
-            --border-secondary: #560bad;
-            --border-tertiary: #480ca8;
-            --accent-primary: #8b5cf6;
-            --accent-secondary: #7c3aed;
-            --accent-success: #10b981;
-            --accent-info: #3b82f6;
-            --accent-warning: #f59e0b;
-            --accent-danger: #ef4444;
-            --shadow-primary: #0004;
-            --shadow-secondary: #0008;
-            --shadow-tertiary: #0002;
+            --bg-primary: #0a0a0a;
+            --bg-secondary: #1a0a0a;
+            --bg-tertiary: #2a0a0a;
+            --bg-quaternary: #3a0a0a;
+            --bg-quinary: #4a0a0a;
+            --bg-senary: #5a0a0a;
+            --text-primary: #ff4444;
+            --text-secondary: #ff6666;
+            --text-tertiary: #ff8888;
+            --text-quaternary: #ffaaaa;
+            --text-quinary: #ffcccc;
+            --text-senary: #ffeeee;
+            --border-primary: #ff0000;
+            --border-secondary: #cc0000;
+            --border-tertiary: #990000;
+            --accent-primary: #ff3333;
+            --accent-secondary: #cc2222;
+            --accent-success: #00ff44;
+            --accent-info: #4444ff;
+            --accent-warning: #ffaa00;
+            --accent-danger: #ff0000;
+            --shadow-primary: rgba(255, 0, 0, 0.3);
+            --shadow-secondary: rgba(255, 0, 0, 0.5);
+            --shadow-tertiary: rgba(255, 0, 0, 0.2);
             --bg-image: url('backgrounds/dark-theme.png');
+        }
+        /* Лавовые подтеки для темной темы */
+        
+        [data-theme="dark"] .parchment {
+            background: var(--bg-primary);
+            border: 8px solid var(--border-primary);
+            box-shadow: 0 8px 32px var(--shadow-secondary), 0 0 0 12px rgba(255, 0, 0, 0.1), 0 0 20px rgba(255, 0, 0, 0.2), inset 0 0 50px rgba(255, 0, 0, 0.05);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        [data-theme="dark"] .parchment::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: radial-gradient(ellipse 200px 50px at 20% 10%, rgba(255, 100, 0, 0.3) 0%, transparent 50%), radial-gradient(ellipse 150px 40px at 80% 20%, rgba(255, 50, 0, 0.2) 0%, transparent 50%), radial-gradient(ellipse 180px 60px at 40% 80%, rgba(255, 150, 0, 0.25) 0%, transparent 50%), radial-gradient(ellipse 120px 30px at 90% 70%, rgba(255, 80, 0, 0.15) 0%, transparent 50%);
+            pointer-events: none;
+            z-index: 1;
+        }
+        
+        [data-theme="dark"] .parchment::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(45deg, transparent 30%, rgba(255, 0, 0, 0.1) 50%, transparent 70%), linear-gradient(-45deg, transparent 40%, rgba(255, 50, 0, 0.08) 60%, transparent 80%);
+            animation: lavaFlow 8s ease-in-out infinite;
+            pointer-events: none;
+            z-index: 2;
+        }
+        
+        @keyframes lavaFlow {
+            0%,
+            100% {
+                opacity: 0.3;
+                transform: translateX(-10px) translateY(-5px);
+            }
+            25% {
+                opacity: 0.5;
+                transform: translateX(5px) translateY(-10px);
+            }
+            50% {
+                opacity: 0.4;
+                transform: translateX(10px) translateY(5px);
+            }
+            75% {
+                opacity: 0.6;
+                transform: translateX(-5px) translateY(10px);
+            }
+        }
+        
+        [data-theme="dark"] .parchment>* {
+            position: relative;
+            z-index: 3;
         }
         /* Дополнительные стили для тёмной темы */
         
@@ -88,7 +147,10 @@
         [data-theme="dark"] .admin-link {
             color: #ffffff !important;
             font-weight: 700 !important;
-            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.9) !important;
+            text-shadow: 2px 2px 4px rgba(255, 0, 0, 0.8) !important;
+            background: linear-gradient(135deg, #ff3333, #cc0000) !important;
+            border: 2px solid #ff0000 !important;
+            box-shadow: 0 4px 15px rgba(255, 0, 0, 0.4) !important;
         }
         
         [data-theme="dark"] .fast-btn:hover,
@@ -98,7 +160,10 @@
         [data-theme="dark"] .logout-btn:hover,
         [data-theme="dark"] .stats-link:hover,
         [data-theme="dark"] .admin-link:hover {
-            text-shadow: 2px 2px 6px rgba(0, 0, 0, 1) !important;
+            text-shadow: 2px 2px 6px rgba(255, 0, 0, 1) !important;
+            background: linear-gradient(135deg, #ff4444, #ff0000) !important;
+            box-shadow: 0 6px 20px rgba(255, 0, 0, 0.6) !important;
+            transform: translateY(-2px) !important;
         }
         
         body {
