@@ -205,14 +205,15 @@
         }
         
         h1 {
-            margin-top: 50px;
-            margin-bottom: 20px;
+            margin-top: 80px;
+            margin-bottom: 30px;
             text-align: center;
             font-family: 'UnifrakturCook', cursive;
-            font-size: 2.5em;
+            font-size: 2.2em;
             color: var(--text-primary);
-            text-shadow: 2px 2px 4px var(--shadow-primary);
             letter-spacing: 2px;
+            text-shadow: 0 2px 0 rgba(255, 255, 255, 0.5), 0 0 8px rgba(166, 124, 82, 0.7);
+            transition: all 0.3s ease;
         }
         
         .parchment:before,
@@ -236,17 +237,6 @@
             transform: scaleX(-1);
         }
         
-        h1 {
-            font-family: 'UnifrakturCook', cursive;
-            font-size: 2.2em;
-            text-align: center;
-            margin-bottom: 0.2em;
-            color: var(--text-primary);
-            letter-spacing: 2px;
-            text-shadow: 0 2px 0 rgba(255, 255, 255, 0.5), 0 0 8px rgba(166, 124, 82, 0.7);
-            transition: all 0.3s ease;
-        }
-        
         [data-theme="dark"] h1 {
             color: #ffffff;
             text-shadow: 0 2px 0 rgba(255, 0, 0, 0.3), 0 0 8px rgba(255, 0, 0, 0.5), 2px 2px 4px rgba(0, 0, 0, 0.8);
@@ -254,11 +244,12 @@
         
         .fast-bar {
             text-align: center;
-            margin-bottom: 14px;
+            margin-bottom: 20px;
+            margin-top: 10px;
         }
         
         .hotkeys-hint {
-            margin-top: 8px;
+            margin-top: 12px;
             color: var(--text-senary);
             font-size: 0.85em;
             opacity: 0.8;
@@ -273,8 +264,8 @@
         
         .fast-btn {
             display: inline-block;
-            margin: 0 6px 10px 0;
-            padding: 8px 18px;
+            margin: 0 8px 12px 0;
+            padding: 10px 20px;
             background: var(--accent-primary);
             color: #ffffff;
             border: 2px solid var(--accent-secondary);
@@ -314,14 +305,14 @@
         }
         
         .chat-box {
-            min-height: 180px;
-            margin-bottom: 14px;
-            padding: 12px 8px;
+            min-height: 200px;
+            margin-bottom: 16px;
+            padding: 16px 12px;
             background: var(--bg-secondary);
             border-radius: 10px;
             border: 1.5px solid var(--border-primary);
             box-shadow: 0 1px 4px var(--shadow-tertiary);
-            max-height: 260px;
+            max-height: 300px;
             overflow-y: auto;
             font-size: 1em;
             transition: all 0.3s ease;
@@ -365,14 +356,14 @@
         form {
             display: flex;
             gap: 8px;
-            margin-top: 8px;
+            margin-top: 12px;
         }
         
         input[type=text],
         input[type=number] {
             flex: 1;
-            padding: 8px 12px;
-            border-radius: 7px;
+            padding: 10px 14px;
+            border-radius: 8px;
             border: 2px solid var(--border-primary);
             font-size: 1em;
             background: var(--bg-secondary);
@@ -410,8 +401,8 @@
         }
         
         button[type=submit] {
-            padding: 8px 18px;
-            border-radius: 7px;
+            padding: 10px 20px;
+            border-radius: 8px;
             border: 2px solid var(--accent-secondary);
             background: var(--accent-primary);
             color: #ffffff;
@@ -432,11 +423,11 @@
         }
         
         .reset-link {
-            float: right;
             color: var(--accent-danger);
             text-decoration: underline;
             font-size: 0.98em;
             margin-top: 2px;
+            cursor: pointer;
             transition: all 0.3s ease;
         }
         
@@ -448,9 +439,9 @@
             background: var(--bg-secondary);
             border: 1.5px solid var(--border-primary);
             border-radius: 10px;
-            margin: 14px 0 0 0;
-            padding: 10px 12px;
-            min-height: 30px;
+            margin: 20px 0 0 0;
+            padding: 16px 14px;
+            min-height: 40px;
             font-size: 1em;
             transition: all 0.3s ease;
         }
@@ -1607,7 +1598,7 @@
             align-items: center;
             gap: 12px;
             z-index: 100;
-            max-width: calc(100% - 80px);
+            max-width: calc(100% - 120px);
             flex-wrap: wrap;
             background: rgba(255, 255, 255, 0.1);
             padding: 8px 12px;
@@ -3181,9 +3172,9 @@
         
         .chat-input-container {
             display: flex;
-            gap: 8px;
+            gap: 10px;
             align-items: center;
-            margin-top: 8px;
+            margin-top: 12px;
         }
         
         .chat-controls {
