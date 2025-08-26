@@ -57,9 +57,9 @@ if ($userCreatedAt !== 'Неизвестно') {
     <style>
         :root {
             /* Светлая тема */
-            --bg-primary: #f8ecd0;
-            --bg-secondary: #fffbe6;
-            --bg-tertiary: #f3e1b6;
+            --bg-primary: #e8d8b0;
+            --bg-secondary: #f0e6c0;
+            --bg-tertiary: #e0d0a0;
             --text-primary: #2d1b00;
             --text-secondary: #3d2a0a;
             --text-tertiary: #7c4a02;
@@ -70,9 +70,9 @@ if ($userCreatedAt !== 'Неизвестно') {
         }
         
         [data-theme="dark"] {
-            --bg-primary: #0f0f23;
-            --bg-secondary: #1a1a2e;
-            --bg-tertiary: #16213e;
+            --bg-primary: #1a1a2e;
+            --bg-secondary: #252540;
+            --bg-tertiary: #2d2d4a;
             --text-primary: #e8e8e8;
             --text-secondary: #d1d1d1;
             --text-tertiary: #b8a9c9;
