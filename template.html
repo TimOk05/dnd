@@ -153,6 +153,19 @@
             box-shadow: 0 4px 15px rgba(255, 0, 0, 0.4) !important;
         }
         
+        [data-theme="dark"] .theme-btn {
+            background: linear-gradient(135deg, #ff3333, #cc0000) !important;
+            color: #ffffff !important;
+            border: 2px solid #ff0000 !important;
+            box-shadow: 0 4px 15px rgba(255, 0, 0, 0.4) !important;
+        }
+        
+        [data-theme="dark"] .theme-btn:hover {
+            background: linear-gradient(135deg, #ff4444, #ff0000) !important;
+            box-shadow: 0 6px 20px rgba(255, 0, 0, 0.6) !important;
+            transform: scale(1.1) !important;
+        }
+        
         [data-theme="dark"] .fast-btn:hover,
         [data-theme="dark"] button[type=submit]:hover,
         [data-theme="dark"] .modal .modal-save:hover,
@@ -195,7 +208,8 @@
             border: 8px solid var(--border-primary);
             border-radius: 24px;
             box-shadow: 0 8px 32px var(--shadow-secondary), 0 0 0 12px rgba(210, 180, 140, 0.3);
-            max-width: 760px;
+            width: 800px;
+            min-height: 600px;
             margin: 60px auto 36px auto;
             padding: 32px 24px 18px 24px;
             position: relative;
@@ -346,6 +360,16 @@
         
         [data-theme="dark"] .assistant {
             color: #ffaaaa;
+        }
+        
+        [data-theme="dark"] .user-info {
+            background: rgba(255, 0, 0, 0.1);
+            backdrop-filter: blur(10px);
+        }
+        
+        [data-theme="dark"] .welcome-text {
+            color: #ffffff;
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.8);
         }
         
         .msg b {
@@ -1642,9 +1666,9 @@
         }
         
         .admin-link {
-            position: fixed;
-            top: 10px;
-            right: 10px;
+            position: absolute;
+            top: 20px;
+            right: 80px;
             background: var(--accent-warning);
             color: #ffffff;
             border: 2px solid var(--accent-warning);
@@ -1657,7 +1681,7 @@
             box-shadow: 0 2px 8px var(--shadow-primary);
             text-decoration: none;
             display: inline-block;
-            z-index: 1000;
+            z-index: 100;
             font-weight: 600;
             text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.8);
         }
