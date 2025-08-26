@@ -2417,28 +2417,74 @@ function updateNotesDisplay() {
 
 // Функция для редактирования заголовка заметки
 function editNoteTitle(noteIndex, currentTitle) {
-    const newTitle = prompt('Введите новое название заметки:', currentTitle);
+    // Создаем модальное окно для редактирования
+    const modalContent = `
+        <div class="edit-note-modal">
+            <h3>✏️ Редактировать название заметки</h3>
+            <div class="edit-note-form">
+                <label for="edit-note-input">Новое название:</label>
+                <input type="text" id="edit-note-input" value="${currentTitle}" placeholder="Введите новое название" maxlength="50">
+                <div class="edit-note-buttons">
+                    <button class="edit-note-save" onclick="saveNoteTitle(${noteIndex})">💾 Сохранить</button>
+                    <button class="edit-note-cancel" onclick="closeEditModal()">❌ Отмена</button>
+                </div>
+            </div>
+        </div>
+    `;
     
-    if (newTitle !== null && newTitle.trim() !== '') {
-        fetch('', {
-            method: 'POST',
-            headers: {'Content-Type': 'application/x-www-form-urlencoded'},
-            body: 'fast_action=edit_note_title&note_index=' + noteIndex + '&new_title=' + encodeURIComponent(newTitle.trim())
-        })
-        .then(r => r.text())
-        .then(response => {
-            if (response === 'success') {
-                // Обновляем отображение заметок
-                updateNotesInstantly();
-            } else {
-                alert('Ошибка при обновлении названия заметки');
-            }
-        })
-        .catch(error => {
-            console.error('Ошибка:', error);
-            alert('Ошибка при обновлении названия заметки');
-        });
+    showModal(modalContent);
+    
+    // Фокус на поле ввода
+    setTimeout(() => {
+        const input = document.getElementById('edit-note-input');
+        if (input) {
+            input.focus();
+            input.select();
+        }
+    }, 100);
+    
+    // Обработка Enter для сохранения
+    document.getElementById('edit-note-input').addEventListener('keydown', function(e) {
+        if (e.key === 'Enter') {
+            saveNoteTitle(noteIndex);
+        } else if (e.key === 'Escape') {
+            closeEditModal();
+        }
+    });
+}
+
+// Функция для сохранения нового названия заметки
+function saveNoteTitle(noteIndex) {
+    const newTitle = document.getElementById('edit-note-input').value.trim();
+    
+    if (newTitle === '') {
+        alert('Название не может быть пустым');
+        return;
     }
+    
+    fetch('', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/x-www-form-urlencoded'},
+        body: 'fast_action=edit_note_title&note_index=' + noteIndex + '&new_title=' + encodeURIComponent(newTitle)
+    })
+    .then(r => r.text())
+    .then(response => {
+        if (response === 'success') {
+            closeEditModal();
+            updateNotesInstantly();
+        } else {
+            alert('Ошибка при обновлении названия заметки');
+        }
+    })
+    .catch(error => {
+        console.error('Ошибка:', error);
+        alert('Ошибка при обновлении названия заметки');
+    });
+}
+
+// Функция для закрытия модального окна редактирования
+function closeEditModal() {
+    closeModal();
 }
 
 // Функция для мгновенного обновления заметок без перезагрузки

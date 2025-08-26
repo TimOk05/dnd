@@ -3339,6 +3339,86 @@
             margin-bottom: 12px;
             text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3);
         }
+        /* Стили для модального окна редактирования заметки */
+        
+        .edit-note-modal {
+            text-align: center;
+            padding: 20px;
+        }
+        
+        .edit-note-modal h3 {
+            color: var(--text-primary);
+            margin-bottom: 20px;
+            font-size: 1.3em;
+        }
+        
+        .edit-note-form {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            align-items: center;
+        }
+        
+        .edit-note-form label {
+            color: var(--text-secondary);
+            font-weight: bold;
+            font-size: 1.1em;
+        }
+        
+        .edit-note-form input {
+            width: 100%;
+            max-width: 300px;
+            padding: 12px 16px;
+            border: 2px solid var(--border-secondary);
+            border-radius: 8px;
+            background: var(--bg-secondary);
+            color: var(--text-primary);
+            font-size: 1em;
+            transition: all 0.3s ease;
+        }
+        
+        .edit-note-form input:focus {
+            outline: none;
+            border-color: var(--accent-primary);
+            box-shadow: 0 0 0 3px rgba(138, 43, 226, 0.1);
+        }
+        
+        .edit-note-buttons {
+            display: flex;
+            gap: 10px;
+            margin-top: 10px;
+        }
+        
+        .edit-note-save,
+        .edit-note-cancel {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 6px;
+            font-size: 1em;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .edit-note-save {
+            background: linear-gradient(45deg, #4ecdc4, #44a08d);
+            color: white;
+        }
+        
+        .edit-note-save:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(78, 205, 196, 0.3);
+        }
+        
+        .edit-note-cancel {
+            background: linear-gradient(45deg, #ff6b6b, #ee5a24);
+            color: white;
+        }
+        
+        .edit-note-cancel:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(255, 107, 107, 0.3);
+        }
     </style>
 </head>
 
