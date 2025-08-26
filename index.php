@@ -73,8 +73,13 @@ if (isset($_POST['fast_action'])) {
             $results = [];
             for ($i = 0; $i < $count; $i++) $results[] = rand(1, $sides);
             $sum = array_sum($results);
-            $out = "Бросок: $dice\nРезультаты: " . implode(', ', $results) . "\nСумма: $sum";
-            if ($label) $out .= "\nКомментарий: $label";
+            // Формируем результат в зависимости от количества костей
+            if ($count == 1) {
+                $out = "🎲 Бросок: $dice\n📊 Результат: " . $results[0];
+            } else {
+                $out = "🎲 Бросок: $dice\n📊 Результаты: " . implode(', ', $results) . "\n💎 Сумма: $sum";
+            }
+            if ($label) $out .= "\n💬 Комментарий: $label";
             echo nl2br(htmlspecialchars($out));
             exit;
         } else {
@@ -2181,18 +2186,26 @@ function formatResultSegments(txt, isNpc) {
     if (isNpc) {
         return formatNpcBlocks(txt);
     } else {
-        // Для бросков: бросок+результаты, сумма, комментарий (если есть)
+        // Для бросков: красивое форматирование с эмодзи
         const lines = txt.split(/<br>|\n/).map(l => l.trim()).filter(Boolean);
-        let out = '';
-        if (lines.length) {
-            out += `<div class="result-segment">${lines[0]}</div>`;
-        }
-        if (lines.length > 1) {
-            out += `<div class="result-segment-alt">${lines[1]}</div>`;
-        }
-        if (lines.length > 2) {
-            out += `<div class="result-segment">${lines.slice(2).join('<br>')}</div>`;
-        }
+        let out = '<div class="dice-result-container">';
+        
+        lines.forEach((line, index) => {
+            let className = 'dice-result-line';
+            if (line.includes('🎲')) {
+                className += ' dice-header';
+            } else if (line.includes('📊')) {
+                className += ' dice-results';
+            } else if (line.includes('💎')) {
+                className += ' dice-sum';
+            } else if (line.includes('💬')) {
+                className += ' dice-comment';
+            }
+            
+            out += `<div class="${className}">${line}</div>`;
+        });
+        
+        out += '</div>';
         return out;
     }
 }
