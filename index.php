@@ -97,18 +97,62 @@ if (isset($_POST['fast_action'])) {
     if ($action === 'update_notes') {
         $notes = $_SESSION['notes'] ?? [];
         $html = '';
-        foreach ($notes as $idx => $note) {
-            $plainText = strip_tags($note);
-            $lines = explode("\n", $plainText);
-            $firstLine = trim($lines[0] ?? 'Заметка ' . ($idx + 1));
-            if (strlen($firstLine) > 50) {
-                $firstLine = substr($firstLine, 0, 47) . '...';
+        foreach ($notes as $i => $note) {
+            $nameLine = '';
+            
+            // Ищем имя в заголовках персонажей и противников
+            if (preg_match('/<div class="character-note-title">([^<]+)<\/div>/iu', $note, $matches)) {
+                $nameLine = trim($matches[1]);
+            } elseif (preg_match('/<div class="enemy-note-title">([^<]+)<\/div>/iu', $note, $matches)) {
+                $nameLine = trim($matches[1]);
+            } elseif (preg_match('/<div class="npc-name-header">([^<]+)<\/div>/iu', $note, $matches)) {
+                $nameLine = trim($matches[1]);
+            } elseif (preg_match('/<div class="npc-modern-header">([^<]+)<\/div>/iu', $note, $matches)) {
+                $nameLine = trim($matches[1]);
+            } else {
+                // Для старых заметок ищем строку с именем по разным вариантам
+                $plain = strip_tags(str_replace(['<br>', "\n"], "\n", $note));
+                $lines = array_filter(array_map('trim', explode("\n", $plain)));
+                
+                foreach ($lines as $line) {
+                    if (preg_match('/^(Имя|Name|Имя NPC|Имя персонажа)\s*:/iu', $line)) {
+                        $nameLine = $line;
+                        break;
+                    }
+                }
+                
+                // Если нашли имя, извлекаем только имя без префикса
+                if ($nameLine) {
+                    if (preg_match('/^(Имя|Name|Имя NPC|Имя персонажа)\s*:\s*(.+)$/iu', $nameLine, $matches)) {
+                        $nameLine = trim($matches[2]);
+                    }
+                }
+                
+                // Если это не NPC заметка, ищем первое значимое слово
+                if (!$nameLine) {
+                    foreach ($lines as $line) {
+                        $line = trim($line);
+                        if ($line && !preg_match('/^(описание|внешность|черты|способность|оружие|урон|хиты|класс|раса|уровень|профессия)/iu', $line)) {
+                            $nameLine = $line;
+                            break;
+                        }
+                    }
+                }
             }
             
-            $html .= '<div class="note-item" onclick="expandNote(' . $idx . ')">';
-            $html .= '<div class="note-preview">' . htmlspecialchars($firstLine) . '</div>';
-            $html .= '<button class="note-delete" onclick="event.stopPropagation(); removeNote(' . $idx . ')">🗑️</button>';
-            $html .= '</div>';
+            // Очищаем имя - убираем лишние символы
+            if ($nameLine) {
+                $nameLine = preg_replace('/[^\wа-яё\s]/ui', '', $nameLine);
+                $nameLine = trim($nameLine);
+                
+                // Если имя слишком длинное, обрезаем
+                if (mb_strlen($nameLine) > 20) {
+                    $nameLine = mb_substr($nameLine, 0, 20) . '…';
+                }
+            }
+            
+            $preview = $nameLine ?: '(нет данных)';
+            $html .= '<div class="note-item" onclick="expandNote(' . $i . ')">' . htmlspecialchars($preview, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8') . '<button class="note-remove" onclick="event.stopPropagation();removeNote(' . $i . ')">×</button></div>';
         }
         echo $html;
         exit;
@@ -2299,34 +2343,74 @@ window.allNotes = <?php echo json_encode($_SESSION['notes'], JSON_UNESCAPED_UNIC
 
 // Функция для обновления отображения заметок без перезагрузки страницы
 function updateNotesDisplay() {
-    // Плавно скрываем весь контент
-    const parchment = document.querySelector('.parchment');
-    if (parchment) {
-        parchment.style.opacity = '0';
-        parchment.style.transform = 'translateY(-20px)';
-        parchment.style.transition = 'all 0.3s ease';
-    }
-    
-    // Перезагружаем страницу через небольшую задержку
-    setTimeout(() => {
-        window.location.reload();
-    }, 300);
+    // Используем ту же логику, что и для мгновенного обновления
+    updateNotesInstantly();
 }
 
 // Функция для мгновенного обновления заметок без перезагрузки
 function updateNotesInstantly() {
-    // Плавно скрываем весь контент
-    const parchment = document.querySelector('.parchment');
-    if (parchment) {
-        parchment.style.opacity = '0';
-        parchment.style.transform = 'translateY(-20px)';
-        parchment.style.transition = 'all 0.3s ease';
-    }
+    // Получаем блок заметок
+    const notesBlock = document.getElementById('notes-block');
+    if (!notesBlock) return;
     
-    // Перезагружаем страницу через небольшую задержку
-    setTimeout(() => {
-        window.location.reload();
-    }, 300);
+    // Плавно скрываем блок заметок
+    notesBlock.style.opacity = '0';
+    notesBlock.style.transform = 'translateY(-10px)';
+    notesBlock.style.transition = 'all 0.3s ease';
+    
+    // Запрашиваем обновленные заметки
+    fetch('', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/x-www-form-urlencoded'},
+        body: 'fast_action=update_notes'
+    })
+    .then(r => r.text())
+    .then(html => {
+        // Обновляем содержимое блока заметок
+        const notesContent = notesBlock.querySelector('b:contains("Заметки:")');
+        if (notesContent) {
+            // Удаляем старые заметки
+            const oldNotes = notesBlock.querySelectorAll('.note-item');
+            oldNotes.forEach(item => item.remove());
+            
+            // Создаем временный div для парсинга HTML
+            const tempDiv = document.createElement('div');
+            tempDiv.innerHTML = html;
+            const newNoteItems = tempDiv.querySelectorAll('.note-item');
+            
+            // Добавляем новые заметки с анимацией
+            newNoteItems.forEach((item, index) => {
+                const clonedItem = item.cloneNode(true);
+                clonedItem.style.opacity = '0';
+                clonedItem.style.transform = 'translateY(20px)';
+                notesBlock.appendChild(clonedItem);
+                
+                // Анимация появления
+                setTimeout(() => {
+                    clonedItem.style.transition = 'all 0.3s ease';
+                    clonedItem.style.opacity = '1';
+                    clonedItem.style.transform = 'translateY(0)';
+                }, index * 50);
+            });
+        }
+        
+        // Показываем блок заметок обратно
+        setTimeout(() => {
+            notesBlock.style.opacity = '1';
+            notesBlock.style.transform = 'translateY(0)';
+        }, newNoteItems.length * 50 + 100);
+        
+        // Обновляем данные в памяти
+        fetch('', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/x-www-form-urlencoded'},
+            body: 'fast_action=get_notes_data'
+        })
+        .then(r => r.json())
+        .then(data => {
+            window.allNotes = data;
+        });
+    });
 }
 
 // Debug: выводим первую строку каждой заметки в консоль
