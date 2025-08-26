@@ -77,6 +77,35 @@
             --shadow-tertiary: #0002;
             --bg-image: url('https://images.unsplash.com/photo-1506905925346-21bda4d32df4?auto=format&fit=crop&w=1500&q=80');
         }
+        /* Средняя тема (коричневая) */
+        
+        [data-theme="medium"] {
+            --bg-primary: #2d1810;
+            --bg-secondary: #3d2418;
+            --bg-tertiary: #4a2e1f;
+            --bg-quaternary: #5a3826;
+            --bg-quinary: #6a422d;
+            --bg-senary: #7a4c34;
+            --text-primary: #f4e4d6;
+            --text-secondary: #e8d4c2;
+            --text-tertiary: #dcc4ae;
+            --text-quaternary: #d0b49a;
+            --text-quinary: #c4a486;
+            --text-senary: #b89472;
+            --border-primary: #8b4513;
+            --border-secondary: #a0522d;
+            --border-tertiary: #cd853f;
+            --accent-primary: #d2691e;
+            --accent-secondary: #ff8c00;
+            --accent-success: #228b22;
+            --accent-info: #4682b4;
+            --accent-warning: #daa520;
+            --accent-danger: #dc143c;
+            --shadow-primary: #0003;
+            --shadow-secondary: #0006;
+            --shadow-tertiary: #0001;
+            --bg-image: url('https://images.unsplash.com/photo-1518709268805-4e9042af2176?auto=format&fit=crop&w=1500&q=80');
+        }
         /* Дополнительные стили для тёмной темы */
         
         [data-theme="dark"] .fast-btn,
@@ -3013,6 +3042,93 @@
         .advanced-settings {
             display: none;
         }
+        /* Улучшенный интерфейс чата */
+        
+        .chat-input-container {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+            margin-top: 8px;
+        }
+        
+        .chat-controls {
+            display: flex;
+            gap: 4px;
+            align-items: center;
+        }
+        
+        .pdf-upload-btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 40px;
+            height: 40px;
+            background: var(--bg-tertiary);
+            border: 2px solid var(--border-primary);
+            border-radius: 7px;
+            cursor: pointer;
+            font-size: 1.2em;
+            transition: all 0.3s ease;
+            color: var(--text-secondary);
+        }
+        
+        .pdf-upload-btn:hover {
+            background: var(--accent-info);
+            color: white;
+            border-color: var(--accent-info);
+        }
+        
+        .send-btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 40px;
+            height: 40px;
+            background: var(--accent-primary);
+            border: 2px solid var(--accent-secondary);
+            border-radius: 7px;
+            cursor: pointer;
+            font-size: 1.2em;
+            color: white;
+            transition: all 0.3s ease;
+            font-weight: bold;
+        }
+        
+        .send-btn:hover {
+            background: var(--accent-secondary);
+            transform: translateY(-1px);
+            box-shadow: 0 3px 8px var(--shadow-primary);
+        }
+        
+        .chat-actions {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 8px;
+            font-size: 0.9em;
+        }
+        
+        #pdf-status {
+            color: var(--accent-info);
+            font-weight: bold;
+        }
+        /* Мобильная версия чата */
+        
+        @media (max-width: 768px) {
+            .chat-input-container {
+                flex-direction: column;
+                gap: 8px;
+            }
+            .chat-controls {
+                width: 100%;
+                justify-content: center;
+            }
+            .chat-actions {
+                flex-direction: column;
+                gap: 8px;
+                text-align: center;
+            }
+        }
     </style>
 </head>
 
@@ -3042,10 +3158,21 @@
         <div class="chat-box">
             {{chat_messages}}
         </div>
-        <form method="post" id="chatForm">
-            <input type="text" name="message" id="messageInput" placeholder="Введите сообщение..." autocomplete="off" required>
-            <button type="submit">Отправить</button>
-            <a class="reset-link" href="?reset=1">Сбросить чат</a>
+        <form method="post" id="chatForm" enctype="multipart/form-data">
+            <div class="chat-input-container">
+                <input type="text" name="message" id="messageInput" placeholder="Введите сообщение..." autocomplete="off" required>
+                <div class="chat-controls">
+                    <label for="pdf-upload" class="pdf-upload-btn" title="Загрузить PDF">
+                        📄
+                        <input type="file" id="pdf-upload" name="pdf" accept=".pdf" style="display: none;">
+                    </label>
+                    <button type="submit" class="send-btn">➤</button>
+                </div>
+            </div>
+            <div class="chat-actions">
+                <a class="reset-link" href="#" onclick="clearAIChat()">Очистить чат</a>
+                <span id="pdf-status" style="display: none;">📄 PDF загружен</span>
+            </div>
         </form>
         <div class="notes-block" id="notes-block">
             <b>Заметки:</b> {{notes_block}}
@@ -3080,8 +3207,29 @@
                 messageInput.addEventListener('keydown', function(e) {
                     if (e.key === 'Enter' && !e.shiftKey) {
                         e.preventDefault();
-                        document.getElementById('chatForm').submit();
+                        sendAIMessage();
                     }
+                });
+            }
+
+            // Обработка загрузки PDF
+            const pdfUpload = document.getElementById('pdf-upload');
+            if (pdfUpload) {
+                pdfUpload.addEventListener('change', function(e) {
+                    const file = e.target.files[0];
+                    if (file) {
+                        document.getElementById('pdf-status').style.display = 'inline';
+                        document.getElementById('pdf-status').textContent = `📄 ${file.name}`;
+                    }
+                });
+            }
+
+            // Обработка отправки формы
+            const chatForm = document.getElementById('chatForm');
+            if (chatForm) {
+                chatForm.addEventListener('submit', function(e) {
+                    e.preventDefault();
+                    sendAIMessage();
                 });
             }
 
@@ -3092,7 +3240,16 @@
 
             themeToggle.addEventListener('click', function() {
                 const currentTheme = body.getAttribute('data-theme');
-                const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+                let newTheme;
+
+                // Переключаем между тремя темами: light -> medium -> dark -> light
+                if (currentTheme === 'light') {
+                    newTheme = 'medium';
+                } else if (currentTheme === 'medium') {
+                    newTheme = 'dark';
+                } else {
+                    newTheme = 'light';
+                }
 
                 body.setAttribute('data-theme', newTheme);
                 localStorage.setItem('theme', newTheme);
@@ -3100,7 +3257,13 @@
             });
 
             function updateThemeIcon(theme) {
-                themeIcon.textContent = theme === 'dark' ? '☀️' : '🌙';
+                if (theme === 'dark') {
+                    themeIcon.textContent = '☀️';
+                } else if (theme === 'medium') {
+                    themeIcon.textContent = '🌙';
+                } else {
+                    themeIcon.textContent = '🌅';
+                }
             }
 
             // Показываем приветственное сообщение для новых пользователей
@@ -3161,6 +3324,110 @@
                         console.log('ServiceWorker registration failed: ', error);
                     });
             });
+        }
+
+        // Функция отправки сообщения в AI чат
+        function sendAIMessage() {
+            const messageInput = document.getElementById('messageInput');
+            const pdfUpload = document.getElementById('pdf-upload');
+            const chatBox = document.querySelector('.chat-box');
+
+            const message = messageInput.value.trim();
+            if (!message) return;
+
+            // Добавляем сообщение пользователя
+            addMessageToChat('user', message);
+            messageInput.value = '';
+
+            // Показываем индикатор загрузки
+            const loadingDiv = addMessageToChat('assistant', '🤔 Думаю...');
+
+            // Подготавливаем данные для отправки
+            const formData = new FormData();
+            formData.append('action', 'send_message');
+            formData.append('message', message);
+
+            if (pdfUpload.files[0]) {
+                formData.append('pdf', pdfUpload.files[0]);
+            }
+
+            // Отправляем запрос
+            fetch('api/ai-chat.php', {
+                    method: 'POST',
+                    body: formData
+                })
+                .then(response => response.json())
+                .then(data => {
+                    // Удаляем индикатор загрузки
+                    if (loadingDiv && loadingDiv.parentNode) {
+                        loadingDiv.parentNode.removeChild(loadingDiv);
+                    }
+
+                    if (data.success) {
+                        addMessageToChat('assistant', data.response);
+
+                        // Очищаем PDF статус если файл был обработан
+                        if (data.pdf_processed) {
+                            pdfUpload.value = '';
+                            document.getElementById('pdf-status').style.display = 'none';
+                        }
+                    } else {
+                        addMessageToChat('assistant', '❌ Ошибка: ' + (data.error || 'Неизвестная ошибка'));
+                    }
+                })
+                .catch(error => {
+                    console.error('Ошибка отправки сообщения:', error);
+
+                    // Удаляем индикатор загрузки
+                    if (loadingDiv && loadingDiv.parentNode) {
+                        loadingDiv.parentNode.removeChild(loadingDiv);
+                    }
+
+                    addMessageToChat('assistant', '❌ Ошибка соединения с сервером');
+                });
+        }
+
+        // Функция добавления сообщения в чат
+        function addMessageToChat(role, content) {
+            const chatBox = document.querySelector('.chat-box');
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `msg ${role}`;
+
+            const who = role === 'user' ? 'Вы' : 'AI';
+            messageDiv.innerHTML = `<b>${who}:</b> ${content}`;
+
+            chatBox.appendChild(messageDiv);
+            chatBox.scrollTop = chatBox.scrollHeight;
+
+            return messageDiv;
+        }
+
+        // Функция очистки AI чата
+        function clearAIChat() {
+            if (!confirm('Очистить историю чата?')) return;
+
+            fetch('api/ai-chat.php', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                    },
+                    body: 'action=clear_chat'
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        const chatBox = document.querySelector('.chat-box');
+                        chatBox.innerHTML = '';
+                        document.getElementById('pdf-status').style.display = 'none';
+                        document.getElementById('pdf-upload').value = '';
+                    } else {
+                        alert('Ошибка: ' + (data.error || 'Неизвестная ошибка'));
+                    }
+                })
+                .catch(error => {
+                    console.error('Ошибка очистки чата:', error);
+                    alert('Ошибка соединения с сервером');
+                });
         }
     </script>
 </body>

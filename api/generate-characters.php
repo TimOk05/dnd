@@ -126,6 +126,17 @@ class CharacterGenerator {
         $name = preg_replace('/\s+([А-ЯЁ])/u', ' $1', $name); // Добавляем пробелы перед заглавными буквами
         $name = trim($name);
         
+        // Убираем дублирующиеся слова
+        $words = explode(' ', $name);
+        $uniqueWords = [];
+        foreach ($words as $word) {
+            $word = trim($word);
+            if (!empty($word) && !in_array(strtolower($word), array_map('strtolower', $uniqueWords))) {
+                $uniqueWords[] = $word;
+            }
+        }
+        $name = implode(' ', $uniqueWords);
+        
         // Если после очистки осталась пустая строка, возвращаем fallback
         if (empty($name) || strlen($name) < 2) {
             return 'Странник';
@@ -202,7 +213,9 @@ class CharacterGenerator {
                 'speed' => $this->getSpeed($race_data),
                 'initiative' => $this->calculateInitiative($abilities['dex']),
                 'proficiency_bonus' => $this->calculateProficiencyBonus($level),
+                'attack_bonus' => $this->calculateAttackBonus($class_data, $abilities, $level),
                 'damage' => $this->calculateDamage($class_data, $abilities, $level),
+                'main_weapon' => $this->getMainWeapon($class_data),
                 'proficiencies' => $this->getProficiencies($class_data),
                 'spells' => $this->getSpells($class_data, $level, $abilities['int'], $abilities['wis'], $abilities['cha']),
                 'features' => $this->getFeatures($class_data, $level),
@@ -587,6 +600,62 @@ class CharacterGenerator {
         }
         
         return $damage_formula;
+    }
+    
+    /**
+     * Расчет попадания (атаки)
+     */
+    private function calculateAttackBonus($class_data, $abilities, $level = 1) {
+        $proficiency_bonus = $this->calculateProficiencyBonus($level);
+        $str_bonus = floor(($abilities['str'] - 10) / 2);
+        
+        // Базовый бонус атаки = бонус мастерства + модификатор силы
+        $attack_bonus = $proficiency_bonus + $str_bonus;
+        
+        // Формируем строку в формате "+X" или "-X"
+        if ($attack_bonus >= 0) {
+            return '+' . $attack_bonus;
+        } else {
+            return $attack_bonus; // Уже будет со знаком минус
+        }
+    }
+    
+    /**
+     * Получение основного оружия персонажа
+     */
+    private function getMainWeapon($class_data) {
+        $weapons = [];
+        
+        // Определяем оружие на основе владений класса
+        if (in_array('Воинское оружие', $class_data['proficiencies'])) {
+            $weapons = ['Длинный меч', 'Боевой топор', 'Молот', 'Копье', 'Алебарда', 'Меч-рапира'];
+        } elseif (in_array('Простое оружие', $class_data['proficiencies'])) {
+            $weapons = ['Булава', 'Короткий меч', 'Кинжал', 'Дубина', 'Копье', 'Топор'];
+        }
+        
+        // Добавляем специальное оружие для определенных классов
+        if (in_array('Кинжалы', $class_data['proficiencies'])) {
+            $weapons[] = 'Кинжал';
+        }
+        if (in_array('Посохи', $class_data['proficiencies'])) {
+            $weapons[] = 'Магический посох';
+        }
+        if (in_array('Арбалеты', $class_data['proficiencies'])) {
+            $weapons[] = 'Легкий арбалет';
+        }
+        if (in_array('Короткие мечи', $class_data['proficiencies'])) {
+            $weapons[] = 'Короткий меч';
+        }
+        if (in_array('Длинные мечи', $class_data['proficiencies'])) {
+            $weapons[] = 'Длинный меч';
+        }
+        
+        // Если нет оружия, возвращаем базовое
+        if (empty($weapons)) {
+            $weapons = ['Кинжал', 'Дубина', 'Копье'];
+        }
+        
+        return $weapons[array_rand($weapons)];
     }
     
     /**
@@ -994,7 +1063,6 @@ class CharacterGenerator {
      */
     private function generateFallbackDescription($character) {
         $race = $character['race'];
-        $class = $character['class'];
         $gender = $character['gender'];
         $name = $character['name'];
         
@@ -1014,6 +1082,18 @@ class CharacterGenerator {
             'halfling' => [
                 'male' => "{$name} - жизнерадостный полурослик с кудрявыми волосами и весёлыми глазами. Его движения быстры и ловки, а улыбка заразительна.",
                 'female' => "{$name} - очаровательная полуросличка с милым личиком и звонким голосом. Её глаза полны любопытства, а характер дружелюбен и открыт."
+            ],
+            'tabaxi' => [
+                'male' => "{$name} - грациозный табакси с ярким мехом и острыми когтями. Его движения бесшумны и точны, а глаза светятся любопытством и хитростью.",
+                'female' => "{$name} - изящная табакси с мягким мехом и гибким телом. Её походка легка и бесшумна, а взгляд полон загадочности и мудрости."
+            ],
+            'dragonborn' => [
+                'male' => "{$name} - величественный драконорожденный с чешуйчатой кожей и внушительной осанкой. Его глаза горят внутренним огнем, а голос звучит как гром.",
+                'female' => "{$name} - гордая драконорожденная с благородными чертами и чешуйчатой кожей. Её движения полны достоинства, а взгляд проницателен и мудр."
+            ],
+            'tiefling' => [
+                'male' => "{$name} - загадочный тифлинг с рогами и хвостом, чьи глаза светятся адским огнем. Его присутствие внушает трепет, а голос звучит как шепот демонов.",
+                'female' => "{$name} - очаровательная тифлинг с изящными рогами и хвостом, чьи глаза мерцают таинственным светом. Её движения грациозны, а характер загадочен."
             ]
         ];
         
@@ -1022,7 +1102,7 @@ class CharacterGenerator {
         }
         
         // Fallback для других рас
-        return "{$name} - представитель расы {$race}, чей внешний вид отражает особенности его народа. {$class} {$character['level']} уровня, готовый к приключениям.";
+        return "{$name} - представитель расы {$race}, чей внешний вид отражает особенности его народа. Готов к приключениям и полон решимости.";
     }
     
     /**

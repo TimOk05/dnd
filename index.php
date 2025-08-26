@@ -164,7 +164,7 @@ $fastBtns .= '<button class="fast-btn" onclick="openDiceStep1()">🎲 Бросо
 $fastBtns .= '<button class="fast-btn" onclick="openCharacterModal()">⚔️ Персонаж</button>';
 $fastBtns .= '<button class="fast-btn" onclick="openEnemyModal()">👹 Противники</button>';
 $fastBtns .= '<button class="fast-btn" onclick="openInitiativeModal()">⚡ Инициатива</button>';
-$fastBtns .= '<a href="generators.php" class="fast-btn" style="text-decoration: none; display: inline-block;">🎲 Генераторы</a>';
+$fastBtns .= '<a href="combat.html" class="fast-btn" style="text-decoration: none; display: inline-block;">⚔️ Система боя</a>';
 
 // --- Генерация сообщений чата (пропускаем system) ---
 $chatMsgs = '';
@@ -1807,6 +1807,8 @@ function formatCharacterFromApi(character) {
     out += '<div class="info-item"><strong>Скорость:</strong> ' + (character.speed || 'Не определена') + ' футов</div>';
     out += '<div class="info-item"><strong>Инициатива:</strong> ' + (character.initiative || 'Не определена') + '</div>';
     out += '<div class="info-item"><strong>Бонус мастерства:</strong> +' + (character.proficiency_bonus || 'Не определен') + '</div>';
+    out += '<div class="info-item"><strong>Оружие:</strong> ' + (character.main_weapon || 'Не определено') + '</div>';
+    out += '<div class="info-item"><strong>Попадание:</strong> ' + (character.attack_bonus || 'Не определено') + '</div>';
     out += '<div class="info-item"><strong>Урон:</strong> ' + (character.damage || 'Не определен') + '</div>';
     out += '</div>';
     out += '</div></div>';
