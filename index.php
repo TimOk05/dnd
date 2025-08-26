@@ -298,7 +298,7 @@ function getDiceResult(dice) {
         
         document.getElementById('modal-content').innerHTML = editButton + formatResultSegments(txt, false);
         document.getElementById('modal-save').style.display = '';
-        document.getElementById('modal-save').onclick = function() { saveNote(txt); closeModal(); };
+        document.getElementById('modal-save').onclick = function() { saveNoteAndUpdate(txt); closeModal(); };
     });
 }
 
@@ -329,7 +329,7 @@ function updateDiceComment(dice, count) {
         
         document.getElementById('modal-content').innerHTML = editButton + formatResultSegments(txt, false);
         document.getElementById('modal-save').style.display = '';
-        document.getElementById('modal-save').onclick = function() { saveNote(txt); closeModal(); };
+        document.getElementById('modal-save').onclick = function() { saveNoteAndUpdate(txt); closeModal(); };
     });
 }
 // --- Генерация персонажей и противников ---
@@ -1126,7 +1126,7 @@ function fetchNpcFromAI(race, npcClass, background, level, advancedSettings = {}
                 
                 document.getElementById('modal-content').innerHTML = html;
                 document.getElementById('modal-save').style.display = '';
-                document.getElementById('modal-save').onclick = function() { saveNote(document.getElementById('modal-content').innerHTML); closeModal(); };
+                document.getElementById('modal-save').onclick = function() { saveNoteAndUpdate(document.getElementById('modal-content').innerHTML); closeModal(); };
                 
                 // Удаляем старую кнопку повторной генерации, если она есть
                 let oldRegenerateBtn = document.querySelector('.modal-regenerate');
@@ -2163,6 +2163,59 @@ function closeModal() {
 }
 document.getElementById('modal-close').onclick = closeModal;
 document.getElementById('modal-bg').onclick = function(e) { if (e.target === this) closeModal(); };
+
+// Новая функция для сохранения заметки с мгновенным обновлением
+function saveNoteAndUpdate(content) {
+    // Если content не передан, берем из модального окна
+    if (!content) {
+        content = document.getElementById('modal-content').innerHTML;
+    }
+    
+    // Извлекаем имя NPC из заголовка
+    var headerElement = document.querySelector('.npc-modern-header');
+    var npcName = headerElement ? headerElement.textContent.trim() : 'NPC';
+    
+    // Если имя пустое или "NPC", пытаемся найти имя в содержимом
+    if (!npcName || npcName === 'NPC') {
+        // Ищем имя в тексте содержимого
+        var plainText = content.replace(/<[^>]+>/g, '\n');
+        var lines = plainText.split(/\n/).map(l => l.trim()).filter(Boolean);
+        
+        for (var i = 0; i < lines.length; i++) {
+            var line = lines[i];
+            if (line && line.length > 2 && line.length < 30 && 
+                !/^(описание|внешность|черты|способность|оружие|урон|хиты|класс|раса|уровень|профессия|технические)/i.test(line) &&
+                !line.includes(':') && !line.includes('—')) {
+                npcName = line;
+                break;
+            }
+        }
+    }
+    
+    // Очищаем имя от лишних слов (только первое слово с большой буквы)
+    if (npcName && npcName !== 'NPC') {
+        var words = npcName.split(/\s+/);
+        if (words.length > 1) {
+            // Берем только первое слово как имя
+            npcName = words[0];
+        }
+        // Убираем лишние символы
+        npcName = npcName.replace(/[^\wа-яё]/gi, '').trim();
+    }
+    
+    // Добавляем имя в начало заметки для лучшей идентификации
+    var noteWithName = '<div class="npc-name-header">' + npcName + '</div>' + content;
+    
+    fetch('', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/x-www-form-urlencoded'},
+        body: 'add_note=1&note_content=' + encodeURIComponent(noteWithName)
+    }).then(() => {
+        // Мгновенно обновляем заметки без перезагрузки
+        updateNotesInstantly();
+    });
+}
+
 function saveNote(content) {
     // Сохраняем HTML содержимого модального окна
     var content = document.getElementById('modal-content').innerHTML;
@@ -2217,8 +2270,8 @@ function removeNote(idx) {
         headers: {'Content-Type': 'application/x-www-form-urlencoded'},
         body: 'remove_note=' + encodeURIComponent(idx)
     }).then(() => {
-        // Обновляем только блок заметок без перезагрузки страницы
-        updateNotesDisplay();
+        // Мгновенно обновляем заметки без перезагрузки
+        updateNotesInstantly();
     });
 }
 function expandNote(idx) {
@@ -2261,6 +2314,59 @@ function updateNotesDisplay() {
     setTimeout(() => {
         window.location.reload();
     }, 300);
+}
+
+// Функция для мгновенного обновления заметок без перезагрузки
+function updateNotesInstantly() {
+    fetch('', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/x-www-form-urlencoded'},
+        body: 'fast_action=update_notes'
+    })
+    .then(r => r.text())
+    .then(html => {
+        // Ищем контейнер заметок
+        const notesSection = document.querySelector('b:contains("Заметки:")');
+        if (notesSection) {
+            const notesContainer = notesSection.parentElement;
+            if (notesContainer) {
+                // Удаляем старые заметки
+                const oldNotes = notesContainer.querySelectorAll('.note-item');
+                oldNotes.forEach(item => item.remove());
+                
+                // Создаем временный div для парсинга HTML
+                const tempDiv = document.createElement('div');
+                tempDiv.innerHTML = html;
+                const newNoteItems = tempDiv.querySelectorAll('.note-item');
+                
+                // Добавляем новые заметки с анимацией
+                newNoteItems.forEach((item, index) => {
+                    const clonedItem = item.cloneNode(true);
+                    clonedItem.style.opacity = '0';
+                    clonedItem.style.transform = 'translateY(20px)';
+                    notesContainer.appendChild(clonedItem);
+                    
+                    // Анимация появления
+                    setTimeout(() => {
+                        clonedItem.style.transition = 'all 0.3s ease';
+                        clonedItem.style.opacity = '1';
+                        clonedItem.style.transform = 'translateY(0)';
+                    }, index * 50);
+                });
+            }
+        }
+        
+        // Обновляем данные в памяти
+        fetch('', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/x-www-form-urlencoded'},
+            body: 'fast_action=get_notes_data'
+        })
+        .then(r => r.json())
+        .then(data => {
+            window.allNotes = data;
+        });
+    });
 }
 
 // Debug: выводим первую строку каждой заметки в консоль
