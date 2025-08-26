@@ -2349,9 +2349,16 @@ function updateNotesDisplay() {
 
 // Функция для мгновенного обновления заметок без перезагрузки
 function updateNotesInstantly() {
+    console.log('updateNotesInstantly called');
+    
     // Получаем блок заметок
     const notesBlock = document.getElementById('notes-block');
-    if (!notesBlock) return;
+    if (!notesBlock) {
+        console.log('notes-block not found');
+        return;
+    }
+    
+    console.log('Fetching updated notes...');
     
     // Запрашиваем обновленные заметки
     fetch('', {
@@ -2359,26 +2366,31 @@ function updateNotesInstantly() {
         headers: {'Content-Type': 'application/x-www-form-urlencoded'},
         body: 'fast_action=update_notes'
     })
-    .then(r => r.text())
+    .then(r => {
+        console.log('Response status:', r.status);
+        return r.text();
+    })
     .then(html => {
-        // Обновляем содержимое блока заметок
-        const notesContent = notesBlock.querySelector('b:contains("Заметки:")');
-        if (notesContent) {
-            // Удаляем старые заметки
-            const oldNotes = notesBlock.querySelectorAll('.note-item');
-            oldNotes.forEach(item => item.remove());
-            
-            // Создаем временный div для парсинга HTML
-            const tempDiv = document.createElement('div');
-            tempDiv.innerHTML = html;
-            const newNoteItems = tempDiv.querySelectorAll('.note-item');
-            
-            // Добавляем новые заметки
-            newNoteItems.forEach((item) => {
-                const clonedItem = item.cloneNode(true);
-                notesBlock.appendChild(clonedItem);
-            });
-        }
+        console.log('Received HTML:', html);
+        
+        // Удаляем старые заметки
+        const oldNotes = notesBlock.querySelectorAll('.note-item');
+        console.log('Removing', oldNotes.length, 'old notes');
+        oldNotes.forEach(item => item.remove());
+        
+        // Создаем временный div для парсинга HTML
+        const tempDiv = document.createElement('div');
+        tempDiv.innerHTML = html;
+        const newNoteItems = tempDiv.querySelectorAll('.note-item');
+        console.log('Found', newNoteItems.length, 'new notes');
+        
+        // Добавляем новые заметки
+        newNoteItems.forEach((item) => {
+            const clonedItem = item.cloneNode(true);
+            notesBlock.appendChild(clonedItem);
+        });
+        
+        console.log('Notes updated successfully');
         
         // Обновляем данные в памяти
         fetch('', {
@@ -2389,7 +2401,11 @@ function updateNotesInstantly() {
         .then(r => r.json())
         .then(data => {
             window.allNotes = data;
+            console.log('Notes data updated in memory');
         });
+    })
+    .catch(error => {
+        console.error('Error updating notes:', error);
     });
 }
 
