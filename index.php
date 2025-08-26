@@ -1830,8 +1830,8 @@ function formatCharacterFromApi(character) {
     // Броски спасения
     if (character.saving_throws && character.saving_throws.length > 0) {
         out += '<div class="character-section">';
-        out += '<div class="section-title">🛡️ Броски спасения</div>';
-        out += '<div class="section-content">';
+        out += '<div class="section-title" onclick="toggleSavingThrows(this)">🛡️ Броски спасения <span class="toggle-icon">▼</span></div>';
+        out += '<div class="section-content saving-throws-content" style="display: none;">';
         out += '<div class="info-grid">';
         character.saving_throws.forEach(throw_item => {
             out += '<div class="info-item"><strong>' + (throw_item.name || 'Неизвестно') + ':</strong> ' + (throw_item.modifier >= 0 ? '+' : '') + (throw_item.modifier || '0') + '</div>';
@@ -1876,11 +1876,38 @@ function formatCharacterFromApi(character) {
         out += '<div class="character-section">';
         out += '<div class="section-title">🔮 Заклинания</div>';
         out += '<div class="section-content">';
-        out += '<ul class="spell-list">';
+        out += '<div class="spell-list">';
         character.spells.forEach(spell => {
-            out += '<li>' + spell + '</li>';
+            if (typeof spell === 'object' && spell.name) {
+                // Новый формат с детальной информацией
+                out += '<div class="spell-item">';
+                out += '<div class="spell-header" onclick="toggleSpellDetails(this)">';
+                out += '<span class="spell-name">' + spell.name + '</span>';
+                out += '<span class="spell-level">' + spell.level + ' уровень</span>';
+                out += '<span class="spell-school">' + spell.school + '</span>';
+                out += '<span class="spell-toggle">▼</span>';
+                out += '</div>';
+                out += '<div class="spell-details" style="display: none;">';
+                out += '<div class="spell-info">';
+                out += '<div><strong>Время накладывания:</strong> ' + spell.casting_time + '</div>';
+                out += '<div><strong>Дистанция:</strong> ' + spell.range + '</div>';
+                out += '<div><strong>Компоненты:</strong> ' + spell.components + '</div>';
+                out += '<div><strong>Длительность:</strong> ' + spell.duration + '</div>';
+                if (spell.damage) {
+                    out += '<div><strong>Урон:</strong> ' + spell.damage + '</div>';
+                }
+                out += '</div>';
+                out += '<div class="spell-description">' + spell.description + '</div>';
+                out += '</div>';
+                out += '</div>';
+            } else {
+                // Старый формат (просто строка)
+                out += '<div class="spell-item">';
+                out += '<div class="spell-name">' + spell + '</div>';
+                out += '</div>';
+            }
         });
-        out += '</ul>';
+        out += '</div>';
         out += '</div></div>';
     }
     
@@ -2448,6 +2475,34 @@ function selectFromNotes(name, initiative, type) {
                 valueField.value = initiative;
             }
         }, 100);
+    }
+}
+
+// --- Функция переключения деталей заклинания ---
+function toggleSpellDetails(header) {
+    const details = header.nextElementSibling;
+    const toggle = header.querySelector('.spell-toggle');
+    
+    if (details.style.display === 'none') {
+        details.style.display = 'block';
+        toggle.textContent = '▲';
+    } else {
+        details.style.display = 'none';
+        toggle.textContent = '▼';
+    }
+}
+
+// --- Функция переключения бросков спасения ---
+function toggleSavingThrows(header) {
+    const content = header.nextElementSibling;
+    const toggle = header.querySelector('.toggle-icon');
+    
+    if (content.style.display === 'none') {
+        content.style.display = 'block';
+        toggle.textContent = '▲';
+    } else {
+        content.style.display = 'none';
+        toggle.textContent = '▼';
     }
 }
 

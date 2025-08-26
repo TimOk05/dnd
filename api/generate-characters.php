@@ -3,6 +3,12 @@
 if (php_sapi_name() !== 'cli') {
     header('Content-Type: application/json');
 }
+
+// Проверяем метод запроса только если это не CLI
+if (php_sapi_name() !== 'cli' && (!isset($_SERVER['REQUEST_METHOD']) || $_SERVER['REQUEST_METHOD'] !== 'POST')) {
+    echo json_encode(['success' => false, 'error' => 'Метод не поддерживается']);
+    exit;
+}
 require_once __DIR__ . '/../config.php';
 
 class CharacterGenerator {
@@ -209,7 +215,7 @@ class CharacterGenerator {
             }
             
             // Генерируем характеристики
-            $abilities = $this->generateAbilities($race_data);
+            $abilities = $this->generateAbilities($race_data, $level);
             
             // Проверяем корректность характеристик
             if (!$this->validateAbilities($abilities)) {
@@ -231,7 +237,7 @@ class CharacterGenerator {
                 'speed' => $this->getSpeed($race_data),
                 'initiative' => $this->calculateInitiative($abilities['dex']),
                 'proficiency_bonus' => $this->calculateProficiencyBonus($level),
-                'damage' => $this->calculateDamage($class_data, $abilities),
+                'damage' => $this->calculateDamage($class_data, $abilities, $level),
                 'proficiencies' => $this->getProficiencies($class_data),
                 'spells' => $this->getSpells($class_data, $level, $abilities['int'], $abilities['wis'], $abilities['cha']),
                 'features' => $this->getFeatures($class_data, $level),
@@ -491,7 +497,7 @@ class CharacterGenerator {
     /**
      * Генерация характеристик
      */
-    private function generateAbilities($race_data) {
+    private function generateAbilities($race_data, $level = 1) {
         $abilities = [
             'str' => $this->rollAbilityScore(),
             'dex' => $this->rollAbilityScore(),
@@ -509,6 +515,18 @@ class CharacterGenerator {
                     // Ограничиваем максимальное значение 20
                     $abilities[$ability] = min(20, $abilities[$ability]);
                 }
+            }
+        }
+        
+        // Улучшение характеристик с уровнем (каждые 4 уровня)
+        $ability_improvements = floor(($level - 1) / 4);
+        if ($ability_improvements > 0) {
+            // Улучшаем случайные характеристики
+            $ability_names = ['str', 'dex', 'con', 'int', 'wis', 'cha'];
+            for ($i = 0; $i < $ability_improvements; $i++) {
+                $ability = $ability_names[array_rand($ability_names)];
+                $abilities[$ability] += 2;
+                $abilities[$ability] = min(20, $abilities[$ability]);
             }
         }
         
@@ -574,10 +592,24 @@ class CharacterGenerator {
     /**
      * Расчет урона
      */
-    private function calculateDamage($class_data, $abilities) {
+    private function calculateDamage($class_data, $abilities, $level = 1) {
         $damage_die = $class_data['hit_die'];
         $damage_bonus = floor(($abilities['str'] - 10) / 2);
-        return $damage_die . ' + ' . $damage_bonus;
+        
+        // Улучшение урона с уровнем
+        $damage_multiplier = 1;
+        if ($level >= 5) {
+            $damage_multiplier = 2; // Дополнительная атака
+        }
+        if ($level >= 11) {
+            $damage_multiplier = 3; // Улучшенная дополнительная атака
+        }
+        if ($level >= 20) {
+            $damage_multiplier = 4; // Превосходная дополнительная атака
+        }
+        
+        $total_damage = $damage_die * $damage_multiplier;
+        return $total_damage . ' + ' . ($damage_bonus * $damage_multiplier);
     }
     
     /**
@@ -640,14 +672,126 @@ class CharacterGenerator {
         $ability_modifier = floor(($ability_score - 10) / 2);
         
         $spells = [];
+        
+        // Заклинания 1 уровня
         if ($level >= 1) {
-            $spells[] = 'Свет';
+            $level1_spells = [
+                [
+                    'name' => 'Свет',
+                    'level' => 1,
+                    'school' => 'Воплощение',
+                    'casting_time' => '1 действие',
+                    'range' => 'Касание',
+                    'components' => 'V, M (светлячок или светящийся мох)',
+                    'duration' => '1 час',
+                    'description' => 'Вы касаетесь объекта размером не больше 10 футов в любом измерении. Пока заклинание активно, объект испускает яркий свет в радиусе 20 футов и тусклый свет еще на 20 футов.',
+                    'damage' => null
+                ],
+                [
+                    'name' => 'Магическая стрела',
+                    'level' => 1,
+                    'school' => 'Воплощение',
+                    'casting_time' => '1 действие',
+                    'range' => '120 футов',
+                    'components' => 'V, S',
+                    'duration' => 'Мгновенно',
+                    'description' => 'Вы создаете три светящихся дротика магической энергии. Каждый дротик поражает цель по вашему выбору, которую вы можете видеть в пределах дистанции.',
+                    'damage' => '1d4 + ' . $ability_modifier . ' урона силовым полем за дротик'
+                ],
+                [
+                    'name' => 'Лечение ран',
+                    'level' => 1,
+                    'school' => 'Воплощение',
+                    'casting_time' => '1 действие',
+                    'range' => 'Касание',
+                    'components' => 'V, S',
+                    'duration' => 'Мгновенно',
+                    'description' => 'Существо, которого вы касаетесь, восстанавливает количество хитов, равное 1d8 + модификатор вашей характеристики заклинаний.',
+                    'damage' => '1d8 + ' . $ability_modifier . ' лечения'
+                ],
+                [
+                    'name' => 'Щит',
+                    'level' => 1,
+                    'school' => 'Воплощение',
+                    'casting_time' => '1 реакция',
+                    'range' => 'На себя',
+                    'components' => 'V, S',
+                    'duration' => '1 раунд',
+                    'description' => 'Невидимый барьер магической силы появляется и защищает вас, давая +5 к КД до начала вашего следующего хода.',
+                    'damage' => null
+                ]
+            ];
+            
+            // Выбираем случайные заклинания 1 уровня
+            $spell_count = min(2, count($level1_spells));
+            $selected_spells = array_rand($level1_spells, $spell_count);
+            if (!is_array($selected_spells)) {
+                $selected_spells = [$selected_spells];
+            }
+            
+            foreach ($selected_spells as $index) {
+                $spells[] = $level1_spells[$index];
+            }
         }
+        
+        // Заклинания 2 уровня
         if ($level >= 3) {
-            $spells[] = 'Магическая стрела';
+            $level2_spells = [
+                [
+                    'name' => 'Огненный шар',
+                    'level' => 3,
+                    'school' => 'Воплощение',
+                    'casting_time' => '1 действие',
+                    'range' => '150 футов',
+                    'components' => 'V, S, M (маленький шарик из гуано летучей мыши и серы)',
+                    'duration' => 'Мгновенно',
+                    'description' => 'Яркий светящийся шар огня летит к выбранной точке в пределах дистанции и взрывается в яркой вспышке.',
+                    'damage' => '8d6 урона огнем'
+                ],
+                [
+                    'name' => 'Невидимость',
+                    'level' => 2,
+                    'school' => 'Иллюзия',
+                    'casting_time' => '1 действие',
+                    'range' => 'Касание',
+                    'components' => 'V, S, M (ресница, завернутая в кусочек смолы)',
+                    'duration' => 'Концентрация, до 1 часа',
+                    'description' => 'Существо, которого вы касаетесь, и все, что оно носит или несет, становятся невидимыми до тех пор, пока заклинание не закончится.',
+                    'damage' => null
+                ]
+            ];
+            
+            $spells[] = $level2_spells[array_rand($level2_spells)];
         }
+        
+        // Заклинания 3 уровня
         if ($level >= 5) {
-            $spells[] = 'Огненный шар';
+            $level3_spells = [
+                [
+                    'name' => 'Молния',
+                    'level' => 3,
+                    'school' => 'Воплощение',
+                    'casting_time' => '1 действие',
+                    'range' => 'На себя (100-футовая линия)',
+                    'components' => 'V, S, M (кусочек меха и стержень из янтаря, кристалла или стекла)',
+                    'duration' => 'Мгновенно',
+                    'description' => 'Молния формируется в линию длиной 100 футов и шириной 5 футов, исходящую от вас в выбранном направлении.',
+                    'damage' => '8d6 урона электричеством'
+                ],
+                [
+                    'name' => 'Полет',
+                    'level' => 3,
+                    'school' => 'Преобразование',
+                    'casting_time' => '1 действие',
+                    'range' => 'Касание',
+                    'components' => 'V, S, M (перо любой птицы)',
+                    'duration' => 'Концентрация, до 10 минут',
+                    'description' => 'Вы касаетесь согласного существа. Цель получает скорость полета 60 футов на время действия заклинания.',
+                    'damage' => null
+                ]
+            ];
+            
+            $spells[] = $level3_spells[array_rand($level3_spells)];
         }
         
         return $spells;
@@ -675,20 +819,64 @@ class CharacterGenerator {
     private function getEquipment($class_data) {
         $equipment = [];
         
+        // Доспехи
         if (in_array('Все доспехи', $class_data['proficiencies'])) {
-            $equipment[] = 'Кольчуга';
+            $armors = ['Кольчуга', 'Кожаный доспех', 'Кожаная броня', 'Стеганый доспех'];
+            $equipment[] = $armors[array_rand($armors)];
         } elseif (in_array('Средние доспехи', $class_data['proficiencies'])) {
-            $equipment[] = 'Кожаный доспех';
+            $armors = ['Кожаный доспех', 'Кожаная броня', 'Стеганый доспех'];
+            $equipment[] = $armors[array_rand($armors)];
+        } elseif (in_array('Легкие доспехи', $class_data['proficiencies'])) {
+            $armors = ['Кожаная броня', 'Стеганый доспех'];
+            $equipment[] = $armors[array_rand($armors)];
         }
         
+        // Щиты
+        if (in_array('Щиты', $class_data['proficiencies'])) {
+            $equipment[] = 'Деревянный щит';
+        }
+        
+        // Оружие
         if (in_array('Воинское оружие', $class_data['proficiencies'])) {
-            $equipment[] = 'Длинный меч';
+            $weapons = ['Длинный меч', 'Боевой топор', 'Молот', 'Копье', 'Алебарда'];
+            $equipment[] = $weapons[array_rand($weapons)];
         } elseif (in_array('Простое оружие', $class_data['proficiencies'])) {
-            $equipment[] = 'Булава';
+            $weapons = ['Булава', 'Короткий меч', 'Кинжал', 'Дубина', 'Копье'];
+            $equipment[] = $weapons[array_rand($weapons)];
         }
         
+        // Дополнительное оружие
+        if (in_array('Кинжалы', $class_data['proficiencies'])) {
+            $equipment[] = 'Кинжал';
+        }
+        if (in_array('Посохи', $class_data['proficiencies'])) {
+            $equipment[] = 'Магический посох';
+        }
+        if (in_array('Арбалеты', $class_data['proficiencies'])) {
+            $equipment[] = 'Легкий арбалет';
+        }
+        
+        // Базовое снаряжение
         $equipment[] = 'Рюкзак исследователя';
-        $equipment[] = '10 золотых монет';
+        $equipment[] = 'Веревка (50 футов)';
+        $equipment[] = 'Факел';
+        $equipment[] = 'Трутница';
+        
+        // Зелья и магические предметы
+        $potions = ['Зелье лечения', 'Зелье невидимости', 'Зелье прыгучести', 'Зелье сопротивления огню'];
+        $equipment[] = $potions[array_rand($potions)];
+        
+        // Бытовые предметы
+        $tools = ['Набор для выживания', 'Инструменты кузнеца', 'Инструменты плотника', 'Инструменты кожевника'];
+        $equipment[] = $tools[array_rand($tools)];
+        
+        // Дополнительные предметы
+        $items = ['Компас', 'Карта местности', 'Свисток', 'Зеркало', 'Мыло', 'Полотенце'];
+        $equipment[] = $items[array_rand($items)];
+        
+        // Деньги
+        $gold = rand(5, 25);
+        $equipment[] = "{$gold} золотых монет";
         
         return $equipment;
     }

@@ -1862,6 +1862,89 @@
             font-size: 1em;
             font-weight: bold;
         }
+        /* Новые стили для заклинаний */
+        
+        .spell-item {
+            margin-bottom: 12px;
+            border: 1px solid var(--border-tertiary);
+            border-radius: 8px;
+            overflow: hidden;
+        }
+        
+        .spell-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 16px;
+            background: var(--bg-tertiary);
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+        
+        .spell-header:hover {
+            background: var(--bg-quaternary);
+        }
+        
+        .spell-name {
+            font-weight: bold;
+            color: var(--text-primary);
+            flex: 1;
+        }
+        
+        .spell-level {
+            color: var(--accent-primary);
+            font-size: 0.9em;
+            margin: 0 12px;
+        }
+        
+        .spell-school {
+            color: var(--text-tertiary);
+            font-size: 0.9em;
+            margin: 0 12px;
+        }
+        
+        .spell-toggle {
+            color: var(--accent-primary);
+            font-weight: bold;
+            transition: transform 0.2s;
+        }
+        
+        .spell-details {
+            padding: 16px;
+            background: var(--bg-primary);
+            border-top: 1px solid var(--border-tertiary);
+        }
+        
+        .spell-info {
+            margin-bottom: 12px;
+        }
+        
+        .spell-info div {
+            margin-bottom: 6px;
+            font-size: 0.9em;
+        }
+        
+        .spell-description {
+            color: var(--text-secondary);
+            line-height: 1.5;
+            font-size: 0.9em;
+        }
+        /* Стили для сворачиваемых секций */
+        
+        .section-title {
+            cursor: pointer;
+            user-select: none;
+        }
+        
+        .toggle-icon {
+            color: var(--accent-primary);
+            font-weight: bold;
+            transition: transform 0.2s;
+        }
+        
+        .saving-throws-content {
+            transition: all 0.3s ease;
+        }
         /* Блоки противников */
         
         .enemies-container {
