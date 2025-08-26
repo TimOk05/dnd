@@ -193,14 +193,88 @@ class CombatSystem {
      * Очистка боя
      */
     public function clearCombat() {
-        $this->participants = [];
-        $this->current_turn = 0;
-        $this->round = 1;
+        $_SESSION['combat'] = [
+            'participants' => [],
+            'current_turn' => 0,
+            'round' => 1
+        ];
         
         return [
             'success' => true,
             'message' => 'Бой очищен'
         ];
+    }
+    
+    /**
+     * Завершение боя
+     */
+    public function endCombat() {
+        // Сохраняем результаты в заметки
+        $result = $this->saveCombatResult([
+            'participants' => $this->participants,
+            'current_turn' => $this->current_turn,
+            'round' => $this->round,
+            'end_reason' => 'combat_ended'
+        ]);
+        
+        // Очищаем бой
+        $this->clearCombat();
+        
+        return [
+            'success' => true,
+            'message' => 'Бой завершен и результаты сохранены'
+        ];
+    }
+    
+    /**
+     * Сохранение результатов боя в заметки
+     */
+    public function saveCombatResult($data) {
+        $participants = $data['participants'] ?? [];
+        $round = $data['round'] ?? 1;
+        
+        // Формируем HTML для заметки
+        $noteContent = '<div class="combat-result">';
+        $noteContent .= '<div class="combat-result-title">Результаты боя</div>';
+        $noteContent .= '<div class="combat-result-info">';
+        $noteContent .= '<div><strong>Раунд:</strong> ' . $round . '</div>';
+        $noteContent .= '<div><strong>Участники:</strong></div>';
+        
+        foreach ($participants as $participant) {
+            $status = $this->getStatusText($participant['status']);
+            $noteContent .= '<div class="combat-participant">';
+            $noteContent .= '<strong>' . htmlspecialchars($participant['name']) . '</strong> ';
+            $noteContent .= '(' . ($participant['type'] === 'character' ? 'Персонаж' : 'Противник') . ') - ';
+            $noteContent .= 'Хиты: ' . $participant['current_hp'] . '/' . $participant['max_hp'] . ' ';
+            $noteContent .= 'Статус: ' . $status;
+            $noteContent .= '</div>';
+        }
+        
+        $noteContent .= '</div></div>';
+        
+        // Сохраняем в заметки
+        if (!isset($_SESSION['notes'])) {
+            $_SESSION['notes'] = [];
+        }
+        
+        $_SESSION['notes'][] = $noteContent;
+        
+        return [
+            'success' => true,
+            'message' => 'Результаты боя сохранены в заметки'
+        ];
+    }
+    
+    /**
+     * Получение текста статуса
+     */
+    private function getStatusText($status) {
+        switch ($status) {
+            case 'active': return 'Активен';
+            case 'unconscious': return 'Без сознания';
+            case 'dead': return 'Мертв';
+            default: return 'Неизвестно';
+        }
     }
     
     /**
@@ -249,6 +323,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             
         case 'clear_combat':
             $result = $combat->clearCombat();
+            break;
+            
+        case 'end_combat':
+            $result = $combat->endCombat();
+            break;
+            
+        case 'save_result':
+            $data = json_decode($_POST['data'], true);
+            $result = $combat->saveCombatResult($data);
             break;
             
         case 'roll_initiative':

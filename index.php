@@ -93,6 +93,32 @@ if (isset($_POST['fast_action'])) {
         }
         exit;
     }
+    // --- Обновление отображения заметок ---
+    if ($action === 'update_notes') {
+        $notes = $_SESSION['notes'] ?? [];
+        $html = '';
+        foreach ($notes as $idx => $note) {
+            $plainText = strip_tags($note);
+            $lines = explode("\n", $plainText);
+            $firstLine = trim($lines[0] ?? 'Заметка ' . ($idx + 1));
+            if (strlen($firstLine) > 50) {
+                $firstLine = substr($firstLine, 0, 47) . '...';
+            }
+            
+            $html .= '<div class="note-item" onclick="expandNote(' . $idx . ')">';
+            $html .= '<div class="note-preview">' . htmlspecialchars($firstLine) . '</div>';
+            $html .= '<button class="note-delete" onclick="event.stopPropagation(); removeNote(' . $idx . ')">🗑️</button>';
+            $html .= '</div>';
+        }
+        echo $html;
+        exit;
+    }
+    // --- Получение данных заметок ---
+    if ($action === 'get_notes_data') {
+        header('Content-Type: application/json');
+        echo json_encode($_SESSION['notes'] ?? [], JSON_UNESCAPED_UNICODE);
+        exit;
+    }
     echo 'Неизвестное действие';
     exit;
 }
@@ -267,7 +293,41 @@ function getDiceResult(dice) {
     })
     .then(r => r.text())
     .then(txt => {
-        document.getElementById('modal-content').innerHTML = formatResultSegments(txt, false);
+        // Добавляем кнопку редактирования комментария
+        const editButton = '<button class="fast-btn" onclick="editDiceComment(\'' + dice + '\', \'' + count + '\', \'' + label + '\')" style="margin-bottom: 10px;">✏️ Редактировать комментарий</button>';
+        
+        document.getElementById('modal-content').innerHTML = editButton + formatResultSegments(txt, false);
+        document.getElementById('modal-save').style.display = '';
+        document.getElementById('modal-save').onclick = function() { saveNote(txt); closeModal(); };
+    });
+}
+
+// Функция для редактирования комментария
+function editDiceComment(dice, count, currentLabel) {
+    showModal(`<b class="mini-menu-title">Редактировать комментарий для ${count}${dice}</b>
+        <div class="npc-level-wrap">
+            <input type="text" id="edit-dice-label" placeholder="Комментарий (необязательно)" value="${currentLabel}" style="width:90%">
+        </div>
+        <button class="fast-btn" onclick="updateDiceComment(\'' + dice + '\', \'' + count + '\')">Обновить</button>`);
+    document.getElementById('modal-save').style.display = 'none';
+    setTimeout(() => document.getElementById('edit-dice-label').focus(), 100);
+}
+
+// Функция для обновления комментария
+function updateDiceComment(dice, count) {
+    let newLabel = document.getElementById('edit-dice-label').value;
+    let diceStr = count + dice;
+    fetch('', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/x-www-form-urlencoded'},
+        body: 'fast_action=dice_result&dice=' + encodeURIComponent(diceStr) + '&label=' + encodeURIComponent(newLabel)
+    })
+    .then(r => r.text())
+    .then(txt => {
+        // Добавляем кнопку редактирования комментария
+        const editButton = '<button class="fast-btn" onclick="editDiceComment(\'' + dice + '\', \'' + count + '\', \'' + newLabel + '\')" style="margin-bottom: 10px;">✏️ Редактировать комментарий</button>';
+        
+        document.getElementById('modal-content').innerHTML = editButton + formatResultSegments(txt, false);
         document.getElementById('modal-save').style.display = '';
         document.getElementById('modal-save').onclick = function() { saveNote(txt); closeModal(); };
     });
@@ -286,7 +346,7 @@ function openCharacterModal() {
             </div>
             
             <form id="characterForm" class="character-form">
-                <div class="form-grid">
+                <div class="form-grid-compact">
                     <div class="form-group">
                         <label for="character-race">Раса персонажа</label>
                         <select id="character-race" name="race" required>
@@ -373,6 +433,13 @@ function openCharacterModal() {
                 </button>
             </form>
             
+            <div id="characterProgress" class="progress-container" style="display: none;">
+                <div class="progress-bar">
+                    <div class="progress-fill"></div>
+                </div>
+                <div class="progress-text">Создание персонажа...</div>
+            </div>
+            
             <div id="characterResult" class="result-container"></div>
         </div>
     `);
@@ -387,10 +454,20 @@ function openCharacterModal() {
         formData.append('use_ai', 'on'); // AI всегда включен
         const submitBtn = this.querySelector('button[type="submit"]');
         const resultDiv = document.getElementById('characterResult');
+        const progressDiv = document.getElementById('characterProgress');
         
-        submitBtn.innerHTML = '<span class="btn-icon">⏳</span><span class="btn-text">Создание...</span>';
-        submitBtn.disabled = true;
-        resultDiv.innerHTML = '<div class="loading">Создание персонажа с AI-улучшением...</div>';
+        // Скрываем форму и показываем прогресс
+        this.style.display = 'none';
+        progressDiv.style.display = 'block';
+        
+        // Анимация прогресса
+        const progressFill = progressDiv.querySelector('.progress-fill');
+        let progress = 0;
+        const progressInterval = setInterval(() => {
+            progress += Math.random() * 15;
+            if (progress > 90) progress = 90;
+            progressFill.style.width = progress + '%';
+        }, 200);
         
         fetch('api/generate-characters.php', {
             method: 'POST',
@@ -398,28 +475,39 @@ function openCharacterModal() {
         })
         .then(response => response.json())
         .then(data => {
-            submitBtn.innerHTML = '<span class="btn-icon">⚔️</span><span class="btn-text">Создать персонажа</span>';
-            submitBtn.disabled = false;
+            clearInterval(progressInterval);
+            progressFill.style.width = '100%';
             
-            if (data.success) {
-                const character = data.npc;
-                resultDiv.innerHTML = formatCharacterFromApi(character);
+            setTimeout(() => {
+                progressDiv.style.display = 'none';
+                this.style.display = 'block';
                 
-                // Добавляем кнопку сохранения в заметки
-                resultDiv.innerHTML += `
-                    <div class="save-character-section">
-                                        <button class="save-character-btn" onclick="saveCharacterToNotes(${JSON.stringify(character).replace(/"/g, '&quot;')})">
-                    💾 Сохранить в заметки
-                </button>
-                    </div>
-                `;
-            } else {
-                resultDiv.innerHTML = '<div class="error">Ошибка: ' + (data.error || 'Неизвестная ошибка') + '</div>';
-            }
+                if (data.success) {
+                    const character = data.npc;
+                    resultDiv.innerHTML = formatCharacterFromApi(character);
+                    
+                    // Добавляем кнопку сохранения в заметки
+                    resultDiv.innerHTML += `
+                        <div class="save-character-section">
+                            <button class="save-character-btn" onclick="saveCharacterToNotes(${JSON.stringify(character).replace(/"/g, '&quot;')})">
+                                💾 Сохранить в заметки
+                            </button>
+                        </div>
+                    `;
+                    
+                    // Автоматическая прокрутка к результату
+                    setTimeout(() => {
+                        resultDiv.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                    }, 100);
+                } else {
+                    resultDiv.innerHTML = '<div class="error">Ошибка: ' + (data.error || 'Неизвестная ошибка') + '</div>';
+                }
+            }, 500);
         })
         .catch(error => {
-            submitBtn.innerHTML = '<span class="btn-icon">⚔️</span><span class="btn-text">Создать персонажа</span>';
-            submitBtn.disabled = false;
+            clearInterval(progressInterval);
+            progressDiv.style.display = 'none';
+            this.style.display = 'block';
             resultDiv.innerHTML = '<div class="error">Ошибка сети: ' + error.message + '</div>';
         });
     });
@@ -517,6 +605,11 @@ function openEnemyModal() {
         .then(data => {
             if (data.success && data.enemies) {
                 resultDiv.innerHTML = formatEnemiesFromApi(data.enemies);
+                
+                // Автоматическая прокрутка к результату
+                setTimeout(() => {
+                    resultDiv.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                }, 100);
             } else {
                 resultDiv.innerHTML = '<div class="error">Ошибка: ' + (data.error || 'Неизвестная ошибка') + '</div>';
             }
@@ -1788,7 +1881,7 @@ function formatCharacterFromApi(character) {
     
     // Основная информация
     out += '<div class="character-section">';
-    out += '<div class="section-title">🏷️ Основная информация</div>';
+    out += '<div class="section-title" onclick="toggleSection(this)">🏷️ Основная информация <span class="toggle-icon">▼</span></div>';
     out += '<div class="section-content">';
     out += '<div class="info-grid">';
     out += '<div class="info-item"><strong>Пол:</strong> ' + (character.gender || 'Не определен') + '</div>';
@@ -1799,7 +1892,7 @@ function formatCharacterFromApi(character) {
     
     // Боевые характеристики
     out += '<div class="character-section">';
-    out += '<div class="section-title">⚔️ Боевые характеристики</div>';
+    out += '<div class="section-title" onclick="toggleSection(this)">⚔️ Боевые характеристики <span class="toggle-icon">▼</span></div>';
     out += '<div class="section-content">';
     out += '<div class="info-grid">';
     out += '<div class="info-item"><strong>Хиты:</strong> ' + (character.hit_points || 'Не определены') + '</div>';
@@ -1816,7 +1909,7 @@ function formatCharacterFromApi(character) {
     // Характеристики
     if (character.abilities) {
         out += '<div class="character-section">';
-        out += '<div class="section-title">📊 Характеристики</div>';
+        out += '<div class="section-title" onclick="toggleSection(this)">📊 Характеристики <span class="toggle-icon">▼</span></div>';
         out += '<div class="section-content">';
         out += '<div class="abilities-grid">';
         out += '<div class="ability-item">СИЛ: ' + (character.abilities.str || '?') + '</div>';
@@ -1832,8 +1925,8 @@ function formatCharacterFromApi(character) {
     // Броски спасения
     if (character.saving_throws && character.saving_throws.length > 0) {
         out += '<div class="character-section">';
-        out += '<div class="section-title" onclick="toggleSavingThrows(this)">🛡️ Броски спасения <span class="toggle-icon">▼</span></div>';
-        out += '<div class="section-content saving-throws-content" style="display: none;">';
+        out += '<div class="section-title" onclick="toggleSection(this)">🛡️ Броски спасения <span class="toggle-icon">▼</span></div>';
+        out += '<div class="section-content saving-throws-content">';
         out += '<div class="info-grid">';
         character.saving_throws.forEach(throw_item => {
             out += '<div class="info-item"><strong>' + (throw_item.name || 'Неизвестно') + ':</strong> ' + (throw_item.modifier >= 0 ? '+' : '') + (throw_item.modifier || '0') + '</div>';
@@ -1845,7 +1938,7 @@ function formatCharacterFromApi(character) {
     // Владения
     if (character.proficiencies && character.proficiencies.length > 0) {
         out += '<div class="character-section">';
-        out += '<div class="section-title">⚔️ Владения</div>';
+        out += '<div class="section-title" onclick="toggleSection(this)">⚔️ Владения <span class="toggle-icon">▼</span></div>';
         out += '<div class="section-content">';
         out += '<div class="proficiencies-list">';
         character.proficiencies.forEach(prof => {
@@ -1858,7 +1951,7 @@ function formatCharacterFromApi(character) {
     // Описание
     if (character.description) {
         out += '<div class="character-section">';
-        out += '<div class="section-title">📝 Описание</div>';
+        out += '<div class="section-title" onclick="toggleSection(this)">📝 Описание <span class="toggle-icon">▼</span></div>';
         out += '<div class="section-content">';
         out += '<p>' + character.description + '</p>';
         out += '</div></div>';
@@ -1867,7 +1960,7 @@ function formatCharacterFromApi(character) {
     // Предыстория
     if (character.background) {
         out += '<div class="character-section">';
-        out += '<div class="section-title">📖 Предыстория</div>';
+        out += '<div class="section-title" onclick="toggleSection(this)">📖 Предыстория <span class="toggle-icon">▼</span></div>';
         out += '<div class="section-content">';
         out += '<p>' + character.background + '</p>';
         out += '</div></div>';
@@ -1944,7 +2037,7 @@ function formatEnemiesFromApi(enemies) {
         
         // Основная информация
         out += '<div class="enemy-section">';
-        out += '<div class="section-title">🏷️ Основная информация</div>';
+        out += '<div class="section-title" onclick="toggleSection(this)">🏷️ Основная информация <span class="toggle-icon">▼</span></div>';
         out += '<div class="section-content">';
         out += '<div class="info-grid">';
         out += '<div class="info-item"><strong>Тип:</strong> ' + (enemy.type || 'Не определен') + '</div>';
@@ -1955,7 +2048,7 @@ function formatEnemiesFromApi(enemies) {
         
         // Боевые характеристики
         out += '<div class="enemy-section">';
-        out += '<div class="section-title">⚔️ Боевые характеристики</div>';
+        out += '<div class="section-title" onclick="toggleSection(this)">⚔️ Боевые характеристики <span class="toggle-icon">▼</span></div>';
         out += '<div class="section-content">';
         out += '<div class="info-grid">';
         out += '<div class="info-item"><strong>Хиты:</strong> ' + (enemy.hit_points || 'Не определены') + '</div>';
@@ -1967,7 +2060,7 @@ function formatEnemiesFromApi(enemies) {
         // Характеристики
         if (enemy.abilities) {
             out += '<div class="enemy-section">';
-            out += '<div class="section-title">📊 Характеристики</div>';
+            out += '<div class="section-title" onclick="toggleSection(this)">📊 Характеристики <span class="toggle-icon">▼</span></div>';
             out += '<div class="section-content">';
             out += '<div class="abilities-grid">';
             out += '<div class="ability-item">СИЛ: ' + (enemy.abilities.str || '?') + '</div>';
@@ -1983,7 +2076,7 @@ function formatEnemiesFromApi(enemies) {
         // Действия
         if (enemy.actions && enemy.actions.length > 0) {
             out += '<div class="enemy-section">';
-            out += '<div class="section-title">⚔️ Действия</div>';
+            out += '<div class="section-title" onclick="toggleSection(this)">⚔️ Действия <span class="toggle-icon">▼</span></div>';
             out += '<div class="section-content">';
             out += '<ul class="actions-list">';
             enemy.actions.forEach(action => {
@@ -1996,7 +2089,7 @@ function formatEnemiesFromApi(enemies) {
         // Особые способности
         if (enemy.special_abilities && enemy.special_abilities.length > 0) {
             out += '<div class="enemy-section">';
-            out += '<div class="section-title">🌟 Особые способности</div>';
+            out += '<div class="section-title" onclick="toggleSection(this)">🌟 Особые способности <span class="toggle-icon">▼</span></div>';
             out += '<div class="section-content">';
             out += '<ul class="abilities-list">';
             enemy.special_abilities.forEach(ability => {
@@ -2009,7 +2102,7 @@ function formatEnemiesFromApi(enemies) {
         // Описание
         if (enemy.description) {
             out += '<div class="enemy-section">';
-            out += '<div class="section-title">📝 Описание</div>';
+            out += '<div class="section-title" onclick="toggleSection(this)">📝 Описание <span class="toggle-icon">▼</span></div>';
             out += '<div class="section-content">';
             out += '<p>' + enemy.description + '</p>';
             out += '</div></div>';
@@ -2113,14 +2206,20 @@ function saveNote(content) {
         method: 'POST',
         headers: {'Content-Type': 'application/x-www-form-urlencoded'},
         body: 'add_note=1&note_content=' + encodeURIComponent(noteWithName)
-    }).then(() => location.reload());
+    }).then(() => {
+        // Обновляем только блок заметок без перезагрузки страницы
+        updateNotesDisplay();
+    });
 }
 function removeNote(idx) {
     fetch('', {
         method: 'POST',
         headers: {'Content-Type': 'application/x-www-form-urlencoded'},
         body: 'remove_note=' + encodeURIComponent(idx)
-    }).then(() => location.reload());
+    }).then(() => {
+        // Обновляем только блок заметок без перезагрузки страницы
+        updateNotesDisplay();
+    });
 }
 function expandNote(idx) {
     if (window.allNotes && window.allNotes[idx]) {
@@ -2144,6 +2243,26 @@ function expandNote(idx) {
 }
 // Передаём все заметки в JS
 window.allNotes = <?php echo json_encode($_SESSION['notes'], JSON_UNESCAPED_UNICODE); ?>;
+
+// Функция для обновления отображения заметок без перезагрузки страницы
+function updateNotesDisplay() {
+    // Плавно скрываем заметки
+    const notesSection = document.querySelector('b:contains("Заметки:")');
+    if (notesSection) {
+        const notesContainer = notesSection.parentElement;
+        if (notesContainer) {
+            notesContainer.style.opacity = '0';
+            notesContainer.style.transform = 'translateY(-10px)';
+            notesContainer.style.transition = 'all 0.3s ease';
+        }
+    }
+    
+    // Перезагружаем страницу через небольшую задержку
+    setTimeout(() => {
+        window.location.reload();
+    }, 300);
+}
+
 // Debug: выводим первую строку каждой заметки в консоль
 if (window.allNotes) {
     window.allNotes.forEach((n, i) => {
@@ -2223,7 +2342,12 @@ document.querySelector('form').onsubmit = function(e) {
             // Ctrl+Enter для отправки сообщения
             if (e.ctrlKey && e.key === 'Enter') {
                 e.preventDefault();
-                document.getElementById('chatForm').submit();
+                // Используем новую функцию AI чата вместо старой формы
+                if (typeof sendAIMessage === 'function') {
+                    sendAIMessage();
+                } else {
+                    document.getElementById('chatForm').submit();
+                }
             }
             
             // F1 для броска костей

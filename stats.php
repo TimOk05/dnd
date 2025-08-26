@@ -55,100 +55,191 @@ if ($userCreatedAt !== 'Неизвестно') {
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Статистика - DnD Copilot</title>
     <style>
+        :root {
+            /* Светлая тема */
+            --bg-primary: #f8ecd0;
+            --bg-secondary: #fffbe6;
+            --bg-tertiary: #f3e1b6;
+            --text-primary: #2d1b00;
+            --text-secondary: #3d2a0a;
+            --text-tertiary: #7c4a02;
+            --accent-primary: #a67c52;
+            --accent-secondary: #7c4a02;
+            --border-primary: #a67c52;
+            --shadow-primary: #0002;
+        }
+        
+        [data-theme="dark"] {
+            --bg-primary: #0f0f23;
+            --bg-secondary: #1a1a2e;
+            --bg-tertiary: #16213e;
+            --text-primary: #e8e8e8;
+            --text-secondary: #d1d1d1;
+            --text-tertiary: #b8a9c9;
+            --accent-primary: #8b5cf6;
+            --accent-secondary: #7c3aed;
+            --border-primary: #7209b7;
+            --shadow-primary: #0004;
+        }
+        
+        [data-theme="medium"] {
+            --bg-primary: #2d1810;
+            --bg-secondary: #3d2418;
+            --bg-tertiary: #4a2e1f;
+            --text-primary: #f4e4d6;
+            --text-secondary: #e8d4c2;
+            --text-tertiary: #dcc4ae;
+            --accent-primary: #d2691e;
+            --accent-secondary: #ff8c00;
+            --border-primary: #8b4513;
+            --shadow-primary: #0003;
+        }
+        
         body {
-            font-family: Arial, sans-serif;
+            font-family: 'Roboto', Arial, sans-serif;
             margin: 0;
             padding: 20px;
-            background: #f5f5f5;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            transition: all 0.3s ease;
         }
+        
+        .theme-switcher {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 1000;
+        }
+        
+        .theme-btn {
+            background: var(--accent-primary);
+            color: white;
+            border: none;
+            padding: 8px 12px;
+            border-radius: 6px;
+            cursor: pointer;
+            margin-left: 5px;
+            font-size: 0.9em;
+            transition: all 0.3s ease;
+        }
+        
+        .theme-btn:hover {
+            background: var(--accent-secondary);
+        }
+        
+        .theme-btn.active {
+            background: var(--accent-secondary);
+            box-shadow: 0 0 10px var(--accent-primary);
+        }
+        
         .stats-container {
             max-width: 800px;
             margin: 0 auto;
-            background: white;
+            background: var(--bg-secondary);
             border-radius: 10px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            box-shadow: 0 4px 20px var(--shadow-primary);
             overflow: hidden;
+            border: 2px solid var(--border-primary);
         }
+        
         .stats-header {
-            background: #3498db;
+            background: var(--accent-primary);
             color: white;
             padding: 20px;
             text-align: center;
         }
+        
         .stats-header h1 {
             margin: 0;
             font-size: 2em;
         }
+        
         .stats-content {
             padding: 20px;
         }
+        
         .stats-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
             gap: 20px;
             margin-bottom: 30px;
         }
+        
         .stat-card {
-            background: #ecf0f1;
+            background: var(--bg-tertiary);
             padding: 20px;
             border-radius: 8px;
             text-align: center;
+            border: 1px solid var(--border-primary);
         }
+        
         .stat-number {
             font-size: 2.5em;
             font-weight: bold;
-            color: #2c3e50;
+            color: var(--text-primary);
             margin-bottom: 10px;
         }
+        
         .stat-label {
-            color: #7f8c8d;
+            color: var(--text-secondary);
             font-size: 1.1em;
         }
+        
         .section {
             margin-bottom: 30px;
         }
+        
         .section h2 {
-            color: #2c3e50;
-            border-bottom: 2px solid #3498db;
+            color: var(--text-primary);
+            border-bottom: 2px solid var(--accent-primary);
             padding-bottom: 10px;
             margin-bottom: 20px;
         }
+        
         .user-info {
-            background: #f8f9fa;
+            background: var(--bg-tertiary);
             padding: 20px;
             border-radius: 8px;
-            border-left: 4px solid #3498db;
+            border-left: 4px solid var(--accent-primary);
         }
+        
         .info-row {
             display: flex;
             justify-content: space-between;
             padding: 10px 0;
-            border-bottom: 1px solid #eee;
+            border-bottom: 1px solid var(--border-primary);
         }
+        
         .info-row:last-child {
             border-bottom: none;
         }
+        
         .info-label {
             font-weight: bold;
-            color: #2c3e50;
+            color: var(--text-primary);
         }
+        
         .info-value {
-            color: #7f8c8d;
+            color: var(--text-secondary);
         }
+        
         .back-link {
             display: inline-block;
             margin-bottom: 20px;
-            color: #3498db;
+            color: var(--accent-primary);
             text-decoration: none;
             padding: 10px 20px;
-            background: #ecf0f1;
+            background: var(--bg-tertiary);
             border-radius: 5px;
+            border: 1px solid var(--border-primary);
+            transition: all 0.3s ease;
         }
         .back-link:hover {
-            background: #d5dbdb;
+            background: var(--accent-primary);
+            color: white;
         }
         .achievement {
-            background: #f39c12;
+            background: var(--accent-secondary);
             color: white;
             padding: 15px;
             border-radius: 8px;
@@ -161,6 +252,13 @@ if ($userCreatedAt !== 'Неизвестно') {
     </style>
 </head>
 <body>
+    <!-- Переключатель тем -->
+    <div class="theme-switcher">
+        <button class="theme-btn active" onclick="setTheme('light')">☀️</button>
+        <button class="theme-btn" onclick="setTheme('dark')">🌙</button>
+        <button class="theme-btn" onclick="setTheme('medium')">🍂</button>
+    </div>
+    
     <div class="stats-container">
         <div class="stats-header">
             <h1>📊 Статистика</h1>
@@ -266,5 +364,45 @@ if ($userCreatedAt !== 'Неизвестно') {
             </div>
         </div>
     </div>
+    
+    <script>
+        // Функция для переключения тем
+        function setTheme(theme) {
+            // Убираем активный класс со всех кнопок
+            document.querySelectorAll('.theme-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            
+            // Добавляем активный класс к выбранной кнопке
+            event.target.classList.add('active');
+            
+            // Устанавливаем тему
+            document.documentElement.setAttribute('data-theme', theme);
+            
+            // Сохраняем выбор в localStorage
+            localStorage.setItem('theme', theme);
+        }
+        
+        // Загружаем сохраненную тему при загрузке страницы
+        document.addEventListener('DOMContentLoaded', function() {
+            const savedTheme = localStorage.getItem('theme') || 'light';
+            setTheme(savedTheme);
+            
+            // Устанавливаем правильную активную кнопку
+            document.querySelectorAll('.theme-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            
+            const themeButtons = {
+                'light': document.querySelector('.theme-btn:nth-child(1)'),
+                'dark': document.querySelector('.theme-btn:nth-child(2)'),
+                'medium': document.querySelector('.theme-btn:nth-child(3)')
+            };
+            
+            if (themeButtons[savedTheme]) {
+                themeButtons[savedTheme].classList.add('active');
+            }
+        });
+    </script>
 </body>
 </html>
