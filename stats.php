@@ -82,18 +82,7 @@ if ($userCreatedAt !== 'Неизвестно') {
             --shadow-primary: #0004;
         }
         
-        [data-theme="medium"] {
-            --bg-primary: #2d1810;
-            --bg-secondary: #3d2418;
-            --bg-tertiary: #4a2e1f;
-            --text-primary: #f4e4d6;
-            --text-secondary: #e8d4c2;
-            --text-tertiary: #dcc4ae;
-            --accent-primary: #d2691e;
-            --accent-secondary: #ff8c00;
-            --border-primary: #8b4513;
-            --shadow-primary: #0003;
-        }
+
         
         body {
             font-family: 'Roboto', Arial, sans-serif;
@@ -256,7 +245,6 @@ if ($userCreatedAt !== 'Неизвестно') {
     <div class="theme-switcher">
         <button class="theme-btn active" onclick="setTheme('light')">☀️</button>
         <button class="theme-btn" onclick="setTheme('dark')">🌙</button>
-        <button class="theme-btn" onclick="setTheme('medium')">🍂</button>
     </div>
     
     <div class="stats-container">
@@ -395,8 +383,7 @@ if ($userCreatedAt !== 'Неизвестно') {
             
             const themeButtons = {
                 'light': document.querySelector('.theme-btn:nth-child(1)'),
-                'dark': document.querySelector('.theme-btn:nth-child(2)'),
-                'medium': document.querySelector('.theme-btn:nth-child(3)')
+                'dark': document.querySelector('.theme-btn:nth-child(2)')
             };
             
             if (themeButtons[savedTheme]) {

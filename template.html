@@ -46,7 +46,7 @@
             --shadow-primary: #0002;
             --shadow-secondary: #0006;
             --shadow-tertiary: #0001;
-            --bg-image: none;
+            --bg-image: url('backgrounds/light-theme.png');
         }
         /* Тёмная тема */
         
@@ -75,36 +75,7 @@
             --shadow-primary: #0004;
             --shadow-secondary: #0008;
             --shadow-tertiary: #0002;
-            --bg-image: none;
-        }
-        /* Средняя тема (коричневая) */
-        
-        [data-theme="medium"] {
-            --bg-primary: #2d1810;
-            --bg-secondary: #3d2418;
-            --bg-tertiary: #4a2e1f;
-            --bg-quaternary: #5a3826;
-            --bg-quinary: #6a422d;
-            --bg-senary: #7a4c34;
-            --text-primary: #f4e4d6;
-            --text-secondary: #e8d4c2;
-            --text-tertiary: #dcc4ae;
-            --text-quaternary: #d0b49a;
-            --text-quinary: #c4a486;
-            --text-senary: #b89472;
-            --border-primary: #8b4513;
-            --border-secondary: #a0522d;
-            --border-tertiary: #cd853f;
-            --accent-primary: #d2691e;
-            --accent-secondary: #ff8c00;
-            --accent-success: #228b22;
-            --accent-info: #4682b4;
-            --accent-warning: #daa520;
-            --accent-danger: #dc143c;
-            --shadow-primary: #0003;
-            --shadow-secondary: #0006;
-            --shadow-tertiary: #0001;
-            --bg-image: none;
+            --bg-image: url('backgrounds/dark-theme.png');
         }
         /* Дополнительные стили для тёмной темы */
         
@@ -131,7 +102,8 @@
         }
         
         body {
-            background: var(--bg-primary);
+            background: var(--bg-image) no-repeat center center fixed, var(--bg-primary);
+            background-size: cover;
             min-height: 100vh;
             margin: 0;
             font-family: 'Roboto', 'IM Fell English SC', serif;
@@ -3532,10 +3504,8 @@
                 const currentTheme = body.getAttribute('data-theme');
                 let newTheme;
 
-                // Переключаем между тремя темами: light -> medium -> dark -> light
+                // Переключаем между двумя темами: light -> dark -> light
                 if (currentTheme === 'light') {
-                    newTheme = 'medium';
-                } else if (currentTheme === 'medium') {
                     newTheme = 'dark';
                 } else {
                     newTheme = 'light';
@@ -3549,10 +3519,8 @@
             function updateThemeIcon(theme) {
                 if (theme === 'dark') {
                     themeIcon.textContent = '🌙';
-                } else if (theme === 'medium') {
-                    themeIcon.textContent = '☀️';
                 } else {
-                    themeIcon.textContent = '🌅';
+                    themeIcon.textContent = '☀️';
                 }
             }
 
