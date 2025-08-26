@@ -159,11 +159,42 @@ if (isset($_POST['fast_action'])) {
             }
             
             $preview = $nameLine ?: '(нет данных)';
-            $html .= '<div class="note-item" onclick="expandNote(' . $i . ')">' . htmlspecialchars($preview, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8') . '<button class="note-remove" onclick="event.stopPropagation();removeNote(' . $i . ')">×</button></div>';
+            $html .= '<div class="note-item" onclick="expandNote(' . $i . ')">' . htmlspecialchars($preview, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8') . '<button class="note-edit" onclick="event.stopPropagation();editNoteTitle(' . $i . ', \'' . htmlspecialchars($nameLine, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8') . '\')">✏️</button><button class="note-remove" onclick="event.stopPropagation();removeNote(' . $i . ')">×</button></div>';
         }
         echo $html;
         exit;
     }
+    // --- Редактирование заголовка заметки ---
+    if ($action === 'edit_note_title') {
+        $noteIndex = (int)($_POST['note_index'] ?? -1);
+        $newTitle = trim($_POST['new_title'] ?? '');
+        
+        if ($noteIndex >= 0 && $noteIndex < count($_SESSION['notes']) && $newTitle !== '') {
+            $note = $_SESSION['notes'][$noteIndex];
+            
+            // Заменяем заголовок в зависимости от типа заметки
+            if (preg_match('/<div class="dice-result-header">[^<]+<\/div>/iu', $note)) {
+                // Для результатов костей
+                $note = preg_replace('/<div class="dice-result-header">[^<]+<\/div>/iu', '<div class="dice-result-header">' . htmlspecialchars($newTitle, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8') . '</div>', $note);
+            } elseif (preg_match('/<div class="npc-name-header">[^<]+<\/div>/iu', $note)) {
+                // Для NPC
+                $note = preg_replace('/<div class="npc-name-header">[^<]+<\/div>/iu', '<div class="npc-name-header">' . htmlspecialchars($newTitle, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8') . '</div>', $note);
+            } elseif (preg_match('/<div class="character-note-title">[^<]+<\/div>/iu', $note)) {
+                // Для персонажей
+                $note = preg_replace('/<div class="character-note-title">[^<]+<\/div>/iu', '<div class="character-note-title">' . htmlspecialchars($newTitle, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8') . '</div>', $note);
+            } elseif (preg_match('/<div class="enemy-note-title">[^<]+<\/div>/iu', $note)) {
+                // Для противников
+                $note = preg_replace('/<div class="enemy-note-title">[^<]+<\/div>/iu', '<div class="enemy-note-title">' . htmlspecialchars($newTitle, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8') . '</div>', $note);
+            }
+            
+            $_SESSION['notes'][$noteIndex] = $note;
+            echo 'success';
+        } else {
+            echo 'error';
+        }
+        exit;
+    }
+    
     // --- Получение данных заметок ---
     if ($action === 'get_notes_data') {
         header('Content-Type: application/json');
@@ -311,7 +342,7 @@ foreach ($_SESSION['notes'] as $i => $note) {
     }
     
     $preview = $nameLine ?: '(нет данных)';
-    $notesBlock .= '<div class="note-item" onclick="expandNote(' . $i . ')">' . htmlspecialchars($preview, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8') . '<button class="note-remove" onclick="event.stopPropagation();removeNote(' . $i . ')">×</button></div>';
+    $notesBlock .= '<div class="note-item" onclick="expandNote(' . $i . ')">' . htmlspecialchars($preview, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8') . '<button class="note-edit" onclick="event.stopPropagation();editNoteTitle(' . $i . ', \'' . htmlspecialchars($nameLine, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8') . '\')">✏️</button><button class="note-remove" onclick="event.stopPropagation();removeNote(' . $i . ')">×</button></div>';
 }
 
 // --- Загрузка шаблона и подстановка контента ---
@@ -2382,6 +2413,32 @@ window.allNotes = <?php echo json_encode($_SESSION['notes'], JSON_UNESCAPED_UNIC
 function updateNotesDisplay() {
     // Используем ту же логику, что и для мгновенного обновления
     updateNotesInstantly();
+}
+
+// Функция для редактирования заголовка заметки
+function editNoteTitle(noteIndex, currentTitle) {
+    const newTitle = prompt('Введите новое название заметки:', currentTitle);
+    
+    if (newTitle !== null && newTitle.trim() !== '') {
+        fetch('', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/x-www-form-urlencoded'},
+            body: 'fast_action=edit_note_title&note_index=' + noteIndex + '&new_title=' + encodeURIComponent(newTitle.trim())
+        })
+        .then(r => r.text())
+        .then(response => {
+            if (response === 'success') {
+                // Обновляем отображение заметок
+                updateNotesInstantly();
+            } else {
+                alert('Ошибка при обновлении названия заметки');
+            }
+        })
+        .catch(error => {
+            console.error('Ошибка:', error);
+            alert('Ошибка при обновлении названия заметки');
+        });
+    }
 }
 
 // Функция для мгновенного обновления заметок без перезагрузки
