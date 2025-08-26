@@ -109,6 +109,8 @@ if (isset($_POST['fast_action'])) {
                 $nameLine = trim($matches[1]);
             } elseif (preg_match('/<div class="npc-modern-header">([^<]+)<\/div>/iu', $note, $matches)) {
                 $nameLine = trim($matches[1]);
+            } elseif (preg_match('/<div class="dice-result-header">([^<]+)<\/div>/iu', $note, $matches)) {
+                $nameLine = trim($matches[1]);
             } else {
                 // Для старых заметок ищем строку с именем по разным вариантам
                 $plain = strip_tags(str_replace(['<br>', "\n"], "\n", $note));
@@ -259,6 +261,8 @@ foreach ($_SESSION['notes'] as $i => $note) {
         $nameLine = trim($matches[1]);
     } elseif (preg_match('/<div class="npc-modern-header">([^<]+)<\/div>/iu', $note, $matches)) {
         $nameLine = trim($matches[1]);
+    } elseif (preg_match('/<div class="dice-result-header">([^<]+)<\/div>/iu', $note, $matches)) {
+        $nameLine = trim($matches[1]);
     } else {
         // Для старых заметок ищем строку с именем по разным вариантам
         $plain = strip_tags(str_replace(['<br>', "\n"], "\n", $note));
@@ -342,7 +346,7 @@ function getDiceResult(dice) {
         
         document.getElementById('modal-content').innerHTML = editButton + formatResultSegments(txt, false);
         document.getElementById('modal-save').style.display = '';
-        document.getElementById('modal-save').onclick = function() { saveNoteAndUpdate(txt); closeModal(); };
+        document.getElementById('modal-save').onclick = function() { saveDiceResultAsNote(txt, label); closeModal(); };
     });
 }
 
@@ -373,7 +377,7 @@ function updateDiceComment(dice, count) {
         
         document.getElementById('modal-content').innerHTML = editButton + formatResultSegments(txt, false);
         document.getElementById('modal-save').style.display = '';
-        document.getElementById('modal-save').onclick = function() { saveNoteAndUpdate(txt); closeModal(); };
+        document.getElementById('modal-save').onclick = function() { saveDiceResultAsNote(txt, newLabel); closeModal(); };
     });
 }
 // --- Генерация персонажей и противников ---
@@ -2207,6 +2211,26 @@ function closeModal() {
 }
 document.getElementById('modal-close').onclick = closeModal;
 document.getElementById('modal-bg').onclick = function(e) { if (e.target === this) closeModal(); };
+
+// Функция для сохранения результата костей с комментарием
+function saveDiceResultAsNote(content, comment) {
+    // Если comment не передан, используем "Бросок костей"
+    if (!comment || comment.trim() === '') {
+        comment = 'Бросок костей';
+    }
+    
+    // Добавляем комментарий в начало заметки для идентификации
+    var noteWithComment = '<div class="dice-result-header">' + comment + '</div>' + content;
+    
+    fetch('', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/x-www-form-urlencoded'},
+        body: 'add_note=1&note_content=' + encodeURIComponent(noteWithComment)
+    }).then(() => {
+        // Мгновенно обновляем заметки без перезагрузки
+        updateNotesInstantly();
+    });
+}
 
 // Новая функция для сохранения заметки с мгновенным обновлением
 function saveNoteAndUpdate(content) {
