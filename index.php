@@ -2353,9 +2353,6 @@ function updateNotesInstantly() {
     const notesBlock = document.getElementById('notes-block');
     if (!notesBlock) return;
     
-    // Мерцание - быстро скрываем и показываем
-    notesBlock.style.opacity = '0';
-    
     // Запрашиваем обновленные заметки
     fetch('', {
         method: 'POST',
@@ -2382,11 +2379,6 @@ function updateNotesInstantly() {
                 notesBlock.appendChild(clonedItem);
             });
         }
-        
-        // Показываем блок заметок обратно
-        setTimeout(() => {
-            notesBlock.style.opacity = '1';
-        }, 100);
         
         // Обновляем данные в памяти
         fetch('', {
