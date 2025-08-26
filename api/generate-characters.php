@@ -245,11 +245,10 @@ class CharacterGenerator {
                 'saving_throws' => $this->getSavingThrows($class_data, $abilities)
             ];
             
-            // Добавляем AI-описание если включено
-            if ($use_ai) {
-                $character['description'] = $this->generateDescription($character);
-                $character['background'] = $this->generateBackground($character);
-            }
+            // Добавляем описание (AI или fallback)
+            $character['use_ai'] = $use_ai ? 'on' : 'off';
+            $character['description'] = $this->generateDescription($character);
+            $character['background'] = $this->generateBackground($character);
             
             return [
                 'success' => true,
@@ -596,20 +595,33 @@ class CharacterGenerator {
         $damage_die = $class_data['hit_die'];
         $damage_bonus = floor(($abilities['str'] - 10) / 2);
         
-        // Улучшение урона с уровнем
-        $damage_multiplier = 1;
+        // Определяем количество кубиков и их размер
+        $dice_count = 1;
+        $dice_size = $damage_die;
+        
+        // Улучшение урона с уровнем (дополнительные атаки)
         if ($level >= 5) {
-            $damage_multiplier = 2; // Дополнительная атака
+            $dice_count = 2; // Дополнительная атака
         }
         if ($level >= 11) {
-            $damage_multiplier = 3; // Улучшенная дополнительная атака
+            $dice_count = 3; // Улучшенная дополнительная атака
         }
         if ($level >= 20) {
-            $damage_multiplier = 4; // Превосходная дополнительная атака
+            $dice_count = 4; // Превосходная дополнительная атака
         }
         
-        $total_damage = $damage_die * $damage_multiplier;
-        return $total_damage . ' + ' . ($damage_bonus * $damage_multiplier);
+        // Формируем формулу урона в формате "XdY + Z"
+        $damage_formula = $dice_count . 'd' . $dice_size;
+        
+        // Добавляем бонус только если он положительный
+        if ($damage_bonus > 0) {
+            $damage_formula .= ' + ' . $damage_bonus;
+        } elseif ($damage_bonus < 0) {
+            // Для отрицательных бонусов показываем как "XdY - Z"
+            $damage_formula .= ' - ' . abs($damage_bonus);
+        }
+        
+        return $damage_formula;
     }
     
     /**
@@ -944,6 +956,8 @@ class CharacterGenerator {
      * Генерация описания с помощью AI
      */
     private function generateDescription($character) {
+        // AI всегда включен для генерации описаний
+        
         // Формируем полную информацию о персонаже для AI
         $characterInfo = "Персонаж: {$character['name']}, {$character['race']} {$character['class']} {$character['level']} уровня.\n";
         $characterInfo .= "Профессия: {$character['occupation']}\n";
@@ -958,7 +972,7 @@ class CharacterGenerator {
         }
         
         if (!empty($character['spells'])) {
-            $characterInfo .= "Заклинания: " . implode(', ', $character['spells']) . "\n";
+            $characterInfo .= "Заклинания: " . implode(', ', array_column($character['spells'], 'name')) . "\n";
         }
         
         $prompt = "Опиши внешность и характер персонажа на основе его полных данных:\n\n" . $characterInfo . "\n" .
@@ -967,9 +981,10 @@ class CharacterGenerator {
         
         try {
             $response = $this->callDeepSeek($prompt);
-            return $response ?: 'Описание не определено';
+            return $response ?: $this->generateFallbackDescription($character);
         } catch (Exception $e) {
-            return 'Описание не определено';
+            error_log("AI description generation failed: " . $e->getMessage());
+            return $this->generateFallbackDescription($character);
         }
     }
     
@@ -977,6 +992,8 @@ class CharacterGenerator {
      * Генерация предыстории с помощью AI
      */
     private function generateBackground($character) {
+        // AI всегда включен для генерации предысторий
+        
         // Формируем полную информацию о персонаже для AI
         $characterInfo = "Персонаж: {$character['name']}, {$character['race']} {$character['class']} {$character['level']} уровня.\n";
         $characterInfo .= "Профессия: {$character['occupation']}\n";
@@ -991,7 +1008,7 @@ class CharacterGenerator {
         }
         
         if (!empty($character['spells'])) {
-            $characterInfo .= "Заклинания: " . implode(', ', $character['spells']) . "\n";
+            $characterInfo .= "Заклинания: " . implode(', ', array_column($character['spells'], 'name')) . "\n";
         }
         
         $prompt = "Создай краткую предысторию персонажа на основе его полных данных:\n\n" . $characterInfo . "\n" .
@@ -1000,10 +1017,71 @@ class CharacterGenerator {
         
         try {
             $response = $this->callDeepSeek($prompt);
-            return $response ?: 'Предыстория не определена';
+            return $response ?: $this->generateFallbackBackground($character);
         } catch (Exception $e) {
-            return 'Предыстория не определена';
+            error_log("AI background generation failed: " . $e->getMessage());
+            return $this->generateFallbackBackground($character);
         }
+    }
+    
+    /**
+     * Генерация fallback описания без AI
+     */
+    private function generateFallbackDescription($character) {
+        $race = $character['race'];
+        $class = $character['class'];
+        $gender = $character['gender'];
+        $name = $character['name'];
+        
+        $descriptions = [
+            'human' => [
+                'male' => "{$name} - крепкий мужчина средних лет с решительным взглядом. Его руки покрыты мозолями от долгих лет тренировок, а в глазах читается опыт и мудрость.",
+                'female' => "{$name} - стройная женщина с уверенной осанкой и острым взглядом. Её движения точны и выверены, а в голосе звучит непоколебимая уверенность."
+            ],
+            'elf' => [
+                'male' => "{$name} - высокий эльф с благородными чертами лица и длинными светлыми волосами. Его движения грациозны, а взгляд проницателен и полон древней мудрости.",
+                'female' => "{$name} - изящная эльфийка с тонкими чертами лица и серебристыми волосами. Её походка легка как ветер, а глаза сияют внутренним светом."
+            ],
+            'dwarf' => [
+                'male' => "{$name} - коренастый дварф с густой бородой и крепкими руками. Его взгляд прямой и честный, а голос звучит как гром среди гор.",
+                'female' => "{$name} - крепкая дварфийка с заплетёнными в косы волосами и решительным выражением лица. Её руки умелые, а характер твёрд как камень."
+            ],
+            'halfling' => [
+                'male' => "{$name} - жизнерадостный полурослик с кудрявыми волосами и весёлыми глазами. Его движения быстры и ловки, а улыбка заразительна.",
+                'female' => "{$name} - очаровательная полуросличка с милым личиком и звонким голосом. Её глаза полны любопытства, а характер дружелюбен и открыт."
+            ]
+        ];
+        
+        if (isset($descriptions[$race][$gender])) {
+            return $descriptions[$race][$gender];
+        }
+        
+        // Fallback для других рас
+        return "{$name} - представитель расы {$race}, чей внешний вид отражает особенности его народа. {$class} {$character['level']} уровня, готовый к приключениям.";
+    }
+    
+    /**
+     * Генерация fallback предыстории без AI
+     */
+    private function generateFallbackBackground($character) {
+        $race = $character['race'];
+        $class = $character['class'];
+        $occupation = $character['occupation'];
+        $name = $character['name'];
+        
+        $backgrounds = [
+            'human' => "{$name} вырос в мире людей, где научился ценить силу и упорство. Работая {$occupation}, он развил навыки, которые привели его к пути {$class}.",
+            'elf' => "{$name} провёл долгие годы в изучении древних знаний своего народа. Его интерес к {$occupation} и природная склонность к магии привели к становлению {$class}.",
+            'dwarf' => "{$name} родился среди гор и камня, где почитается мастерство и честь. Работая {$occupation}, он развил качества, необходимые для пути {$class}.",
+            'halfling' => "{$name} вырос в уютном мире полуросликов, где ценится дружба и смекалка. Его опыт в {$occupation} помог развить навыки, полезные для {$class}."
+        ];
+        
+        if (isset($backgrounds[$race])) {
+            return $backgrounds[$race];
+        }
+        
+        // Fallback для других рас
+        return "{$name} прошёл непростой путь от {$occupation} до {$class}. Его опыт и навыки делают его ценным союзником в любом приключении.";
     }
     
     /**
