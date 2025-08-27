@@ -75,17 +75,17 @@
             --shadow-primary: rgba(210, 105, 30, 0.2);
             --shadow-secondary: rgba(210, 105, 30, 0.3);
             --shadow-tertiary: rgba(210, 105, 30, 0.1);
-            --bg-image: url('backgrounds/medium-theme.png');
+            --bg-image: url('backgrounds/orange-theme.png');
         }
         /* Стили кнопок для средней темы */
         
-        [data-theme="medium"] .fast-btn,
-        [data-theme="medium"] button[type=submit],
-        [data-theme="medium"] .modal .modal-save,
-        [data-theme="medium"] .modal-regenerate,
-        [data-theme="medium"] .logout-btn,
-        [data-theme="medium"] .stats-link,
-        [data-theme="medium"] .admin-link {
+        html[data-theme="medium"] .fast-btn,
+        html[data-theme="medium"] button[type=submit],
+        html[data-theme="medium"] .modal .modal-save,
+        html[data-theme="medium"] .modal-regenerate,
+        html[data-theme="medium"] .logout-btn,
+        html[data-theme="medium"] .stats-link,
+        html[data-theme="medium"] .admin-link {
             color: #f4e4d6 !important;
             font-weight: 700 !important;
             text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.9) !important;
@@ -97,13 +97,13 @@
             overflow: hidden !important;
         }
         
-        [data-theme="medium"] .fast-btn:hover,
-        [data-theme="medium"] button[type=submit]:hover,
-        [data-theme="medium"] .modal .modal-save:hover,
-        [data-theme="medium"] .modal-regenerate:hover,
-        [data-theme="medium"] .logout-btn:hover,
-        [data-theme="medium"] .stats-link:hover,
-        [data-theme="medium"] .admin-link:hover {
+        html[data-theme="medium"] .fast-btn:hover,
+        html[data-theme="medium"] button[type=submit]:hover,
+        html[data-theme="medium"] .modal .modal-save:hover,
+        html[data-theme="medium"] .modal-regenerate:hover,
+        html[data-theme="medium"] .logout-btn:hover,
+        html[data-theme="medium"] .stats-link:hover,
+        html[data-theme="medium"] .admin-link:hover {
             color: #ffffff !important;
             background: linear-gradient(135deg, #ff8c00, #d2691e) !important;
             box-shadow: 0 6px 20px rgba(210, 105, 30, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.2) !important;
@@ -112,7 +112,7 @@
         }
         /* Стили для admin-link в средней теме */
         
-        [data-theme="medium"] .admin-link {
+        html[data-theme="medium"] .admin-link {
             position: absolute !important;
             top: 20px !important;
             right: 80px !important;
@@ -123,14 +123,14 @@
             z-index: 100 !important;
         }
         
-        [data-theme="medium"] .admin-link:hover {
+        html[data-theme="medium"] .admin-link:hover {
             background: var(--bg-secondary) !important;
             color: var(--accent-warning) !important;
             box-shadow: 0 4px 12px var(--shadow-secondary) !important;
         }
         /* Стили для stats-link в средней теме */
         
-        [data-theme="medium"] .stats-link {
+        html[data-theme="medium"] .stats-link {
             position: absolute !important;
             top: 20px !important;
             right: 140px !important;
@@ -141,7 +141,7 @@
             z-index: 100 !important;
         }
         
-        [data-theme="medium"] .stats-link:hover {
+        html[data-theme="medium"] .stats-link:hover {
             background: var(--bg-secondary) !important;
             color: var(--accent-info) !important;
             box-shadow: 0 4px 12px var(--shadow-secondary) !important;
@@ -241,13 +241,13 @@
         }
         /* Дополнительные стили для тёмной темы */
         
-        [data-theme="dark"] .fast-btn,
-        [data-theme="dark"] button[type=submit],
-        [data-theme="dark"] .modal .modal-save,
-        [data-theme="dark"] .modal-regenerate,
-        [data-theme="dark"] .logout-btn,
-        [data-theme="dark"] .stats-link,
-        [data-theme="dark"] .admin-link {
+        html[data-theme="dark"] .fast-btn,
+        html[data-theme="dark"] button[type=submit],
+        html[data-theme="dark"] .modal .modal-save,
+        html[data-theme="dark"] .modal-regenerate,
+        html[data-theme="dark"] .logout-btn,
+        html[data-theme="dark"] .stats-link,
+        html[data-theme="dark"] .admin-link {
             color: #ffe6e6 !important;
             font-weight: 700 !important;
             text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.9) !important;
@@ -259,13 +259,13 @@
             overflow: hidden !important;
         }
         
-        [data-theme="dark"] .fast-btn::before,
-        [data-theme="dark"] button[type=submit]::before,
-        [data-theme="dark"] .modal .modal-save::before,
-        [data-theme="dark"] .modal-regenerate::before,
-        [data-theme="dark"] .logout-btn::before,
-        [data-theme="dark"] .stats-link::before,
-        [data-theme="dark"] .admin-link::before {
+        html[data-theme="dark"] .fast-btn::before,
+        html[data-theme="dark"] button[type=submit]::before,
+        html[data-theme="dark"] .modal .modal-save::before,
+        html[data-theme="dark"] .modal-regenerate::before,
+        html[data-theme="dark"] .logout-btn::before,
+        html[data-theme="dark"] .stats-link::before,
+        html[data-theme="dark"] .admin-link::before {
             content: '';
             position: absolute;
             top: 0;
@@ -277,17 +277,17 @@
             z-index: 1;
         }
         
-        [data-theme="dark"] .fast-btn:hover::before,
-        [data-theme="dark"] button[type=submit]:hover::before,
-        [data-theme="dark"] .modal .modal-save:hover::before,
-        [data-theme="dark"] .modal-regenerate:hover::before,
-        [data-theme="dark"] .logout-btn:hover::before,
-        [data-theme="dark"] .stats-link:hover::before,
-        [data-theme="dark"] .admin-link:hover::before {
+        html[data-theme="dark"] .fast-btn:hover::before,
+        html[data-theme="dark"] button[type=submit]:hover::before,
+        html[data-theme="dark"] .modal .modal-save:hover::before,
+        html[data-theme="dark"] .modal-regenerate:hover::before,
+        html[data-theme="dark"] .logout-btn:hover::before,
+        html[data-theme="dark"] .stats-link:hover::before,
+        html[data-theme="dark"] .admin-link:hover::before {
             left: 100%;
         }
         
-        [data-theme="dark"] .theme-btn {
+        html[data-theme="dark"] .theme-btn {
             background: linear-gradient(135deg, #cc2222, #990000) !important;
             color: #ffe6e6 !important;
             border: 3px solid #cc0000 !important;
@@ -296,7 +296,7 @@
             overflow: hidden !important;
         }
         
-        [data-theme="dark"] .theme-btn::before {
+        html[data-theme="dark"] .theme-btn::before {
             content: '';
             position: absolute;
             top: 0;
@@ -309,18 +309,18 @@
             z-index: 1;
         }
         
-        [data-theme="dark"] .theme-btn:hover::before {
+        html[data-theme="dark"] .theme-btn:hover::before {
             left: 100%;
         }
         
-        [data-theme="dark"] .theme-toggle {
+        html[data-theme="dark"] .theme-toggle {
             position: absolute;
             top: 20px;
             right: 20px;
             z-index: 100;
         }
         
-        [data-theme="dark"] .admin-link {
+        html[data-theme="dark"] .admin-link {
             position: absolute !important;
             top: 20px !important;
             right: 80px !important;
@@ -331,27 +331,31 @@
             z-index: 100 !important;
         }
         
-        [data-theme="dark"] .admin-link:hover {
+        html[data-theme="dark"] .admin-link:hover {
             background: var(--bg-secondary) !important;
             color: var(--accent-warning) !important;
             box-shadow: 0 4px 12px var(--shadow-secondary) !important;
         }
         /* Стили для stats-link в темной теме */
         
-        [data-theme="dark"] .stats-link {
+        html[data-theme="dark"] .stats-link {
+            position: absolute !important;
+            top: 20px !important;
+            right: 140px !important;
             color: #ffe6e6 !important;
             background: var(--accent-info) !important;
             border: 2px solid var(--accent-info) !important;
             box-shadow: 0 2px 8px var(--shadow-primary) !important;
+            z-index: 100 !important;
         }
         
-        [data-theme="dark"] .stats-link:hover {
+        html[data-theme="dark"] .stats-link:hover {
             background: var(--bg-secondary) !important;
             color: var(--accent-info) !important;
             box-shadow: 0 4px 12px var(--shadow-secondary) !important;
         }
         
-        [data-theme="dark"] .theme-btn:hover {
+        html[data-theme="dark"] .theme-btn:hover {
             color: #ffffff !important;
             background: linear-gradient(135deg, #dd3333, #cc0000) !important;
             box-shadow: 0 6px 20px rgba(204, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.2) !important;
@@ -359,14 +363,14 @@
             border-color: #ff0000 !important;
         }
         
-        [data-theme="dark"] .fast-btn:hover,
-        [data-theme="dark"] button[type=submit]:hover,
-        [data-theme="dark"] .modal .modal-save:hover,
-        [data-theme="dark"] .modal-regenerate:hover,
-        [data-theme="dark"] .logout-btn:hover,
-        [data-theme="dark"] .stats-link:hover,
-        [data-theme="dark"] .admin-link:hover {
-            color: var(--text-primary) !important;
+        html[data-theme="dark"] .fast-btn:hover,
+        html[data-theme="dark"] button[type=submit]:hover,
+        html[data-theme="dark"] .modal .modal-save:hover,
+        html[data-theme="dark"] .modal-regenerate:hover,
+        html[data-theme="dark"] .logout-btn:hover,
+        html[data-theme="dark"] .stats-link:hover,
+        html[data-theme="dark"] .admin-link:hover {
+            color: #ffffff !important;
             text-shadow: 2px 2px 6px rgba(0, 0, 0, 1) !important;
             background: linear-gradient(135deg, #dd3333, #cc0000) !important;
             box-shadow: 0 6px 20px rgba(204, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.2) !important;
