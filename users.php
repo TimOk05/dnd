@@ -235,9 +235,23 @@ function getCurrentUser() {
         return null;
     }
     
+    // Возвращаем имя пользователя из сессии
+    return $_SESSION['username'];
+}
+
+// Функция для получения данных текущего пользователя
+function getCurrentUserData() {
+    if (!isLoggedIn()) {
+        return null;
+    }
+    
     $users = loadUsers();
     foreach ($users as $user) {
-        if ($user['id'] === $_SESSION['user_id']) {
+        if (isset($user['id']) && $user['id'] === $_SESSION['user_id']) {
+            return $user;
+        }
+        // Также проверяем по имени пользователя для совместимости
+        if (isset($user['username']) && $user['username'] === $_SESSION['username']) {
             return $user;
         }
     }
@@ -257,8 +271,8 @@ function logout() {
 
 // Функция для проверки роли пользователя
 function hasRole($role) {
-    $user = getCurrentUser();
-    return $user && $user['role'] === $role;
+    $user = getCurrentUserData();
+    return $user && isset($user['role']) && $user['role'] === $role;
 }
 
 // Функция для изменения пароля
@@ -289,6 +303,37 @@ function changePassword($userId, $currentPassword, $newPassword) {
     }
     
     return ['success' => false, 'error' => 'Пользователь не найден'];
+}
+
+// Функция для проверки прав администратора
+function isAdmin() {
+    // Проверяем, есть ли флаг администратора в сессии
+    if (isset($_SESSION['is_admin']) && $_SESSION['is_admin'] === true) {
+        return true;
+    }
+    
+    // Проверяем роль пользователя
+    $user = getCurrentUserData();
+    return $user && isset($user['role']) && $user['role'] === 'admin';
+}
+
+// Функция для проверки пароля администратора
+function checkAdminPassword($password) {
+    // Здесь можно настроить пароль администратора
+    // Для безопасности рекомендуется хранить хеш пароля в конфигурации
+    $adminPassword = getenv('ADMIN_PASSWORD') ?: 'admin123'; // Пароль по умолчанию
+    
+    // Проверяем хеш пароля
+    if (password_verify($password, password_hash($adminPassword, PASSWORD_DEFAULT))) {
+        return true;
+    }
+    
+    // Для обратной совместимости проверяем прямой пароль
+    if (hash_equals($password, $adminPassword)) {
+        return true;
+    }
+    
+    return false;
 }
 
 // Функция для удаления пользователя (только для администратора)
@@ -404,6 +449,31 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             case 'logout':
                 $result = logout();
                 $response = $result;
+                break;
+                
+            case 'admin_login':
+                $password = $_POST['password'] ?? '';
+                $csrfToken = $_POST['csrf_token'] ?? '';
+                
+                // Проверяем CSRF токен
+                if (!verifyCSRFToken($csrfToken)) {
+                    $response = ['success' => false, 'message' => 'Ошибка безопасности. Обновите страницу.'];
+                    break;
+                }
+                
+                if (empty($password)) {
+                    $response = ['success' => false, 'message' => 'Введите пароль администратора'];
+                    break;
+                }
+                
+                if (checkAdminPassword($password)) {
+                    $_SESSION['is_admin'] = true;
+                    logActivity('admin_login', 'admin', $_SERVER['REMOTE_ADDR'] ?? 'unknown', true);
+                    $response = ['success' => true, 'message' => 'Доступ администратора предоставлен'];
+                } else {
+                    logActivity('admin_login_failed', 'admin', $_SERVER['REMOTE_ADDR'] ?? 'unknown', false);
+                    $response = ['success' => false, 'message' => 'Неверный пароль администратора'];
+                }
                 break;
                 
             default:

@@ -2,6 +2,9 @@
 require_once 'config.php';
 require_once 'users.php';
 
+// Запускаем сессию
+configureSession();
+
 // Проверяем авторизацию
 if (!isLoggedIn()) {
     header('Location: login.php');
@@ -9,16 +12,8 @@ if (!isLoggedIn()) {
 }
 
 $currentUser = getCurrentUser();
+$userData = getCurrentUserData();
 $users = loadUsers();
-
-// Находим данные текущего пользователя
-$userData = null;
-foreach ($users as $user) {
-    if (hash_equals($user['username'], $currentUser)) {
-        $userData = $user;
-        break;
-    }
-}
 
 // Статистика приложения
 $totalUsers = count($users);
@@ -38,9 +33,15 @@ foreach ($users as $user) {
 }
 
 // Статистика пользователя
-$userLoginCount = $userData['login_count'] ?? 0;
-$userCreatedAt = $userData['created_at'] ?? 'Неизвестно';
-$userLastLogin = $userData['last_login'] ?? 'Никогда';
+if ($userData) {
+    $userLoginCount = $userData['login_count'] ?? 0;
+    $userCreatedAt = $userData['created_at'] ?? 'Неизвестно';
+    $userLastLogin = $userData['last_login'] ?? 'Никогда';
+} else {
+    $userLoginCount = 0;
+    $userCreatedAt = 'Неизвестно';
+    $userLastLogin = 'Никогда';
+}
 
 // Вычисляем время с регистрации
 $daysSinceRegistration = 0;
@@ -100,16 +101,16 @@ if ($userCreatedAt !== 'Неизвестно') {
         
         [data-theme="mystic"] {
             /* Мистическая тема (фиолетовая) */
-            --bg-primary: #0a0a1a;
-            --bg-secondary: #1a1a2e;
-            --bg-tertiary: #16213e;
-            --text-primary: #e0e0ff;
-            --text-secondary: #b8a9ff;
-            --text-tertiary: #9d7cff;
-            --accent-primary: #8b5cf6;
-            --accent-secondary: #7c3aed;
-            --border-primary: #8b5cf6;
-            --shadow-primary: rgba(139, 92, 246, 0.2);
+            --bg-primary: #0f0f23;
+            --bg-secondary: #1a1a3a;
+            --bg-tertiary: #252550;
+            --text-primary: #e8e8ff;
+            --text-secondary: #c8c8ff;
+            --text-tertiary: #a8a8ff;
+            --accent-primary: #6b46c1;
+            --accent-secondary: #553c9a;
+            --border-primary: #6b46c1;
+            --shadow-primary: rgba(107, 70, 193, 0.2);
         }
         
         body {
@@ -126,6 +127,76 @@ if ($userCreatedAt !== 'Неизвестно') {
             top: 20px;
             right: 20px;
             z-index: 1000;
+        }
+        
+        .theme-dropdown {
+            position: relative;
+            display: inline-block;
+        }
+        
+        .theme-menu {
+            position: absolute;
+            top: 100%;
+            right: 0;
+            background: var(--bg-secondary);
+            border: 2px solid var(--border-primary);
+            border-radius: 8px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+            min-width: 150px;
+            opacity: 0;
+            visibility: hidden;
+            transform: translateY(-10px);
+            transition: all 0.3s ease;
+            z-index: 1001;
+        }
+        
+        .theme-dropdown:hover .theme-menu {
+            opacity: 1;
+            visibility: visible;
+            transform: translateY(0);
+        }
+        
+        .theme-option {
+            display: flex;
+            align-items: center;
+            padding: 10px 15px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            border-bottom: 1px solid var(--border-primary);
+        }
+        
+        .theme-option:last-child {
+            border-bottom: none;
+        }
+        
+        .theme-option:hover {
+            background: var(--accent-primary);
+            color: white;
+        }
+        
+        .theme-option.active {
+            background: var(--accent-primary);
+            color: white;
+        }
+        
+        .theme-icon {
+            margin-right: 8px;
+            font-size: 1.1em;
+        }
+        
+        .theme-name {
+            font-size: 0.9em;
+            font-weight: 500;
+        }
+        
+        .theme-arrow {
+            margin-left: 5px;
+            font-size: 0.8em;
+            transition: transform 0.3s ease;
+        }
+        
+        .theme-dropdown:hover .theme-arrow {
+            transform: rotate(180deg);
         }
         
         .theme-btn {
@@ -316,10 +387,30 @@ if ($userCreatedAt !== 'Неизвестно') {
 <body>
     <!-- Переключатель тем -->
     <div class="theme-switcher">
-        <button class="theme-btn active" onclick="setTheme('light')">☀️</button>
-        <button class="theme-btn" onclick="setTheme('medium')">🌅</button>
-        <button class="theme-btn" onclick="setTheme('dark')">🌙</button>
-        <button class="theme-btn" onclick="setTheme('mystic')">🔮</button>
+        <div class="theme-dropdown">
+            <button class="theme-btn active" id="theme-toggle">
+                <span class="theme-icon">☀️</span>
+                <span class="theme-arrow">▼</span>
+            </button>
+            <div class="theme-menu" id="theme-menu">
+                <div class="theme-option active" data-theme="light">
+                    <span class="theme-icon">☀️</span>
+                    <span class="theme-name">Светлая</span>
+                </div>
+                <div class="theme-option" data-theme="medium">
+                    <span class="theme-icon">🌅</span>
+                    <span class="theme-name">Средняя</span>
+                </div>
+                <div class="theme-option" data-theme="dark">
+                    <span class="theme-icon">🌙</span>
+                    <span class="theme-name">Тёмная</span>
+                </div>
+                <div class="theme-option" data-theme="mystic">
+                    <span class="theme-icon">🔮</span>
+                    <span class="theme-name">Мистическая</span>
+                </div>
+            </div>
+        </div>
     </div>
     
     <div class="stats-container">
@@ -430,42 +521,46 @@ if ($userCreatedAt !== 'Неизвестно') {
     
     <script>
         // Функция для переключения тем
-        function setTheme(theme) {
-            // Убираем активный класс со всех кнопок
-            document.querySelectorAll('.theme-btn').forEach(btn => {
-                btn.classList.remove('active');
+        const themeOptions = document.querySelectorAll('.theme-option');
+        const themeIcon = document.querySelector('#theme-toggle .theme-icon');
+        
+        themeOptions.forEach(option => {
+            option.addEventListener('click', function() {
+                const selectedTheme = this.getAttribute('data-theme');
+                document.documentElement.setAttribute('data-theme', selectedTheme);
+                localStorage.setItem('theme', selectedTheme);
+                updateThemeIcon(selectedTheme);
+                updateActiveOption(selectedTheme);
             });
-            
-            // Добавляем активный класс к выбранной кнопке
-            event.target.classList.add('active');
-            
-            // Устанавливаем тему
-            document.documentElement.setAttribute('data-theme', theme);
-            
-            // Сохраняем выбор в localStorage
-            localStorage.setItem('theme', theme);
+        });
+        
+        function updateActiveOption(theme) {
+            themeOptions.forEach(option => {
+                option.classList.remove('active');
+                if (option.getAttribute('data-theme') === theme) {
+                    option.classList.add('active');
+                }
+            });
+        }
+        
+        function updateThemeIcon(theme) {
+            if (theme === 'dark') {
+                themeIcon.textContent = '🌙';
+            } else if (theme === 'medium') {
+                themeIcon.textContent = '🌅';
+            } else if (theme === 'mystic') {
+                themeIcon.textContent = '🔮';
+            } else {
+                themeIcon.textContent = '☀️';
+            }
         }
         
         // Загружаем сохраненную тему при загрузке страницы
         document.addEventListener('DOMContentLoaded', function() {
             const savedTheme = localStorage.getItem('theme') || 'light';
-            setTheme(savedTheme);
-            
-            // Устанавливаем правильную активную кнопку
-            document.querySelectorAll('.theme-btn').forEach(btn => {
-                btn.classList.remove('active');
-            });
-            
-            const themeButtons = {
-                'light': document.querySelector('.theme-btn:nth-child(1)'),
-                'medium': document.querySelector('.theme-btn:nth-child(2)'),
-                'dark': document.querySelector('.theme-btn:nth-child(3)'),
-                'mystic': document.querySelector('.theme-btn:nth-child(4)')
-            };
-            
-            if (themeButtons[savedTheme]) {
-                themeButtons[savedTheme].classList.add('active');
-            }
+            document.documentElement.setAttribute('data-theme', savedTheme);
+            updateThemeIcon(savedTheme);
+            updateActiveOption(savedTheme);
         });
     </script>
 </body>
