@@ -137,7 +137,7 @@ if ($userCreatedAt !== 'Неизвестно') {
         .stats-container {
             max-width: 800px;
             margin: 0 auto;
-            background: var(--bg-secondary) url('https://www.transparenttextures.com/patterns/cream-paper.png');
+            background: var(--bg-secondary) url('https://www.transparenttextures.com/patterns/checkered-pattern.png');
             border-radius: 10px;
             box-shadow: 0 4px 20px var(--shadow-primary);
             overflow: hidden;
@@ -178,7 +178,7 @@ if ($userCreatedAt !== 'Неизвестно') {
         }
         
         .stat-card {
-            background: var(--bg-tertiary) url('https://www.transparenttextures.com/patterns/cream-paper.png');
+            background: var(--bg-tertiary) url('https://www.transparenttextures.com/patterns/checkered-pattern.png');
             padding: 20px;
             border-radius: 8px;
             text-align: center;
@@ -219,7 +219,7 @@ if ($userCreatedAt !== 'Неизвестно') {
         }
         
         .user-info {
-            background: var(--bg-tertiary) url('https://www.transparenttextures.com/patterns/cream-paper.png');
+            background: var(--bg-tertiary) url('https://www.transparenttextures.com/patterns/checkered-pattern.png');
             padding: 20px;
             border-radius: 8px;
             border-left: 4px solid var(--accent-primary);
