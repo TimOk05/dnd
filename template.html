@@ -161,18 +161,18 @@
             --text-quaternary: #aa7777;
             --text-quinary: #996666;
             --text-senary: #885555;
-            --border-primary: #cc0000;
-            --border-secondary: #990000;
-            --border-tertiary: #660000;
-            --accent-primary: #cc2222;
-            --accent-secondary: #991111;
+            --border-primary: #660000;
+            --border-secondary: #440000;
+            --border-tertiary: #220000;
+            --accent-primary: #660000;
+            --accent-secondary: #440000;
             --accent-success: #00cc33;
             --accent-info: #3333cc;
-            --accent-warning: #cc8800;
-            --accent-danger: #cc0000;
-            --shadow-primary: rgba(204, 0, 0, 0.2);
-            --shadow-secondary: rgba(204, 0, 0, 0.3);
-            --shadow-tertiary: rgba(204, 0, 0, 0.1);
+            --accent-warning: #664400;
+            --accent-danger: #660000;
+            --shadow-primary: rgba(102, 0, 0, 0.2);
+            --shadow-secondary: rgba(102, 0, 0, 0.3);
+            --shadow-tertiary: rgba(102, 0, 0, 0.1);
             --bg-image: url('backgrounds/dark-theme.png');
         }
         /* Лавовые подтеки для темной темы */
@@ -251,10 +251,10 @@
             color: #ffe6e6 !important;
             font-weight: 700 !important;
             text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.9) !important;
-            background: linear-gradient(135deg, #cc2222, #990000) !important;
-            border: 3px solid #cc0000 !important;
+            background: linear-gradient(135deg, #660000, #440000) !important;
+            border: 3px solid #660000 !important;
             border-radius: 12px !important;
-            box-shadow: 0 4px 15px rgba(204, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.1) !important;
+            box-shadow: 0 4px 15px rgba(102, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.1) !important;
             position: relative !important;
             overflow: hidden !important;
         }
@@ -272,7 +272,7 @@
             left: -100%;
             width: 100%;
             height: 100%;
-            background: linear-gradient(90deg, transparent, rgba(255, 0, 0, 0.2), transparent);
+            background: linear-gradient(90deg, transparent, rgba(102, 0, 0, 0.2), transparent);
             transition: left 0.6s ease;
             z-index: 1;
         }
@@ -288,10 +288,10 @@
         }
         
         html[data-theme="dark"] .theme-btn {
-            background: linear-gradient(135deg, #cc2222, #990000) !important;
+            background: linear-gradient(135deg, #660000, #440000) !important;
             color: #ffe6e6 !important;
-            border: 3px solid #cc0000 !important;
-            box-shadow: 0 4px 15px rgba(204, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.1) !important;
+            border: 3px solid #660000 !important;
+            box-shadow: 0 4px 15px rgba(102, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.1) !important;
             position: relative !important;
             overflow: hidden !important;
         }
@@ -303,7 +303,7 @@
             left: -100%;
             width: 100%;
             height: 100%;
-            background: linear-gradient(90deg, transparent, rgba(255, 0, 0, 0.3), transparent);
+            background: linear-gradient(90deg, transparent, rgba(102, 0, 0, 0.3), transparent);
             transition: left 0.6s ease;
             border-radius: 50%;
             z-index: 1;
@@ -325,16 +325,16 @@
             top: 20px !important;
             right: 80px !important;
             color: #ffe6e6 !important;
-            background: var(--accent-warning) !important;
-            border: 2px solid var(--accent-warning) !important;
-            box-shadow: 0 2px 8px var(--shadow-primary) !important;
+            background: #664400 !important;
+            border: 2px solid #664400 !important;
+            box-shadow: 0 2px 8px rgba(102, 0, 0, 0.2) !important;
             z-index: 100 !important;
         }
         
         html[data-theme="dark"] .admin-link:hover {
             background: var(--bg-secondary) !important;
-            color: var(--accent-warning) !important;
-            box-shadow: 0 4px 12px var(--shadow-secondary) !important;
+            color: #664400 !important;
+            box-shadow: 0 4px 12px rgba(102, 0, 0, 0.3) !important;
         }
         /* Стили для stats-link в темной теме */
         
@@ -343,24 +343,24 @@
             top: 20px !important;
             right: 140px !important;
             color: #ffe6e6 !important;
-            background: var(--accent-info) !important;
-            border: 2px solid var(--accent-info) !important;
-            box-shadow: 0 2px 8px var(--shadow-primary) !important;
+            background: #3333cc !important;
+            border: 2px solid #3333cc !important;
+            box-shadow: 0 2px 8px rgba(102, 0, 0, 0.2) !important;
             z-index: 100 !important;
         }
         
         html[data-theme="dark"] .stats-link:hover {
             background: var(--bg-secondary) !important;
-            color: var(--accent-info) !important;
-            box-shadow: 0 4px 12px var(--shadow-secondary) !important;
+            color: #3333cc !important;
+            box-shadow: 0 4px 12px rgba(102, 0, 0, 0.3) !important;
         }
         
         html[data-theme="dark"] .theme-btn:hover {
             color: #ffffff !important;
-            background: linear-gradient(135deg, #dd3333, #cc0000) !important;
-            box-shadow: 0 6px 20px rgba(204, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.2) !important;
+            background: linear-gradient(135deg, #880000, #660000) !important;
+            box-shadow: 0 6px 20px rgba(102, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.2) !important;
             transform: scale(1.1) rotate(-5deg) !important;
-            border-color: #ff0000 !important;
+            border-color: #880000 !important;
         }
         
         html[data-theme="dark"] .fast-btn:hover,
@@ -372,10 +372,10 @@
         html[data-theme="dark"] .admin-link:hover {
             color: #ffffff !important;
             text-shadow: 2px 2px 6px rgba(0, 0, 0, 1) !important;
-            background: linear-gradient(135deg, #dd3333, #cc0000) !important;
-            box-shadow: 0 6px 20px rgba(204, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.2) !important;
+            background: linear-gradient(135deg, #880000, #660000) !important;
+            box-shadow: 0 6px 20px rgba(102, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.2) !important;
             transform: translateY(-3px) scale(1.02) !important;
-            border-color: #ff0000 !important;
+            border-color: #880000 !important;
         }
         
         body {
