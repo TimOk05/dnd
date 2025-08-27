@@ -234,7 +234,7 @@ if ($userCreatedAt !== 'Неизвестно') {
         
         /* Сетка для мистической темы */
         [data-theme="mystic"] .stats-container {
-            background: var(--bg-secondary) url('https://www.transparenttextures.com/patterns/mystic-pattern.png');
+            background: var(--bg-secondary) url('https://www.transparenttextures.com/patterns/dark-mosaic.png');
         }
         
         .stats-header {
@@ -280,7 +280,7 @@ if ($userCreatedAt !== 'Неизвестно') {
         
         /* Сетка для мистической темы */
         [data-theme="mystic"] .stat-card {
-            background: var(--bg-tertiary) url('https://www.transparenttextures.com/patterns/mystic-pattern.png');
+            background: var(--bg-tertiary) url('https://www.transparenttextures.com/patterns/dark-mosaic.png');
         }
         
         .stat-number {
@@ -325,7 +325,7 @@ if ($userCreatedAt !== 'Неизвестно') {
         
         /* Сетка для мистической темы */
         [data-theme="mystic"] .user-info {
-            background: var(--bg-tertiary) url('https://www.transparenttextures.com/patterns/mystic-pattern.png');
+            background: var(--bg-tertiary) url('https://www.transparenttextures.com/patterns/dark-mosaic.png');
         }
         
         .info-row {
