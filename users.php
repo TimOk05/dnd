@@ -22,7 +22,7 @@ function logActivity($action, $username, $ip, $success = true, $details = []) {
 
 // Функция для проверки блокировки IP
 function isIPBlocked($ip) {
-    global $login_attempts_file, $lockout_time;
+    global $login_attempts_file;
     
     if (!file_exists($login_attempts_file)) {
         return false;
@@ -35,7 +35,7 @@ function isIPBlocked($ip) {
         $count = $attempts[$ip]['count'];
         
         // Если прошло время блокировки, сбрасываем счетчик
-        if (time() - $last_attempt > $lockout_time) {
+        if (time() - $last_attempt > LOCKOUT_TIME) {
             unset($attempts[$ip]);
             file_put_contents($login_attempts_file, json_encode($attempts));
             return false;
@@ -117,34 +117,35 @@ function validatePassword($password) {
 
 // Функция для регистрации пользователя
 function registerUser($username, $password, $email = null) {
-    $username = sanitizeInput($username, 'string');
-    $email = $email ? sanitizeInput($email, 'email') : null;
+    $users = loadUsers();
+    
+    // Очищаем входные данные
+    $username = sanitizeInput($username);
+    $email = $email ? sanitizeInput($email) : null;
     
     // Проверяем сложность пароля
     $passwordErrors = validatePassword($password);
     if (!empty($passwordErrors)) {
-        return ['success' => false, 'errors' => $passwordErrors];
+        return ['success' => false, 'message' => implode(', ', $passwordErrors)];
     }
     
-    $users = loadUsers();
-    
-    // Проверяем, не существует ли уже пользователь
+    // Проверяем, не существует ли уже пользователь с таким именем
     foreach ($users as $user) {
-        if (strtolower($user['username']) === strtolower($username)) {
-            return ['success' => false, 'errors' => ['Пользователь с таким именем уже существует']];
+        if (hash_equals($user['username'], $username)) {
+            return ['success' => false, 'message' => 'Пользователь с таким именем уже существует'];
         }
     }
     
     // Создаем нового пользователя
     $newUser = [
-        'id' => uniqid('user_', true),
+        'id' => uniqid(),
         'username' => $username,
         'password_hash' => password_hash($password, PASSWORD_DEFAULT),
         'email' => $email,
+        'role' => 'user',
         'created_at' => date('Y-m-d H:i:s'),
-        'last_login' => null,
         'is_active' => true,
-        'role' => 'user'
+        'login_count' => 0
     ];
     
     $users[] = $newUser;
@@ -152,63 +153,75 @@ function registerUser($username, $password, $email = null) {
     
     logActivity('user_registered', $username, $_SERVER['REMOTE_ADDR'] ?? 'unknown', true);
     
-    return ['success' => true, 'user' => $newUser];
+    return ['success' => true, 'message' => 'Пользователь успешно зарегистрирован'];
 }
 
 // Функция для аутентификации пользователя
 function authenticateUser($username, $password) {
-    $username = sanitizeInput($username, 'string');
+    $users = loadUsers();
     $ip = $_SERVER['REMOTE_ADDR'] ?? 'unknown';
     
     // Проверяем блокировку IP
     if (isIPBlocked($ip)) {
-        logActivity('login_blocked', $username, $ip, false, ['reason' => 'ip_blocked']);
-        return ['success' => false, 'error' => 'Слишком много неудачных попыток входа. Попробуйте позже.'];
+        logActivity('login_blocked', $username, $ip, false, ['reason' => 'IP blocked']);
+        return ['success' => false, 'message' => 'Слишком много неудачных попыток входа. Попробуйте позже.'];
     }
     
-    $users = loadUsers();
-    
-    foreach ($users as $user) {
-        if (strtolower($user['username']) === strtolower($username)) {
-            if (password_verify($password, $user['password_hash'])) {
-                // Успешный вход
-                recordLoginAttempt($ip, true);
-                
-                // Обновляем время последнего входа
-                $user['last_login'] = date('Y-m-d H:i:s');
-                $user['login_count'] = ($user['login_count'] ?? 0) + 1;
-                
-                // Обновляем пользователя в списке
-                foreach ($users as &$u) {
-                    if ($u['id'] === $user['id']) {
-                        $u = $user;
-                        break;
-                    }
-                }
-                saveUsers($users);
-                
-                // Устанавливаем сессию
-                $_SESSION['user_id'] = $user['id'];
-                $_SESSION['username'] = $user['username'];
-                $_SESSION['role'] = $user['role'];
-                $_SESSION['login_time'] = time();
-                
-                logActivity('login_success', $username, $ip, true);
-                
-                return ['success' => true, 'user' => $user];
-            } else {
-                // Неверный пароль
-                recordLoginAttempt($ip, false);
-                logActivity('login_failed', $username, $ip, false, ['reason' => 'invalid_password']);
-                return ['success' => false, 'error' => 'Неверное имя пользователя или пароль'];
-            }
+    // Ищем пользователя
+    $user = null;
+    foreach ($users as $u) {
+        if (hash_equals($u['username'], $username)) {
+            $user = $u;
+            break;
         }
     }
     
-    // Пользователь не найден
-    recordLoginAttempt($ip, false);
-    logActivity('login_failed', $username, $ip, false, ['reason' => 'user_not_found']);
-    return ['success' => false, 'error' => 'Неверное имя пользователя или пароль'];
+    if (!$user) {
+        recordLoginAttempt($ip, false);
+        logActivity('login_failed', $username, $ip, false, ['reason' => 'user_not_found']);
+        return ['success' => false, 'message' => 'Неверное имя пользователя или пароль'];
+    }
+    
+    // Проверяем пароль
+    if (!password_verify($password, $user['password_hash'])) {
+        recordLoginAttempt($ip, false);
+        logActivity('login_failed', $username, $ip, false, ['reason' => 'wrong_password']);
+        return ['success' => false, 'message' => 'Неверное имя пользователя или пароль'];
+    }
+    
+    // Проверяем активность пользователя
+    if (!($user['is_active'] ?? true)) {
+        recordLoginAttempt($ip, false);
+        logActivity('login_failed', $username, $ip, false, ['reason' => 'user_inactive']);
+        return ['success' => false, 'message' => 'Аккаунт заблокирован'];
+    }
+    
+    // Успешный вход
+    recordLoginAttempt($ip, true);
+    
+    // Обновляем данные пользователя
+    $user['last_login'] = date('Y-m-d H:i:s');
+    $user['login_count'] = ($user['login_count'] ?? 0) + 1;
+    
+    // Обновляем пользователя в массиве
+    foreach ($users as &$u) {
+        if ($u['id'] === $user['id']) {
+            $u = $user;
+            break;
+        }
+    }
+    
+    saveUsers($users);
+    
+    // Устанавливаем сессию
+    $_SESSION['user_id'] = $user['id'];
+    $_SESSION['username'] = $user['username'];
+    $_SESSION['role'] = $user['role'];
+    $_SESSION['login_time'] = time();
+    
+    logActivity('login_success', $username, $ip, true);
+    
+    return ['success' => true, 'message' => 'Вход выполнен успешно'];
 }
 
 // Функция для проверки авторизации
@@ -239,7 +252,7 @@ function logout() {
     }
     
     session_destroy();
-    return ['success' => true];
+    return ['success' => true, 'message' => 'Выход выполнен успешно'];
 }
 
 // Функция для проверки роли пользователя
@@ -337,5 +350,74 @@ function getUserStats() {
     }
     
     return $stats;
+}
+
+// Обработка POST запросов для API
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    header('Content-Type: application/json');
+    
+    $action = $_POST['action'] ?? '';
+    $response = ['success' => false, 'message' => 'Неизвестное действие'];
+    
+    try {
+        switch ($action) {
+            case 'login':
+                $username = $_POST['username'] ?? '';
+                $password = $_POST['password'] ?? '';
+                $csrfToken = $_POST['csrf_token'] ?? '';
+                
+                // Проверяем CSRF токен
+                if (!verifyCSRFToken($csrfToken)) {
+                    $response = ['success' => false, 'message' => 'Ошибка безопасности. Обновите страницу.'];
+                    break;
+                }
+                
+                if (empty($username) || empty($password)) {
+                    $response = ['success' => false, 'message' => 'Заполните все поля'];
+                    break;
+                }
+                
+                $result = authenticateUser($username, $password);
+                $response = $result;
+                break;
+                
+            case 'register':
+                $username = $_POST['username'] ?? '';
+                $password = $_POST['password'] ?? '';
+                $csrfToken = $_POST['csrf_token'] ?? '';
+                
+                // Проверяем CSRF токен
+                if (!verifyCSRFToken($csrfToken)) {
+                    $response = ['success' => false, 'message' => 'Ошибка безопасности. Обновите страницу.'];
+                    break;
+                }
+                
+                if (empty($username) || empty($password)) {
+                    $response = ['success' => false, 'message' => 'Заполните все поля'];
+                    break;
+                }
+                
+                $result = registerUser($username, $password);
+                $response = $result;
+                break;
+                
+            case 'logout':
+                $result = logout();
+                $response = $result;
+                break;
+                
+            default:
+                $response = ['success' => false, 'message' => 'Неизвестное действие'];
+        }
+    } catch (Exception $e) {
+        logMessage('User API error: ' . $e->getMessage(), 'ERROR', [
+            'action' => $action,
+            'trace' => $e->getTraceAsString()
+        ]);
+        $response = ['success' => false, 'message' => 'Внутренняя ошибка сервера'];
+    }
+    
+    echo json_encode($response, JSON_UNESCAPED_UNICODE);
+    exit;
 }
 ?>
