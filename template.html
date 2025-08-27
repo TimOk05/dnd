@@ -107,33 +107,7 @@
             border-color: #ff8c00 !important;
         }
         /* Стили для admin-link в средней теме */
-        
-        [data-theme="medium"] .admin-link {
-            color: #f4e4d6 !important;
-            background: var(--accent-warning) !important;
-            border: 2px solid var(--accent-warning) !important;
-            box-shadow: 0 2px 8px var(--shadow-primary) !important;
-        }
-        
-        [data-theme="medium"] .admin-link:hover {
-            background: var(--bg-secondary) !important;
-            color: var(--accent-warning) !important;
-            box-shadow: 0 4px 12px var(--shadow-secondary) !important;
-        }
-        /* Стили для stats-link в средней теме */
-        
-        [data-theme="medium"] .stats-link {
-            color: #f4e4d6 !important;
-            background: var(--accent-info) !important;
-            border: 2px solid var(--accent-info) !important;
-            box-shadow: 0 2px 8px var(--shadow-primary) !important;
-        }
-        
-        [data-theme="medium"] .stats-link:hover {
-            background: var(--bg-secondary) !important;
-            color: var(--accent-info) !important;
-            box-shadow: 0 4px 12px var(--shadow-secondary) !important;
-        }
+        /* Стили для иконок управляются системной структурой и CSS переменными */
         /* Тёмная тема */
         
         [data-theme="dark"] {
@@ -222,11 +196,7 @@
                 transform: translateX(-5px) translateY(10px);
             }
         }
-        
-        [data-theme="dark"] .parchment>*:not(.admin-link):not(.stats-link):not(.theme-toggle) {
-            position: relative;
-            z-index: 3;
-        }
+        /* Позиционирование элементов верхней части управляется системной структурой */
         /* Дополнительные стили для тёмной темы */
         
         [data-theme="dark"] .fast-btn,
@@ -301,33 +271,7 @@
             right: 20px;
             z-index: 100;
         }
-        
-        [data-theme="dark"] .admin-link {
-            color: #ffe6e6 !important;
-            background: #664400 !important;
-            border: 2px solid #664400 !important;
-            box-shadow: 0 2px 8px rgba(102, 0, 0, 0.2) !important;
-        }
-        
-        [data-theme="dark"] .admin-link:hover {
-            background: var(--bg-secondary) !important;
-            color: #664400 !important;
-            box-shadow: 0 4px 12px rgba(102, 0, 0, 0.3) !important;
-        }
-        /* Стили для stats-link в темной теме */
-        
-        [data-theme="dark"] .stats-link {
-            color: #ffe6e6 !important;
-            background: #3333cc !important;
-            border: 2px solid #3333cc !important;
-            box-shadow: 0 2px 8px rgba(102, 0, 0, 0.2) !important;
-        }
-        
-        [data-theme="dark"] .stats-link:hover {
-            background: var(--bg-secondary) !important;
-            color: #3333cc !important;
-            box-shadow: 0 4px 12px rgba(102, 0, 0, 0.3) !important;
-        }
+        /* Стили для иконок управляются системной структурой и CSS переменными */
         
         [data-theme="dark"] .theme-btn:hover {
             color: #ffe6e6 !important;
@@ -1872,135 +1816,7 @@
             transform: scale(1.1) rotate(5deg);
             box-shadow: 0 6px 20px var(--shadow-secondary), inset 0 1px 0 rgba(255, 255, 255, 0.3);
         }
-        /* Стили для информации о пользователе */
-        
-        .user-info {
-            position: absolute;
-            top: 20px;
-            left: 20px;
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            z-index: 100;
-            max-width: calc(100% - 120px);
-            flex-wrap: wrap;
-            background: rgba(255, 255, 255, 0.1);
-            padding: 8px 12px;
-            border-radius: 8px;
-            backdrop-filter: blur(5px);
-        }
-        
-        .welcome-text {
-            color: var(--text-tertiary);
-            font-weight: bold;
-            font-size: 0.95em;
-            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
-            white-space: nowrap;
-            max-width: 200px;
-            overflow: hidden;
-            text-overflow: ellipsis;
-        }
-        
-        .logout-btn {
-            background: linear-gradient(135deg, var(--accent-danger), #cc0000);
-            color: #fff5f5;
-            border: 2px solid var(--accent-danger);
-            border-radius: 8px;
-            padding: 8px 16px;
-            font-size: 0.9em;
-            font-family: 'IM Fell English SC', serif;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            box-shadow: 0 3px 10px var(--shadow-primary), inset 0 1px 0 rgba(255, 255, 255, 0.2);
-            white-space: nowrap;
-            font-weight: 700;
-            text-shadow: 1px 1px 3px rgba(183, 28, 28, 0.9);
-            position: relative;
-            overflow: hidden;
-        }
-        
-        .logout-btn::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: -100%;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.15), transparent);
-            transition: left 0.4s ease;
-        }
-        
-        .logout-btn:hover::before {
-            left: 100%;
-        }
-        
-        .logout-btn:hover {
-            background: linear-gradient(135deg, #cc0000, var(--accent-danger));
-            color: #ffffff;
-            transform: translateY(-2px) scale(1.05);
-            box-shadow: 0 5px 15px var(--shadow-secondary), inset 0 1px 0 rgba(255, 255, 255, 0.3);
-            text-shadow: 2px 2px 4px rgba(183, 28, 28, 1);
-            border-color: #ff0000;
-        }
-        
-        .admin-link {
-            position: absolute;
-            top: 20px;
-            right: 80px;
-            background: var(--accent-warning);
-            color: #f8f4e8;
-            border: 2px solid var(--accent-warning);
-            border-radius: 8px;
-            padding: 8px 12px;
-            font-size: 1.1em;
-            font-family: inherit;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            box-shadow: 0 2px 8px var(--shadow-primary);
-            text-decoration: none;
-            display: inline-block;
-            z-index: 1000;
-            font-weight: 600;
-            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.8);
-        }
-        
-        .admin-link:hover {
-            background: var(--bg-secondary);
-            color: var(--accent-warning);
-            transform: translateY(-1px);
-            box-shadow: 0 4px 12px var(--shadow-secondary);
-            text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.9);
-        }
-        
-        .stats-link {
-            position: absolute;
-            top: 20px;
-            right: 140px;
-            background: var(--accent-info);
-            color: #f8f4e8;
-            border: 2px solid var(--accent-info);
-            border-radius: 8px;
-            padding: 6px 10px;
-            font-size: 0.85em;
-            font-family: inherit;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            box-shadow: 0 2px 8px var(--shadow-primary);
-            text-decoration: none;
-            display: inline-block;
-            white-space: nowrap;
-            font-weight: 600;
-            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.8);
-            z-index: 1000;
-        }
-        
-        .stats-link:hover {
-            background: var(--bg-secondary);
-            color: var(--accent-info);
-            transform: translateY(-1px);
-            box-shadow: 0 4px 12px var(--shadow-secondary);
-            text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.9);
-        }
+        /* Стили для элементов верхней части уже определены выше в системной структуре */
         /* ===== СТИЛИ ДЛЯ ГЕНЕРАТОРОВ ===== */
         /* Генератор персонажей */
         
@@ -3765,25 +3581,226 @@
             transform: translateY(-2px);
             box-shadow: 0 4px 12px rgba(255, 107, 107, 0.3);
         }
+        /* ===== СИСТЕМА ПОЗИЦИОНИРОВАНИЯ ВЕРХНИХ ЭЛЕМЕНТОВ ===== */
+        /* Все элементы верхней части интерфейса используют единую систему позиционирования */
+        /* Контейнер для всех элементов верхней части */
+        
+        .top-elements-container {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            right: 20px;
+            z-index: 1000;
+            pointer-events: none;
+            /* Позволяет кликам проходить сквозь контейнер */
+        }
+        /* Базовые стили для всех элементов верхней части */
+        
+        .top-elements-container>* {
+            pointer-events: auto;
+            /* Восстанавливает клики для элементов */
+        }
+        /* Информация о пользователе (левый верхний угол) */
+        
+        .user-info {
+            position: absolute;
+            top: 0;
+            left: 0;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            max-width: calc(100% - 200px);
+            flex-wrap: wrap;
+            background: rgba(255, 255, 255, 0.1);
+            padding: 8px 12px;
+            border-radius: 8px;
+            backdrop-filter: blur(5px);
+        }
+        
+        .welcome-text {
+            color: var(--text-tertiary);
+            font-weight: bold;
+            font-size: 0.95em;
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+            white-space: nowrap;
+            max-width: 200px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        /* Переключатель темы (правый верхний угол) */
+        
+        .theme-toggle {
+            position: absolute;
+            top: 0;
+            right: 0;
+        }
+        /* Иконка статистики (справа от переключателя темы) */
+        
+        .stats-link {
+            position: absolute;
+            top: 0;
+            right: 85px;
+            background: var(--accent-info);
+            color: #f8f4e8;
+            border: 2px solid var(--accent-info);
+            border-radius: 8px;
+            padding: 6px 10px;
+            font-size: 0.85em;
+            font-family: inherit;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 8px var(--shadow-primary);
+            text-decoration: none;
+            display: inline-block;
+            white-space: nowrap;
+            font-weight: 600;
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.8);
+        }
+        /* Иконка администратора (справа от статистики) */
+        
+        .admin-link {
+            position: absolute;
+            top: 0;
+            right: 145px;
+            background: var(--accent-warning);
+            color: #f8f4e8;
+            border: 2px solid var(--accent-warning);
+            border-radius: 8px;
+            padding: 8px 12px;
+            font-size: 1.1em;
+            font-family: inherit;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 8px var(--shadow-primary);
+            text-decoration: none;
+            display: inline-block;
+            font-weight: 600;
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.8);
+        }
+        /* Hover эффекты для иконок */
+        
+        .stats-link:hover {
+            background: var(--bg-secondary);
+            color: var(--accent-info);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px var(--shadow-secondary);
+            text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.9);
+        }
+        
+        .admin-link:hover {
+            background: var(--bg-secondary);
+            color: var(--accent-warning);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px var(--shadow-secondary);
+            text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.9);
+        }
+        /* ===== СТИЛИ ДЛЯ КНОПОК ===== */
+        /* Переключатель темы */
+        
+        .theme-btn {
+            background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+            color: #f8f4e8;
+            border: 3px solid var(--border-primary);
+            border-radius: 50%;
+            width: 55px;
+            height: 55px;
+            cursor: pointer;
+            font-size: 1.3em;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 12px var(--shadow-primary), inset 0 1px 0 rgba(255, 255, 255, 0.2);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .theme-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transition: left 0.5s ease;
+            border-radius: 50%;
+        }
+        
+        .theme-btn:hover::before {
+            left: 100%;
+        }
+        
+        .theme-btn:hover {
+            background: linear-gradient(135deg, var(--accent-secondary), var(--accent-primary));
+            transform: scale(1.1) rotate(5deg);
+            box-shadow: 0 6px 20px var(--shadow-secondary), inset 0 1px 0 rgba(255, 255, 255, 0.3);
+        }
+        /* Кнопка выхода */
+        
+        .logout-btn {
+            background: linear-gradient(135deg, var(--accent-danger), #cc0000);
+            color: #fff5f5;
+            border: 2px solid var(--accent-danger);
+            border-radius: 8px;
+            padding: 8px 16px;
+            font-size: 0.9em;
+            font-family: 'IM Fell English SC', serif;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 3px 10px var(--shadow-primary), inset 0 1px 0 rgba(255, 255, 255, 0.2);
+            white-space: nowrap;
+            font-weight: 700;
+            text-shadow: 1px 1px 3px rgba(183, 28, 28, 0.9);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .logout-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.15), transparent);
+            transition: left 0.4s ease;
+        }
+        
+        .logout-btn:hover::before {
+            left: 100%;
+        }
+        
+        .logout-btn:hover {
+            background: linear-gradient(135deg, #cc0000, var(--accent-danger));
+            color: #ffffff;
+            transform: translateY(-2px) scale(1.05);
+            box-shadow: 0 5px 15px var(--shadow-secondary), inset 0 1px 0 rgba(255, 255, 255, 0.3);
+            text-shadow: 2px 2px 4px rgba(183, 28, 28, 1);
+            border-color: #ff0000;
+        }
     </style>
 </head>
 
 <body>
     <div class="parchment">
-        <div class="theme-toggle">
-            <button id="theme-toggle" class="theme-btn" title="Переключить тему">
-                <span class="theme-icon">🌙</span>
-            </button>
-        </div>
-        <div class="user-info">
-            <span class="welcome-text">Добро пожаловать, <?php echo htmlspecialchars($currentUser); ?>!</span>
-            <button class="logout-btn" onclick="logout()">Выйти</button>
-        </div>
+        <div class="top-elements-container">
+            <div class="user-info">
+                <span class="welcome-text">Добро пожаловать, <?php echo htmlspecialchars($currentUser); ?>!</span>
+                <button class="logout-btn" onclick="logout()">Выйти</button>
+            </div>
 
-        <a href="stats.php" class="stats-link" title="Статистика">📊</a>
-        <?php if (isAdmin()): ?>
-        <a href="admin.php" class="admin-link" title="Админ панель">🔧</a>
-        <?php endif; ?>
+            <a href="stats.php" class="stats-link" title="Статистика">📊</a>
+            <?php if (isAdmin()): ?>
+            <a href="admin.php" class="admin-link" title="Админ панель">🔧</a>
+            <?php endif; ?>
+
+            <div class="theme-toggle">
+                <button id="theme-toggle" class="theme-btn" title="Переключить тему">
+                    <span class="theme-icon">🌙</span>
+                </button>
+            </div>
+        </div>
         <h1>DnD Copilot</h1>
         <div class="fast-bar">
             {{fast_buttons}}
