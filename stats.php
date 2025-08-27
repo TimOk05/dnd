@@ -1,4 +1,5 @@
 <?php
+require_once 'config.php';
 require_once 'users.php';
 
 // Проверяем авторизацию
@@ -97,6 +98,20 @@ if ($userCreatedAt !== 'Неизвестно') {
             --shadow-primary: rgba(210, 105, 30, 0.2);
         }
         
+        [data-theme="mystic"] {
+            /* Мистическая тема (фиолетовая) */
+            --bg-primary: #0a0a1a;
+            --bg-secondary: #1a1a2e;
+            --bg-tertiary: #16213e;
+            --text-primary: #e0e0ff;
+            --text-secondary: #b8a9ff;
+            --text-tertiary: #9d7cff;
+            --accent-primary: #8b5cf6;
+            --accent-secondary: #7c3aed;
+            --border-primary: #8b5cf6;
+            --shadow-primary: rgba(139, 92, 246, 0.2);
+        }
+        
         body {
             font-family: 'Roboto', Arial, sans-serif;
             margin: 0;
@@ -154,6 +169,11 @@ if ($userCreatedAt !== 'Неизвестно') {
             background: var(--bg-secondary) url('https://www.transparenttextures.com/patterns/dark-mosaic.png');
         }
         
+        /* Сетка для мистической темы */
+        [data-theme="mystic"] .stats-container {
+            background: var(--bg-secondary) url('https://www.transparenttextures.com/patterns/mystic-pattern.png');
+        }
+        
         .stats-header {
             background: var(--accent-primary);
             color: white;
@@ -195,6 +215,11 @@ if ($userCreatedAt !== 'Неизвестно') {
             background: var(--bg-tertiary) url('https://www.transparenttextures.com/patterns/dark-mosaic.png');
         }
         
+        /* Сетка для мистической темы */
+        [data-theme="mystic"] .stat-card {
+            background: var(--bg-tertiary) url('https://www.transparenttextures.com/patterns/mystic-pattern.png');
+        }
+        
         .stat-number {
             font-size: 2.5em;
             font-weight: bold;
@@ -233,6 +258,11 @@ if ($userCreatedAt !== 'Неизвестно') {
         /* Сетка для тёмной темы */
         [data-theme="dark"] .user-info {
             background: var(--bg-tertiary) url('https://www.transparenttextures.com/patterns/dark-mosaic.png');
+        }
+        
+        /* Сетка для мистической темы */
+        [data-theme="mystic"] .user-info {
+            background: var(--bg-tertiary) url('https://www.transparenttextures.com/patterns/mystic-pattern.png');
         }
         
         .info-row {
@@ -289,6 +319,7 @@ if ($userCreatedAt !== 'Неизвестно') {
         <button class="theme-btn active" onclick="setTheme('light')">☀️</button>
         <button class="theme-btn" onclick="setTheme('medium')">🌅</button>
         <button class="theme-btn" onclick="setTheme('dark')">🌙</button>
+        <button class="theme-btn" onclick="setTheme('mystic')">🔮</button>
     </div>
     
     <div class="stats-container">
@@ -428,7 +459,8 @@ if ($userCreatedAt !== 'Неизвестно') {
             const themeButtons = {
                 'light': document.querySelector('.theme-btn:nth-child(1)'),
                 'medium': document.querySelector('.theme-btn:nth-child(2)'),
-                'dark': document.querySelector('.theme-btn:nth-child(3)')
+                'dark': document.querySelector('.theme-btn:nth-child(3)'),
+                'mystic': document.querySelector('.theme-btn:nth-child(4)')
             };
             
             if (themeButtons[savedTheme]) {

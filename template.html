@@ -137,6 +137,34 @@
             --shadow-tertiary: rgba(102, 0, 0, 0.1);
             --bg-image: url('backgrounds/dark-theme.png');
         }
+        
+        [data-theme="mystic"] {
+            --bg-primary: #0a0a1a;
+            --bg-secondary: #1a1a2e;
+            --bg-tertiary: #16213e;
+            --bg-quaternary: #0f3460;
+            --bg-quinary: #533483;
+            --bg-senary: #7209b7;
+            --text-primary: #e0e0ff;
+            --text-secondary: #b8a9ff;
+            --text-tertiary: #9d7cff;
+            --text-quaternary: #8b5cf6;
+            --text-quinary: #7c3aed;
+            --text-senary: #6d28d9;
+            --border-primary: #8b5cf6;
+            --border-secondary: #7c3aed;
+            --border-tertiary: #6d28d9;
+            --accent-primary: #8b5cf6;
+            --accent-secondary: #7c3aed;
+            --accent-success: #10b981;
+            --accent-info: #3b82f6;
+            --accent-warning: #f59e0b;
+            --accent-danger: #ef4444;
+            --shadow-primary: rgba(139, 92, 246, 0.2);
+            --shadow-secondary: rgba(139, 92, 246, 0.3);
+            --shadow-tertiary: rgba(139, 92, 246, 0.1);
+            --bg-image: url('backgrounds/mystic-theme.png');
+        }
         /* Лавовые подтеки для темной темы */
         
         [data-theme="dark"] .parchment {
@@ -287,6 +315,59 @@
             transform: translateY(-3px) scale(1.02) !important;
             border-color: #880000 !important;
         }
+        /* Кнопки для мистической темы */
+        
+        [data-theme="mystic"] .fast-btn,
+        [data-theme="mystic"] button[type=submit],
+        [data-theme="mystic"] .modal .modal-save,
+        [data-theme="mystic"] .modal-regenerate,
+        [data-theme="mystic"] .logout-btn {
+            color: #e0e0ff !important;
+            font-weight: 700 !important;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.9) !important;
+            background: linear-gradient(135deg, #8b5cf6, #7c3aed) !important;
+            border: 3px solid #8b5cf6 !important;
+            border-radius: 12px !important;
+            box-shadow: 0 4px 15px rgba(139, 92, 246, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.1) !important;
+            position: relative !important;
+            overflow: hidden !important;
+        }
+        
+        [data-theme="mystic"] .fast-btn::before,
+        [data-theme="mystic"] button[type=submit]::before,
+        [data-theme="mystic"] .modal .modal-save::before,
+        [data-theme="mystic"] .modal-regenerate::before,
+        [data-theme="mystic"] .logout-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(139, 92, 246, 0.2), transparent);
+            transition: left 0.6s ease;
+            z-index: 1;
+        }
+        
+        [data-theme="mystic"] .fast-btn:hover::before,
+        [data-theme="mystic"] button[type=submit]:hover::before,
+        [data-theme="mystic"] .modal .modal-save:hover::before,
+        [data-theme="mystic"] .modal-regenerate:hover::before,
+        [data-theme="mystic"] .logout-btn:hover::before {
+            left: 100%;
+        }
+        
+        [data-theme="mystic"] .fast-btn:hover,
+        [data-theme="mystic"] button[type=submit]:hover,
+        [data-theme="mystic"] .modal .modal-save:hover,
+        [data-theme="mystic"] .modal-regenerate:hover,
+        [data-theme="mystic"] .logout-btn:hover {
+            color: #e0e0ff !important;
+            background: linear-gradient(135deg, #7c3aed, #6d28d9) !important;
+            box-shadow: 0 6px 20px rgba(139, 92, 246, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.2) !important;
+            transform: translateY(-3px) scale(1.02) !important;
+            border-color: #7c3aed !important;
+        }
         
         body {
             background: var(--bg-image) no-repeat center center fixed, var(--bg-primary);
@@ -333,6 +414,60 @@
             border: 8px solid var(--border-primary);
             box-shadow: 0 8px 32px var(--shadow-secondary), 0 0 0 12px rgba(210, 105, 30, 0.3);
         }
+        /* Мистическая тема с магическими эффектами */
+        
+        [data-theme="mystic"] .parchment {
+            background: var(--bg-primary) url('https://www.transparenttextures.com/patterns/mystic-pattern.png');
+            border: 8px solid var(--border-primary);
+            box-shadow: 0 8px 32px var(--shadow-secondary), 0 0 0 12px rgba(139, 92, 246, 0.3), 0 0 30px rgba(139, 92, 246, 0.2);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        [data-theme="mystic"] .parchment::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: radial-gradient(ellipse 200px 50px at 20% 10%, rgba(139, 92, 246, 0.15) 0%, transparent 50%), radial-gradient(ellipse 150px 40px at 80% 20%, rgba(124, 58, 237, 0.12) 0%, transparent 50%), radial-gradient(ellipse 180px 60px at 40% 80%, rgba(109, 40, 217, 0.18) 0%, transparent 50%), radial-gradient(ellipse 120px 30px at 90% 70%, rgba(139, 92, 246, 0.1) 0%, transparent 50%);
+            pointer-events: none;
+            z-index: 1;
+        }
+        
+        [data-theme="mystic"] .parchment::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(45deg, transparent 30%, rgba(139, 92, 246, 0.08) 50%, transparent 70%), linear-gradient(-45deg, transparent 40%, rgba(124, 58, 237, 0.06) 60%, transparent 80%);
+            animation: mysticFlow 10s ease-in-out infinite;
+            pointer-events: none;
+            z-index: 2;
+        }
+        
+        @keyframes mysticFlow {
+            0%,
+            100% {
+                opacity: 0.3;
+                transform: translateX(-10px) translateY(-5px);
+            }
+            25% {
+                opacity: 0.5;
+                transform: translateX(5px) translateY(-10px);
+            }
+            50% {
+                opacity: 0.4;
+                transform: translateX(10px) translateY(5px);
+            }
+            75% {
+                opacity: 0.6;
+                transform: translateX(-5px) translateY(10px);
+            }
+        }
         
         h1 {
             margin-top: 80px;
@@ -375,6 +510,11 @@
         [data-theme="dark"] h1 {
             color: #e0e0e0;
             text-shadow: 0 2px 0 rgba(204, 0, 0, 0.2), 0 0 8px rgba(204, 0, 0, 0.3), 2px 2px 4px rgba(0, 0, 0, 0.8);
+        }
+        
+        [data-theme="mystic"] h1 {
+            color: #e0e0ff;
+            text-shadow: 0 2px 0 rgba(139, 92, 246, 0.2), 0 0 8px rgba(139, 92, 246, 0.3), 2px 2px 4px rgba(0, 0, 0, 0.8);
         }
         
         .fast-bar {
@@ -3908,11 +4048,13 @@
                 const currentTheme = document.documentElement.getAttribute('data-theme');
                 let newTheme;
 
-                // Переключаем между тремя темами: light -> medium -> dark -> light
+                // Переключаем между четырьмя темами: light -> medium -> dark -> mystic -> light
                 if (currentTheme === 'light') {
                     newTheme = 'medium';
                 } else if (currentTheme === 'medium') {
                     newTheme = 'dark';
+                } else if (currentTheme === 'dark') {
+                    newTheme = 'mystic';
                 } else {
                     newTheme = 'light';
                 }
@@ -3927,34 +4069,36 @@
                     themeIcon.textContent = '🌙';
                 } else if (theme === 'medium') {
                     themeIcon.textContent = '🍂';
+                } else if (theme === 'mystic') {
+                    themeIcon.textContent = '🔮';
                 } else {
                     themeIcon.textContent = '☀️';
                 }
             }
 
-            // Показываем приветственное сообщение для новых пользователей
-            const urlParams = new URLSearchParams(window.location.search);
-            if (urlParams.get('welcome') === '1') {
-                showWelcomeMessage();
-            }
+            // Приветственное сообщение отключено
+            // const urlParams = new URLSearchParams(window.location.search);
+            // if (urlParams.get('welcome') === '1') {
+            //     showWelcomeMessage();
+            // }
         });
 
-        // Функция показа приветственного сообщения
-        function showWelcomeMessage() {
-            const welcomeDiv = document.createElement('div');
-            welcomeDiv.className = 'npc-toast active';
-            welcomeDiv.textContent = 'Добро пожаловать в DnD Copilot! Начните с генерации NPC или броска костей.';
-            document.body.appendChild(welcomeDiv);
+        // Функция показа приветственного сообщения отключена
+        // function showWelcomeMessage() {
+        //     const welcomeDiv = document.createElement('div');
+        //     welcomeDiv.className = 'npc-toast active';
+        //     welcomeDiv.textContent = 'Добро пожаловать в DnD Copilot! Начните с генерации NPC или броска костей.';
+        //     document.body.appendChild(welcomeDiv);
 
-            setTimeout(() => {
-                welcomeDiv.classList.remove('active');
-                setTimeout(() => {
-                    if (welcomeDiv.parentNode) {
-                        welcomeDiv.parentNode.removeChild(welcomeDiv);
-                    }
-                }, 300);
-            }, 4000);
-        }
+        //     setTimeout(() => {
+        //         welcomeDiv.classList.remove('active');
+        //         setTimeout(() => {
+        //             if (welcomeDiv.parentNode) {
+        //                 welcomeDiv.parentNode.removeChild(welcomeDiv);
+        //             }
+        //         }, 300);
+        //     }, 4000);
+        // }
 
         // Функция выхода
         function logout() {
