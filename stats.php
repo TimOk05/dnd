@@ -70,19 +70,32 @@ if ($userCreatedAt !== 'Неизвестно') {
         }
         
         [data-theme="dark"] {
-            --bg-primary: #0a0a0a;
-            --bg-secondary: #1a0a0a;
-            --bg-tertiary: #2a0a0a;
-            --text-primary: #ffffff;
-            --text-secondary: #ffcccc;
-            --text-tertiary: #ffaaaa;
-            --accent-primary: #ff3333;
-            --accent-secondary: #cc2222;
-            --border-primary: #ff0000;
-            --shadow-primary: rgba(255, 0, 0, 0.3);
+            /* Исправленные цвета тёмной темы для соответствия основному интерфейсу */
+            --bg-primary: #050505;
+            --bg-secondary: #0a0a0a;
+            --bg-tertiary: #0f0f0f;
+            --text-primary: #e0e0e0;
+            --text-secondary: #cc9999;
+            --text-tertiary: #bb8888;
+            --accent-primary: #660000;
+            --accent-secondary: #440000;
+            --border-primary: #660000;
+            --shadow-primary: rgba(102, 0, 0, 0.2);
         }
         
-
+        [data-theme="medium"] {
+            /* Средняя тема (коричневая) */
+            --bg-primary: #2d1810;
+            --bg-secondary: #3d2418;
+            --bg-tertiary: #4d2a20;
+            --text-primary: #f4e4d6;
+            --text-secondary: #e6d4c0;
+            --text-tertiary: #d8c4aa;
+            --accent-primary: #d2691e;
+            --accent-secondary: #ff8c00;
+            --border-primary: #d2691e;
+            --shadow-primary: rgba(210, 105, 30, 0.2);
+        }
         
         body {
             font-family: 'Roboto', Arial, sans-serif;
@@ -244,6 +257,7 @@ if ($userCreatedAt !== 'Неизвестно') {
     <!-- Переключатель тем -->
     <div class="theme-switcher">
         <button class="theme-btn active" onclick="setTheme('light')">☀️</button>
+        <button class="theme-btn" onclick="setTheme('medium')">🌅</button>
         <button class="theme-btn" onclick="setTheme('dark')">🌙</button>
     </div>
     
@@ -347,7 +361,7 @@ if ($userCreatedAt !== 'Неизвестно') {
                     <p><strong>🗣️ Генерация NPC:</strong> Нажмите F2 для создания новых персонажей</p>
                     <p><strong>⚡ Инициатива:</strong> F3 поможет управлять инициативой в бою</p>
                     <p><strong>💬 Чат:</strong> Ctrl+Enter для быстрой отправки сообщений</p>
-                    <p><strong>🌙 Тема:</strong> Переключайте между светлой и темной темой</p>
+                    <p><strong>🌙 Тема:</strong> Переключайте между светлой, средней и темной темами</p>
                 </div>
             </div>
         </div>
@@ -383,7 +397,8 @@ if ($userCreatedAt !== 'Неизвестно') {
             
             const themeButtons = {
                 'light': document.querySelector('.theme-btn:nth-child(1)'),
-                'dark': document.querySelector('.theme-btn:nth-child(2)')
+                'medium': document.querySelector('.theme-btn:nth-child(2)'),
+                'dark': document.querySelector('.theme-btn:nth-child(3)')
             };
             
             if (themeButtons[savedTheme]) {
