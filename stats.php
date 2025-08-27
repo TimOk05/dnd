@@ -189,15 +189,7 @@ if ($userCreatedAt !== 'Неизвестно') {
             font-weight: 500;
         }
         
-        .theme-arrow {
-            margin-left: 5px;
-            font-size: 0.8em;
-            transition: transform 0.3s ease;
-        }
-        
-        .theme-dropdown:hover .theme-arrow {
-            transform: rotate(180deg);
-        }
+
         
         .theme-btn {
             background: var(--accent-primary);
@@ -390,7 +382,6 @@ if ($userCreatedAt !== 'Неизвестно') {
         <div class="theme-dropdown">
             <button class="theme-btn active" id="theme-toggle">
                 <span class="theme-icon">☀️</span>
-                <span class="theme-arrow">▼</span>
             </button>
             <div class="theme-menu" id="theme-menu">
                 <div class="theme-option active" data-theme="light">
