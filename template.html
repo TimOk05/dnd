@@ -104,7 +104,7 @@
         html[data-theme="medium"] .logout-btn:hover,
         html[data-theme="medium"] .stats-link:hover,
         html[data-theme="medium"] .admin-link:hover {
-            color: #ffffff !important;
+            color: #f4e4d6 !important;
             background: linear-gradient(135deg, #ff8c00, #d2691e) !important;
             box-shadow: 0 6px 20px rgba(210, 105, 30, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.2) !important;
             transform: translateY(-3px) scale(1.02) !important;
@@ -113,14 +113,10 @@
         /* Стили для admin-link в средней теме */
         
         html[data-theme="medium"] .admin-link {
-            position: absolute !important;
-            top: 20px !important;
-            right: 80px !important;
             color: #f4e4d6 !important;
             background: var(--accent-warning) !important;
             border: 2px solid var(--accent-warning) !important;
             box-shadow: 0 2px 8px var(--shadow-primary) !important;
-            z-index: 100 !important;
         }
         
         html[data-theme="medium"] .admin-link:hover {
@@ -131,14 +127,10 @@
         /* Стили для stats-link в средней теме */
         
         html[data-theme="medium"] .stats-link {
-            position: absolute !important;
-            top: 20px !important;
-            right: 140px !important;
             color: #f4e4d6 !important;
             background: var(--accent-info) !important;
             border: 2px solid var(--accent-info) !important;
             box-shadow: 0 2px 8px var(--shadow-primary) !important;
-            z-index: 100 !important;
         }
         
         html[data-theme="medium"] .stats-link:hover {
@@ -321,14 +313,10 @@
         }
         
         html[data-theme="dark"] .admin-link {
-            position: absolute !important;
-            top: 20px !important;
-            right: 80px !important;
             color: #ffe6e6 !important;
             background: #664400 !important;
             border: 2px solid #664400 !important;
             box-shadow: 0 2px 8px rgba(102, 0, 0, 0.2) !important;
-            z-index: 100 !important;
         }
         
         html[data-theme="dark"] .admin-link:hover {
@@ -339,14 +327,10 @@
         /* Стили для stats-link в темной теме */
         
         html[data-theme="dark"] .stats-link {
-            position: absolute !important;
-            top: 20px !important;
-            right: 140px !important;
             color: #ffe6e6 !important;
             background: #3333cc !important;
             border: 2px solid #3333cc !important;
             box-shadow: 0 2px 8px rgba(102, 0, 0, 0.2) !important;
-            z-index: 100 !important;
         }
         
         html[data-theme="dark"] .stats-link:hover {
@@ -370,7 +354,7 @@
         html[data-theme="dark"] .logout-btn:hover,
         html[data-theme="dark"] .stats-link:hover,
         html[data-theme="dark"] .admin-link:hover {
-            color: #ffffff !important;
+            color: #ffe6e6 !important;
             text-shadow: 2px 2px 6px rgba(0, 0, 0, 1) !important;
             background: linear-gradient(135deg, #880000, #660000) !important;
             box-shadow: 0 6px 20px rgba(102, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.2) !important;
@@ -2001,6 +1985,9 @@
         }
         
         .stats-link {
+            position: absolute;
+            top: 20px;
+            right: 140px;
             background: var(--accent-info);
             color: #f8f4e8;
             border: 2px solid var(--accent-info);
@@ -2016,6 +2003,7 @@
             white-space: nowrap;
             font-weight: 600;
             text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.8);
+            z-index: 100;
         }
         
         .stats-link:hover {
