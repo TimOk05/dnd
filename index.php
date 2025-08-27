@@ -1976,8 +1976,8 @@ function formatCharacterFromApi(character) {
     
     // Боевые характеристики
     out += '<div class="character-section">';
-    out += '<div class="section-title" onclick="toggleSection(this)">⚔️ Боевые характеристики <span class="toggle-icon">▼</span></div>';
-    out += '<div class="section-content">';
+    out += '<div class="section-title collapsed" onclick="toggleSection(this)">⚔️ Боевые характеристики <span class="toggle-icon">▶</span></div>';
+    out += '<div class="section-content collapsed">';
     out += '<div class="info-grid">';
     out += '<div class="info-item"><strong>Хиты:</strong> ' + (character.hit_points || 'Не определены') + '</div>';
     out += '<div class="info-item"><strong>Класс доспеха:</strong> ' + (character.armor_class || 'Не определен') + '</div>';
@@ -1993,8 +1993,8 @@ function formatCharacterFromApi(character) {
     // Характеристики
     if (character.abilities) {
         out += '<div class="character-section">';
-        out += '<div class="section-title" onclick="toggleSection(this)">📊 Характеристики <span class="toggle-icon">▼</span></div>';
-        out += '<div class="section-content">';
+        out += '<div class="section-title collapsed" onclick="toggleSection(this)">📊 Характеристики <span class="toggle-icon">▶</span></div>';
+        out += '<div class="section-content collapsed">';
         out += '<div class="abilities-grid">';
         out += '<div class="ability-item">СИЛ: ' + (character.abilities.str || '?') + '</div>';
         out += '<div class="ability-item">ЛОВ: ' + (character.abilities.dex || '?') + '</div>';
@@ -2009,8 +2009,8 @@ function formatCharacterFromApi(character) {
     // Броски спасения
     if (character.saving_throws && character.saving_throws.length > 0) {
         out += '<div class="character-section">';
-        out += '<div class="section-title" onclick="toggleSection(this)">🛡️ Броски спасения <span class="toggle-icon">▼</span></div>';
-        out += '<div class="section-content saving-throws-content">';
+        out += '<div class="section-title collapsed" onclick="toggleSection(this)">🛡️ Броски спасения <span class="toggle-icon">▶</span></div>';
+        out += '<div class="section-content saving-throws-content collapsed">';
         out += '<div class="info-grid">';
         character.saving_throws.forEach(throw_item => {
             out += '<div class="info-item"><strong>' + (throw_item.name || 'Неизвестно') + ':</strong> ' + (throw_item.modifier >= 0 ? '+' : '') + (throw_item.modifier || '0') + '</div>';
@@ -2022,8 +2022,8 @@ function formatCharacterFromApi(character) {
     // Владения
     if (character.proficiencies && character.proficiencies.length > 0) {
         out += '<div class="character-section">';
-        out += '<div class="section-title" onclick="toggleSection(this)">⚔️ Владения <span class="toggle-icon">▼</span></div>';
-        out += '<div class="section-content">';
+        out += '<div class="section-title collapsed" onclick="toggleSection(this)">⚔️ Владения <span class="toggle-icon">▶</span></div>';
+        out += '<div class="section-content collapsed">';
         out += '<div class="proficiencies-list">';
         character.proficiencies.forEach(prof => {
             out += '<span class="proficiency-tag">' + prof + '</span>';
@@ -2035,8 +2035,8 @@ function formatCharacterFromApi(character) {
     // Описание
     if (character.description) {
         out += '<div class="character-section">';
-        out += '<div class="section-title" onclick="toggleSection(this)">📝 Описание <span class="toggle-icon">▼</span></div>';
-        out += '<div class="section-content">';
+        out += '<div class="section-title collapsed" onclick="toggleSection(this)">📝 Описание <span class="toggle-icon">▶</span></div>';
+        out += '<div class="section-content collapsed">';
         out += '<p>' + character.description + '</p>';
         out += '</div></div>';
     }
@@ -2044,8 +2044,8 @@ function formatCharacterFromApi(character) {
     // Предыстория
     if (character.background) {
         out += '<div class="character-section">';
-        out += '<div class="section-title" onclick="toggleSection(this)">📖 Предыстория <span class="toggle-icon">▼</span></div>';
-        out += '<div class="section-content">';
+        out += '<div class="section-title collapsed" onclick="toggleSection(this)">📖 Предыстория <span class="toggle-icon">▶</span></div>';
+        out += '<div class="section-content collapsed">';
         out += '<p>' + character.background + '</p>';
         out += '</div></div>';
     }
@@ -2053,8 +2053,8 @@ function formatCharacterFromApi(character) {
     // Заклинания
     if (character.spells && character.spells.length > 0) {
         out += '<div class="character-section">';
-        out += '<div class="section-title">🔮 Заклинания</div>';
-        out += '<div class="section-content">';
+        out += '<div class="section-title collapsed" onclick="toggleSection(this)">🔮 Заклинания <span class="toggle-icon">▶</span></div>';
+        out += '<div class="section-content collapsed">';
         out += '<div class="spell-list">';
         character.spells.forEach(spell => {
             if (typeof spell === 'object' && spell.name) {
@@ -2093,8 +2093,8 @@ function formatCharacterFromApi(character) {
     // Снаряжение
     if (character.equipment && character.equipment.length > 0) {
         out += '<div class="character-section">';
-        out += '<div class="section-title">🎒 Снаряжение</div>';
-        out += '<div class="section-content">';
+        out += '<div class="section-title collapsed" onclick="toggleSection(this)">🎒 Снаряжение <span class="toggle-icon">▶</span></div>';
+        out += '<div class="section-content collapsed">';
         out += '<ul class="equipment-list">';
         character.equipment.forEach(item => {
             out += '<li>' + item + '</li>';
@@ -2132,8 +2132,8 @@ function formatEnemiesFromApi(enemies) {
         
         // Боевые характеристики
         out += '<div class="enemy-section">';
-        out += '<div class="section-title" onclick="toggleSection(this)">⚔️ Боевые характеристики <span class="toggle-icon">▼</span></div>';
-        out += '<div class="section-content">';
+        out += '<div class="section-title collapsed" onclick="toggleSection(this)">⚔️ Боевые характеристики <span class="toggle-icon">▶</span></div>';
+        out += '<div class="section-content collapsed">';
         out += '<div class="info-grid">';
         out += '<div class="info-item"><strong>Хиты:</strong> ' + (enemy.hit_points || 'Не определены') + '</div>';
         out += '<div class="info-item"><strong>Класс доспеха:</strong> ' + (enemy.armor_class || 'Не определен') + '</div>';
@@ -2144,8 +2144,8 @@ function formatEnemiesFromApi(enemies) {
         // Характеристики
         if (enemy.abilities) {
             out += '<div class="enemy-section">';
-            out += '<div class="section-title" onclick="toggleSection(this)">📊 Характеристики <span class="toggle-icon">▼</span></div>';
-            out += '<div class="section-content">';
+            out += '<div class="section-title collapsed" onclick="toggleSection(this)">📊 Характеристики <span class="toggle-icon">▶</span></div>';
+            out += '<div class="section-content collapsed">';
             out += '<div class="abilities-grid">';
             out += '<div class="ability-item">СИЛ: ' + (enemy.abilities.str || '?') + '</div>';
             out += '<div class="ability-item">ЛОВ: ' + (enemy.abilities.dex || '?') + '</div>';
@@ -2160,8 +2160,8 @@ function formatEnemiesFromApi(enemies) {
         // Действия
         if (enemy.actions && enemy.actions.length > 0) {
             out += '<div class="enemy-section">';
-            out += '<div class="section-title" onclick="toggleSection(this)">⚔️ Действия <span class="toggle-icon">▼</span></div>';
-            out += '<div class="section-content">';
+            out += '<div class="section-title collapsed" onclick="toggleSection(this)">⚔️ Действия <span class="toggle-icon">▶</span></div>';
+            out += '<div class="section-content collapsed">';
             out += '<ul class="actions-list">';
             enemy.actions.forEach(action => {
                 out += '<li>' + (action.name || 'Неизвестное действие') + ': ' + (action.description || 'Нет описания') + '</li>';
@@ -2173,8 +2173,8 @@ function formatEnemiesFromApi(enemies) {
         // Особые способности
         if (enemy.special_abilities && enemy.special_abilities.length > 0) {
             out += '<div class="enemy-section">';
-            out += '<div class="section-title" onclick="toggleSection(this)">🌟 Особые способности <span class="toggle-icon">▼</span></div>';
-            out += '<div class="section-content">';
+            out += '<div class="section-title collapsed" onclick="toggleSection(this)">🌟 Особые способности <span class="toggle-icon">▶</span></div>';
+            out += '<div class="section-content collapsed">';
             out += '<ul class="abilities-list">';
             enemy.special_abilities.forEach(ability => {
                 out += '<li>' + (ability.name || 'Неизвестная способность') + ': ' + (ability.description || 'Нет описания') + '</li>';
@@ -2186,8 +2186,8 @@ function formatEnemiesFromApi(enemies) {
         // Описание
         if (enemy.description) {
             out += '<div class="enemy-section">';
-            out += '<div class="section-title" onclick="toggleSection(this)">📝 Описание <span class="toggle-icon">▼</span></div>';
-            out += '<div class="section-content">';
+            out += '<div class="section-title collapsed" onclick="toggleSection(this)">📝 Описание <span class="toggle-icon">▶</span></div>';
+            out += '<div class="section-content collapsed">';
             out += '<p>' + enemy.description + '</p>';
             out += '</div></div>';
         }

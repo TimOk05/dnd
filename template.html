@@ -2039,6 +2039,29 @@
         .section-content {
             color: var(--text-primary);
             line-height: 1.6;
+            max-height: 1000px;
+            overflow: hidden;
+            transition: max-height 0.3s ease, opacity 0.3s ease;
+            opacity: 1;
+        }
+        
+        .section-content.collapsed {
+            max-height: 0;
+            opacity: 0;
+        }
+        
+        .section-title {
+            cursor: pointer;
+            user-select: none;
+        }
+        
+        .section-title .toggle-icon {
+            transition: transform 0.3s ease;
+            margin-left: auto;
+        }
+        
+        .section-title.collapsed .toggle-icon {
+            transform: rotate(-90deg);
         }
         
         .info-grid {
@@ -3769,7 +3792,7 @@
     <div class="parchment">
         <div class="top-elements-container">
             <div class="user-info">
-                <span class="welcome-text">Добро пожаловать, <?php echo htmlspecialchars($currentUser); ?>!</span>
+                <span class="welcome-text">Добро пожаловать <?php echo htmlspecialchars($currentUser); ?>!</span>
                 <button class="logout-btn" onclick="logout()">Выйти</button>
             </div>
 
