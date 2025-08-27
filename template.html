@@ -19,6 +19,46 @@
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&family=UnifrakturCook:wght@700&family=IM+Fell+English+SC&display=swap" rel="stylesheet">
     <style>
          :root {
+            /* Spacing System */
+            --space-1: 0.25rem;
+            --space-2: 0.5rem;
+            --space-3: 0.75rem;
+            --space-4: 1rem;
+            --space-6: 1.5rem;
+            --space-8: 2rem;
+            /* Typography */
+            --font-primary: 'Roboto', system-ui, sans-serif;
+            --font-display: 'UnifrakturCook', serif;
+            --font-mono: 'JetBrains Mono', 'Fira Code', monospace;
+            --text-xs: 0.75rem;
+            --text-sm: 0.875rem;
+            --text-base: 1rem;
+            --text-lg: 1.125rem;
+            --text-xl: 1.25rem;
+            --text-2xl: 1.5rem;
+            --text-3xl: 1.875rem;
+            --line-height-tight: 1.25;
+            --line-height-normal: 1.5;
+            --line-height-relaxed: 1.75;
+            /* Border Radius */
+            --radius-sm: 0.25rem;
+            --radius-md: 0.5rem;
+            --radius-lg: 0.75rem;
+            --radius-xl: 1rem;
+            /* Z-index */
+            --z-dropdown: 1000;
+            --z-sticky: 1020;
+            --z-fixed: 1030;
+            --z-modal: 1040;
+            --z-popover: 1050;
+            --z-tooltip: 1060;
+            /* Shadows */
+            --shadow-xs: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+            --shadow-sm: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);
+            --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+            --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+            --shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
+            /* Legacy variables for compatibility */
             --block-gap: 10px;
             --block-padding: 8px 12px;
             /* Светлая тема */
@@ -393,6 +433,93 @@
             }
         }
         
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        @keyframes scaleIn {
+            from {
+                opacity: 0;
+                transform: scale(0.95);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+        /* Утилитарные классы для анимаций */
+        
+        .fade-in {
+            animation: fadeIn 0.3s ease-out;
+        }
+        
+        .slide-up {
+            animation: slideUp 0.4s ease-out;
+        }
+        
+        .scale-in {
+            animation: scaleIn 0.2s ease-out;
+        }
+        /* Интерактивные эффекты */
+        
+        .interactive {
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        
+        .interactive:hover {
+            transform: scale(1.02);
+        }
+        
+        .interactive:active {
+            transform: scale(0.98);
+        }
+        /* Улучшенная доступность */
+        
+        .fast-btn:focus,
+        .btn:focus,
+        input:focus,
+        button:focus {
+            outline: 2px solid var(--accent-primary);
+            outline-offset: 2px;
+            box-shadow: 0 0 0 4px rgba(166, 124, 82, 0.1);
+        }
+        /* Улучшенные состояния для скринридеров */
+        
+        .sr-only {
+            position: absolute;
+            width: 1px;
+            height: 1px;
+            padding: 0;
+            margin: -1px;
+            overflow: hidden;
+            clip: rect(0, 0, 0, 0);
+            white-space: nowrap;
+            border: 0;
+        }
+        /* Улучшенные hover-эффекты для всех интерактивных элементов */
+        
+        .fast-btn:hover,
+        .btn:hover,
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-lg);
+        }
+        /* Улучшенные active-эффекты */
+        
+        .fast-btn:active,
+        .btn:active,
+        button:active {
+            transform: translateY(0);
+            box-shadow: var(--shadow-md);
+        }
+        
         .parchment {
             background: var(--bg-primary) url('https://www.transparenttextures.com/patterns/checkered-pattern.png');
             border: 8px solid var(--border-primary);
@@ -536,6 +663,51 @@
             border-radius: 6px;
             border: 1px solid var(--border-tertiary);
         }
+        /* Унифицированная система кнопок */
+        
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: var(--space-2);
+            padding: var(--space-3) var(--space-6);
+            border-radius: var(--radius-md);
+            font-weight: 600;
+            font-size: var(--text-sm);
+            line-height: var(--line-height-tight);
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+            cursor: pointer;
+            border: 2px solid transparent;
+            min-height: 44px;
+            /* Touch-friendly */
+            min-width: 44px;
+        }
+        
+        .btn-primary {
+            background: var(--accent-primary);
+            color: white;
+            box-shadow: var(--shadow-md);
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-1px);
+            box-shadow: var(--shadow-lg);
+        }
+        
+        .btn-primary:active {
+            transform: translateY(0);
+        }
+        
+        .btn-secondary {
+            background: var(--bg-secondary);
+            color: var(--text-primary);
+            border: 2px solid var(--border-primary);
+        }
+        
+        .btn-secondary:hover {
+            background: var(--accent-primary);
+            color: white;
+        }
         
         .fast-btn {
             display: inline-block;
@@ -677,26 +849,48 @@
             font-family: 'UnifrakturCook', cursive;
             font-size: 1em;
         }
+        /* Улучшенные формы */
+        
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: var(--space-2);
+        }
+        
+        .form-label {
+            font-weight: 600;
+            color: var(--text-primary);
+            font-size: var(--text-sm);
+        }
         
         form {
             display: flex;
-            gap: 8px;
-            margin-top: 12px;
+            gap: var(--space-2);
+            margin-top: var(--space-3);
         }
         
         input[type=text],
         input[type=number] {
             flex: 1;
-            padding: 10px 14px;
-            border-radius: 8px;
+            padding: var(--space-3) var(--space-4);
+            border-radius: var(--radius-md);
             border: 2px solid var(--border-primary);
-            font-size: 1em;
+            font-size: var(--text-base);
             background: var(--bg-secondary);
             font-family: inherit;
-            color: var(--text-secondary);
+            color: var(--text-primary);
             outline: none;
-            box-shadow: 0 1px 4px var(--shadow-tertiary);
-            transition: all 0.3s ease;
+            box-shadow: var(--shadow-sm);
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+            min-height: 44px;
+            /* Touch-friendly */
+        }
+        
+        input[type=text]:focus,
+        input[type=number]:focus {
+            border-color: var(--accent-primary);
+            box-shadow: 0 0 0 3px rgba(166, 124, 82, 0.1), var(--shadow-md);
+            transform: translateY(-1px);
         }
         
         [data-theme="medium"] input[type=text],
@@ -2585,14 +2779,21 @@
             .fast-btn {
                 margin: 0;
                 padding: 12px 8px;
-                font-size: 0.9em;
-                min-height: 44px;
+                font-size: 1rem;
+                min-height: 48px;
+                min-width: 48px;
                 display: flex;
                 align-items: center;
                 justify-content: center;
                 text-align: center;
-                border-radius: 8px;
+                border-radius: var(--radius-md);
                 /* Цвета наследуются из основных стилей */
+            }
+            .btn {
+                padding: var(--space-4) var(--space-6);
+                font-size: var(--text-base);
+                min-height: 48px;
+                min-width: 48px;
             }
             .hotkeys-hint {
                 display: none;
@@ -2617,10 +2818,10 @@
             }
             input[type=text],
             input[type=number] {
-                font-size: 1em;
-                padding: 12px;
-                border-radius: 8px;
-                min-height: 44px;
+                font-size: var(--text-base);
+                padding: var(--space-3) var(--space-4);
+                border-radius: var(--radius-md);
+                min-height: 48px;
             }
             button[type=submit] {
                 padding: 12px 16px;
