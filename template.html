@@ -48,6 +48,68 @@
             --shadow-tertiary: #0001;
             --bg-image: url('backgrounds/light-theme.png');
         }
+        /* Средняя тема (коричневая) */
+        
+        [data-theme="medium"] {
+            --bg-primary: #2d1810;
+            --bg-secondary: #3d2418;
+            --bg-tertiary: #4d2a20;
+            --bg-quaternary: #5d3028;
+            --bg-quinary: #6d3630;
+            --bg-senary: #7d3c38;
+            --text-primary: #f4e4d6;
+            --text-secondary: #e6d4c0;
+            --text-tertiary: #d8c4aa;
+            --text-quaternary: #cab494;
+            --text-quinary: #bca47e;
+            --text-senary: #ae9468;
+            --border-primary: #d2691e;
+            --border-secondary: #b8860b;
+            --border-tertiary: #a0522d;
+            --accent-primary: #d2691e;
+            --accent-secondary: #ff8c00;
+            --accent-success: #32cd32;
+            --accent-info: #4169e1;
+            --accent-warning: #ffd700;
+            --accent-danger: #dc143c;
+            --shadow-primary: rgba(210, 105, 30, 0.2);
+            --shadow-secondary: rgba(210, 105, 30, 0.3);
+            --shadow-tertiary: rgba(210, 105, 30, 0.1);
+            --bg-image: url('backgrounds/medium-theme.png');
+        }
+        /* Стили кнопок для средней темы */
+        
+        [data-theme="medium"] .fast-btn,
+        [data-theme="medium"] button[type=submit],
+        [data-theme="medium"] .modal .modal-save,
+        [data-theme="medium"] .modal-regenerate,
+        [data-theme="medium"] .logout-btn,
+        [data-theme="medium"] .stats-link,
+        [data-theme="medium"] .admin-link {
+            color: #f4e4d6 !important;
+            font-weight: 700 !important;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.9) !important;
+            background: linear-gradient(135deg, #d2691e, #b8860b) !important;
+            border: 3px solid #d2691e !important;
+            border-radius: 12px !important;
+            box-shadow: 0 4px 15px rgba(210, 105, 30, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.1) !important;
+            position: relative !important;
+            overflow: hidden !important;
+        }
+        
+        [data-theme="medium"] .fast-btn:hover,
+        [data-theme="medium"] button[type=submit]:hover,
+        [data-theme="medium"] .modal .modal-save:hover,
+        [data-theme="medium"] .modal-regenerate:hover,
+        [data-theme="medium"] .logout-btn:hover,
+        [data-theme="medium"] .stats-link:hover,
+        [data-theme="medium"] .admin-link:hover {
+            color: #ffffff !important;
+            background: linear-gradient(135deg, #ff8c00, #d2691e) !important;
+            box-shadow: 0 6px 20px rgba(210, 105, 30, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.2) !important;
+            transform: translateY(-3px) scale(1.02) !important;
+            border-color: #ff8c00 !important;
+        }
         /* Тёмная тема */
         
         [data-theme="dark"] {
@@ -324,6 +386,11 @@
             transform: scaleX(-1);
         }
         
+        [data-theme="medium"] h1 {
+            color: #f4e4d6;
+            text-shadow: 0 2px 0 rgba(210, 105, 30, 0.2), 0 0 8px rgba(210, 105, 30, 0.3), 2px 2px 4px rgba(0, 0, 0, 0.8);
+        }
+        
         [data-theme="dark"] h1 {
             color: #e0e0e0;
             text-shadow: 0 2px 0 rgba(204, 0, 0, 0.2), 0 0 8px rgba(204, 0, 0, 0.3), 2px 2px 4px rgba(0, 0, 0, 0.8);
@@ -423,6 +490,13 @@
             transition: all 0.3s ease;
         }
         
+        [data-theme="medium"] .chat-box {
+            background: rgba(45, 24, 16, 0.9);
+            border: 1.5px solid #d2691e;
+            color: #f4e4d6;
+            box-shadow: 0 1px 4px rgba(210, 105, 30, 0.3), 0 0 10px rgba(210, 105, 30, 0.1);
+        }
+        
         [data-theme="dark"] .chat-box {
             background: rgba(26, 10, 10, 0.9);
             border: 1.5px solid #cc0000;
@@ -443,6 +517,14 @@
         .assistant {
             text-align: left;
             color: var(--text-quinary);
+        }
+        
+        [data-theme="medium"] .user {
+            color: #e6d4c0;
+        }
+        
+        [data-theme="medium"] .assistant {
+            color: #d8c4aa;
         }
         
         [data-theme="dark"] .user {
@@ -500,12 +582,27 @@
             transition: all 0.3s ease;
         }
         
+        [data-theme="medium"] input[type=text],
+        [data-theme="medium"] input[type=number] {
+            background: rgba(45, 24, 16, 0.9);
+            border: 2px solid #d2691e;
+            color: #f4e4d6;
+            box-shadow: 0 1px 4px rgba(210, 105, 30, 0.3);
+        }
+        
         [data-theme="dark"] input[type=text],
         [data-theme="dark"] input[type=number] {
             background: rgba(26, 10, 10, 0.9);
             border: 2px solid #cc0000;
             color: #ffe6e6;
             box-shadow: 0 1px 4px rgba(204, 0, 0, 0.3);
+        }
+        
+        [data-theme="medium"] input[type=text]:focus,
+        [data-theme="medium"] input[type=number]:focus {
+            border: 2px solid #ff8c00;
+            background: rgba(61, 36, 24, 0.9);
+            box-shadow: 0 2px 8px rgba(210, 105, 30, 0.5);
         }
         
         [data-theme="dark"] input[type=text]:focus,
@@ -570,6 +667,13 @@
             min-height: 40px;
             font-size: 1em;
             transition: all 0.3s ease;
+        }
+        
+        [data-theme="medium"] .notes-block {
+            background: rgba(45, 24, 16, 0.9);
+            border: 1.5px solid #d2691e;
+            color: #f4e4d6;
+            box-shadow: 0 1px 4px rgba(210, 105, 30, 0.3), 0 0 10px rgba(210, 105, 30, 0.1);
         }
         
         [data-theme="dark"] .notes-block {
@@ -3757,21 +3861,23 @@
 
             // Загружаем сохраненную тему
             const savedTheme = localStorage.getItem('theme') || 'light';
-            body.setAttribute('data-theme', savedTheme);
+            document.documentElement.setAttribute('data-theme', savedTheme);
             updateThemeIcon(savedTheme);
 
             themeToggle.addEventListener('click', function() {
-                const currentTheme = body.getAttribute('data-theme');
+                const currentTheme = document.documentElement.getAttribute('data-theme');
                 let newTheme;
 
-                // Переключаем между двумя темами: light -> dark -> light
+                // Переключаем между тремя темами: light -> medium -> dark -> light
                 if (currentTheme === 'light') {
+                    newTheme = 'medium';
+                } else if (currentTheme === 'medium') {
                     newTheme = 'dark';
                 } else {
                     newTheme = 'light';
                 }
 
-                body.setAttribute('data-theme', newTheme);
+                document.documentElement.setAttribute('data-theme', newTheme);
                 localStorage.setItem('theme', newTheme);
                 updateThemeIcon(newTheme);
             });
@@ -3779,6 +3885,8 @@
             function updateThemeIcon(theme) {
                 if (theme === 'dark') {
                     themeIcon.textContent = '🌙';
+                } else if (theme === 'medium') {
+                    themeIcon.textContent = '🍂';
                 } else {
                     themeIcon.textContent = '☀️';
                 }
