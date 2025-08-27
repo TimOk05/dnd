@@ -140,7 +140,7 @@
         /* Лавовые подтеки для темной темы */
         
         [data-theme="dark"] .parchment {
-            background: var(--bg-primary);
+            background: var(--bg-primary) url('https://www.transparenttextures.com/patterns/dark-mosaic.png');
             border: 8px solid var(--border-primary);
             box-shadow: 0 8px 32px var(--shadow-secondary), 0 0 0 12px rgba(255, 0, 0, 0.1), 0 0 20px rgba(255, 0, 0, 0.2), inset 0 0 50px rgba(255, 0, 0, 0.05);
             position: relative;
@@ -325,6 +325,13 @@
             transition: all 0.3s ease;
             opacity: 1;
             animation: fadeIn 0.5s ease-in;
+        }
+        /* Сетка для средней темы (коричневая) */
+        
+        [data-theme="medium"] .parchment {
+            background: var(--bg-primary) url('https://www.transparenttextures.com/patterns/dark-wood.png');
+            border: 8px solid var(--border-primary);
+            box-shadow: 0 8px 32px var(--shadow-secondary), 0 0 0 12px rgba(210, 105, 30, 0.3);
         }
         
         h1 {

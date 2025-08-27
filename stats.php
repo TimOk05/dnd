@@ -137,11 +137,21 @@ if ($userCreatedAt !== 'Неизвестно') {
         .stats-container {
             max-width: 800px;
             margin: 0 auto;
-            background: var(--bg-secondary);
+            background: var(--bg-secondary) url('https://www.transparenttextures.com/patterns/old-mathematics.png');
             border-radius: 10px;
             box-shadow: 0 4px 20px var(--shadow-primary);
             overflow: hidden;
             border: 2px solid var(--border-primary);
+        }
+        
+        /* Сетка для средней темы (коричневая) */
+        [data-theme="medium"] .stats-container {
+            background: var(--bg-secondary) url('https://www.transparenttextures.com/patterns/dark-wood.png');
+        }
+        
+        /* Сетка для тёмной темы */
+        [data-theme="dark"] .stats-container {
+            background: var(--bg-secondary) url('https://www.transparenttextures.com/patterns/dark-mosaic.png');
         }
         
         .stats-header {
@@ -168,11 +178,21 @@ if ($userCreatedAt !== 'Неизвестно') {
         }
         
         .stat-card {
-            background: var(--bg-tertiary);
+            background: var(--bg-tertiary) url('https://www.transparenttextures.com/patterns/old-mathematics.png');
             padding: 20px;
             border-radius: 8px;
             text-align: center;
             border: 1px solid var(--border-primary);
+        }
+        
+        /* Сетка для средней темы (коричневая) */
+        [data-theme="medium"] .stat-card {
+            background: var(--bg-tertiary) url('https://www.transparenttextures.com/patterns/dark-wood.png');
+        }
+        
+        /* Сетка для тёмной темы */
+        [data-theme="dark"] .stat-card {
+            background: var(--bg-tertiary) url('https://www.transparenttextures.com/patterns/dark-mosaic.png');
         }
         
         .stat-number {
@@ -199,10 +219,20 @@ if ($userCreatedAt !== 'Неизвестно') {
         }
         
         .user-info {
-            background: var(--bg-tertiary);
+            background: var(--bg-tertiary) url('https://www.transparenttextures.com/patterns/old-mathematics.png');
             padding: 20px;
             border-radius: 8px;
             border-left: 4px solid var(--accent-primary);
+        }
+        
+        /* Сетка для средней темы (коричневая) */
+        [data-theme="medium"] .user-info {
+            background: var(--bg-tertiary) url('https://www.transparenttextures.com/patterns/dark-wood.png');
+        }
+        
+        /* Сетка для тёмной темы */
+        [data-theme="dark"] .user-info {
+            background: var(--bg-tertiary) url('https://www.transparenttextures.com/patterns/dark-mosaic.png');
         }
         
         .info-row {
