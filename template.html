@@ -1958,7 +1958,7 @@
         .admin-link {
             position: absolute;
             top: 20px;
-            right: 60px;
+            right: 80px;
             background: var(--accent-warning);
             color: #f8f4e8;
             border: 2px solid var(--accent-warning);
@@ -1987,7 +1987,7 @@
         .stats-link {
             position: absolute;
             top: 20px;
-            right: 120px;
+            right: 140px;
             background: var(--accent-info);
             color: #f8f4e8;
             border: 2px solid var(--accent-info);
@@ -2525,36 +2525,7 @@
                 align-items: center;
                 justify-content: center;
             }
-            .stats-link {
-                position: absolute;
-                top: 20px;
-                right: 120px;
-                padding: 6px 8px;
-                font-size: 0.85em;
-                min-height: 36px;
-                display: flex;
-                align-items: center;
-                justify-content: center;
-            }
-            .admin-link {
-                position: absolute;
-                top: 20px;
-                right: 80px;
-                padding: 6px 8px;
-                font-size: 0.9em;
-                z-index: 1000;
-                min-height: 36px;
-                min-width: 36px;
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                border-radius: 8px;
-                transition: all 0.3s ease;
-            }
-            .admin-link:hover,
-            .admin-link:active {
-                opacity: 1;
-            }
+            /* Позиционирование иконок наследуется из основных стилей */
             h1 {
                 font-size: 1.6em;
                 margin: 8px 0 12px 0;
@@ -2712,22 +2683,7 @@
                 font-size: 0.8em;
                 min-height: 32px;
             }
-            .stats-link {
-                position: absolute;
-                top: 20px;
-                right: 120px;
-                padding: 6px 8px;
-                font-size: 0.8em;
-                min-height: 32px;
-            }
-            .admin-link {
-                top: 20px;
-                right: 80px;
-                padding: 5px 7px;
-                font-size: 0.85em;
-                min-height: 32px;
-                min-width: 32px;
-            }
+            /* Позиционирование иконок наследуется из основных стилей */
             /* Компактные быстрые кнопки */
             .fast-bar {
                 grid-template-columns: repeat(2, 1fr);
@@ -3833,10 +3789,10 @@
         </div>
         <div class="user-info">
             <span class="welcome-text">Добро пожаловать, <?php echo htmlspecialchars($currentUser); ?>!</span>
-            <a href="stats.php" class="stats-link" title="Статистика">📊</a>
             <button class="logout-btn" onclick="logout()">Выйти</button>
         </div>
 
+        <a href="stats.php" class="stats-link" title="Статистика">📊</a>
         <?php if (isAdmin()): ?>
         <a href="admin.php" class="admin-link" title="Админ панель">🔧</a>
         <?php endif; ?>
