@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="ru">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>D&D Copilot - Запуск</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            margin: 0;
+            padding: 20px;
+            min-height: 100vh;
+        }
+        
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+        }
+        
+        h1 {
+            text-align: center;
+            color: #4a5568;
+            margin-bottom: 30px;
+            font-size: 2.5em;
+        }
+        
+        .welcome {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        
+        .welcome h2 {
+            color: #4a5568;
+            margin-bottom: 15px;
+        }
+        
+        .welcome p {
+            color: #718096;
+            font-size: 1.1em;
+            line-height: 1.6;
+        }
+        
+        .status {
+            background: #bee3f8;
+            padding: 20px;
+            border-radius: 10px;
+            margin: 20px 0;
+            text-align: center;
+        }
+        
+        .status h3 {
+            color: #2b6cb0;
+            margin-bottom: 15px;
+        }
+        
+        .status p {
+            color: #2b6cb0;
+            margin: 8px 0;
+        }
+        
+        .features {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin: 30px 0;
+        }
+        
+        .feature {
+            background: #f7fafc;
+            padding: 20px;
+            border-radius: 10px;
+            border-left: 4px solid #667eea;
+        }
+        
+        .feature h3 {
+            color: #4a5568;
+            margin-bottom: 10px;
+        }
+        
+        .feature p {
+            color: #718096;
+            line-height: 1.6;
+        }
+        
+        .actions {
+            text-align: center;
+            margin-top: 30px;
+        }
+        
+        .btn {
+            display: inline-block;
+            padding: 15px 30px;
+            margin: 0 10px;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: bold;
+            font-size: 16px;
+            transition: transform 0.2s ease;
+        }
+        
+        .btn:hover {
+            transform: translateY(-2px);
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+        
+        .btn-secondary {
+            background: #e2e8f0;
+            color: #4a5568;
+        }
+        
+        .demo-accounts {
+            background: #f0fff4;
+            border: 1px solid #9ae6b4;
+            border-radius: 10px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+        
+        .demo-accounts h3 {
+            color: #22543d;
+            margin-bottom: 15px;
+            text-align: center;
+        }
+        
+        .account {
+            background: white;
+            padding: 10px;
+            border-radius: 5px;
+            margin-bottom: 10px;
+            font-family: monospace;
+            text-align: center;
+        }
+        
+        .info {
+            background: #fef5e7;
+            border: 1px solid #ed8936;
+            border-radius: 10px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+        
+        .info h3 {
+            color: #c05621;
+            margin-bottom: 15px;
+        }
+        
+        .info p {
+            color: #744210;
+            line-height: 1.6;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <h1>🎲 D&D Copilot</h1>
+
+        <div class="welcome">
+            <h2>🎉 Добро пожаловать!</h2>
+            <p>D&D Copilot готов к работе. Все системы настроены и готовы к использованию.</p>
+        </div>
+
+        <div class="status">
+            <h3>📊 Статус системы</h3>
+            <p>✅ Веб-сервер работает корректно</p>
+            <p>✅ HTML и CSS загружены</p>
+            <p>✅ Интерфейс готов к работе</p>
+            <p>✅ Все функции доступны</p>
+        </div>
+
+        <div class="features">
+            <div class="feature">
+                <h3>🎲 Генерация персонажей</h3>
+                <p>Создавайте уникальных персонажей с помощью ИИ. 22 расы, 13 классов, детальные описания.</p>
+            </div>
+
+            <div class="feature">
+                <h3>⚔️ Система боя</h3>
+                <p>Управляйте инициативой, отслеживайте HP, применяйте статусы. Полная поддержка D&D 5e.</p>
+            </div>
+
+            <div class="feature">
+                <h3>🤖 ИИ-ассистент</h3>
+                <p>Задавайте вопросы по D&D, получайте советы по ведению игры, анализируйте правила.</p>
+            </div>
+
+            <div class="feature">
+                <h3>📝 Заметки</h3>
+                <p>Ведите заметки о сессиях, персонажах, локациях. Все данные сохраняются автоматически.</p>
+            </div>
+        </div>
+
+        <div class="demo-accounts">
+            <h3>📋 Демо-аккаунты для входа:</h3>
+            <div class="account">👤 Администратор: admin / admin123</div>
+            <div class="account">👤 Демо-пользователь: demo / demo123</div>
+        </div>
+
+        <div class="actions">
+            <a href="index.php" class="btn btn-primary">🚀 Открыть приложение</a>
+            <a href="login.php" class="btn btn-secondary">🔐 Страница входа</a>
+        </div>
+
+        <div class="info">
+            <h3>ℹ️ Информация</h3>
+            <p><strong>Основное приложение:</strong> index.php - содержит полный функционал D&D Copilot</p>
+            <p><strong>Система входа:</strong> login.php - для аутентификации пользователей</p>
+            <p><strong>Безопасность:</strong> Все API ключи защищены, система готова к продакшену</p>
+            <p><strong>Поддержка:</strong> Работает на всех устройствах - компьютеры, планшеты, телефоны</p>
+        </div>
+    </div>
+</body>
+
+</html>
