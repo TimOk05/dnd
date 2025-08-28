@@ -185,7 +185,7 @@ $csrf_token = generateCSRFToken();
         
         <div class="links">
             <p><a href="login.php">Уже есть аккаунт? Войти</a></p>
-            <p><a href="debug.php">Диагностика системы</a></p>
+            
             <p><a href="index.php">Главная страница</a></p>
         </div>
     </div>

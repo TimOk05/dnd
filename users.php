@@ -115,9 +115,116 @@ function validatePassword($password) {
     return $errors;
 }
 
+// Функция для проверки лимита регистраций с IP
+function isRegistrationLimitExceeded($ip) {
+    $registration_attempts_file = 'registration_attempts.json';
+    
+    if (!file_exists($registration_attempts_file)) {
+        return false;
+    }
+    
+    $attempts = json_decode(file_get_contents($registration_attempts_file), true) ?: [];
+    
+    if (isset($attempts[$ip])) {
+        $last_attempt = $attempts[$ip]['last_attempt'];
+        $count = $attempts[$ip]['count'];
+        
+        // Если прошло 24 часа, сбрасываем счетчик
+        if (time() - $last_attempt > 86400) {
+            unset($attempts[$ip]);
+            file_put_contents($registration_attempts_file, json_encode($attempts));
+            return false;
+        }
+        
+        // Максимум 1 регистрация в день с одного IP
+        if ($count >= 1) {
+            return true;
+        }
+    }
+    
+    return false;
+}
+
+// Функция для проверки общего количества пользователей
+function isUserLimitExceeded() {
+    $users = loadUsers();
+    $maxUsers = 100; // Максимум 100 пользователей в системе
+    
+    return count($users) >= $maxUsers;
+}
+
+// Функция для проверки подозрительной активности
+function isSuspiciousActivity($ip) {
+    $suspicious_ips_file = 'suspicious_ips.json';
+    
+    if (!file_exists($suspicious_ips_file)) {
+        return false;
+    }
+    
+    $suspicious = json_decode(file_get_contents($suspicious_ips_file), true) ?: [];
+    
+    return isset($suspicious[$ip]) && $suspicious[$ip]['blocked_until'] > time();
+}
+
+// Функция для записи подозрительной активности
+function recordSuspiciousActivity($ip, $reason) {
+    $suspicious_ips_file = 'suspicious_ips.json';
+    
+    $suspicious = json_decode(file_get_contents($suspicious_ips_file), true) ?: [];
+    
+    $suspicious[$ip] = [
+        'blocked_until' => time() + 86400, // Блокировка на 24 часа
+        'reason' => $reason,
+        'first_detected' => time()
+    ];
+    
+    file_put_contents($suspicious_ips_file, json_encode($suspicious));
+}
+
+// Функция для записи попытки регистрации
+function recordRegistrationAttempt($ip, $success) {
+    $registration_attempts_file = 'registration_attempts.json';
+    
+    $attempts = json_decode(file_get_contents($registration_attempts_file), true) ?: [];
+    
+    if (!isset($attempts[$ip])) {
+        $attempts[$ip] = ['count' => 0, 'last_attempt' => time()];
+    }
+    
+    if ($success) {
+        // Успешная регистрация - увеличиваем счетчик
+        $attempts[$ip]['count']++;
+        $attempts[$ip]['last_attempt'] = time();
+    } else {
+        // Неудачная попытка - только обновляем время
+        $attempts[$ip]['last_attempt'] = time();
+    }
+    
+    file_put_contents($registration_attempts_file, json_encode($attempts));
+}
+
 // Функция для регистрации пользователя
 function registerUser($username, $password, $email = null) {
     $users = loadUsers();
+    $ip = $_SERVER['REMOTE_ADDR'] ?? 'unknown';
+    
+    // Проверяем лимит регистраций с IP
+    if (isRegistrationLimitExceeded($ip)) {
+        logActivity('registration_blocked', $username, $ip, false, ['reason' => 'IP limit exceeded']);
+        return ['success' => false, 'message' => 'Превышен лимит регистраций с вашего IP адреса. Попробуйте завтра.'];
+    }
+
+    // Проверяем общее количество пользователей
+    if (isUserLimitExceeded()) {
+        logActivity('registration_blocked', $username, $ip, false, ['reason' => 'User limit exceeded']);
+        return ['success' => false, 'message' => 'Превышен лимит пользователей в системе. Попробуйте позже.'];
+    }
+
+    // Проверяем подозрительную активность
+    if (isSuspiciousActivity($ip)) {
+        logActivity('registration_blocked', $username, $ip, false, ['reason' => 'Suspicious activity detected']);
+        return ['success' => false, 'message' => 'Ваша активность была отмечена как подозрительная. Попробуйте позже.'];
+    }
     
     // Очищаем входные данные
     $username = sanitizeInput($username);
@@ -126,12 +233,14 @@ function registerUser($username, $password, $email = null) {
     // Проверяем сложность пароля
     $passwordErrors = validatePassword($password);
     if (!empty($passwordErrors)) {
+        recordRegistrationAttempt($ip, false);
         return ['success' => false, 'message' => implode(', ', $passwordErrors)];
     }
     
     // Проверяем, не существует ли уже пользователь с таким именем
     foreach ($users as $user) {
         if (hash_equals($user['username'], $username)) {
+            recordRegistrationAttempt($ip, false);
             return ['success' => false, 'message' => 'Пользователь с таким именем уже существует'];
         }
     }
@@ -151,7 +260,10 @@ function registerUser($username, $password, $email = null) {
     $users[] = $newUser;
     saveUsers($users);
     
-    logActivity('user_registered', $username, $_SERVER['REMOTE_ADDR'] ?? 'unknown', true);
+    // Записываем успешную регистрацию
+    recordRegistrationAttempt($ip, true);
+    
+    logActivity('user_registered', $username, $ip, true);
     
     return ['success' => true, 'message' => 'Пользователь успешно зарегистрирован'];
 }
@@ -165,6 +277,12 @@ function authenticateUser($username, $password) {
     if (isIPBlocked($ip)) {
         logActivity('login_blocked', $username, $ip, false, ['reason' => 'IP blocked']);
         return ['success' => false, 'message' => 'Слишком много неудачных попыток входа. Попробуйте позже.'];
+    }
+
+    // Проверяем подозрительную активность
+    if (isSuspiciousActivity($ip)) {
+        logActivity('login_blocked', $username, $ip, false, ['reason' => 'Suspicious activity detected']);
+        return ['success' => false, 'message' => 'Ваша активность была отмечена как подозрительная. Попробуйте позже.'];
     }
     
     // Ищем пользователя

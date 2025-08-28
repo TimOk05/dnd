@@ -138,7 +138,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         
         <div class="links">
             <p><a href="simple_register.php">Создать новый аккаунт</a></p>
-            <p><a href="debug.php">Диагностика системы</a></p>
+            
             <p><a href="index.php">Главная страница</a></p>
         </div>
     </div>

@@ -11,43 +11,7 @@ if (!isLoggedIn()) {
 // Получаем имя текущего пользователя
 $currentUser = getCurrentUser();
 
-if (isset($_GET['curltest'])) {
-    $ch = curl_init('https://api.deepseek.com/v1/chat/completions');
-    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-    $result = curl_exec($ch);
-    $err = curl_error($ch);
-    curl_close($ch);
-    echo "CURL RESULT: " . htmlspecialchars($result) . "<br>ERROR: " . htmlspecialchars($err);
-    exit;
-}
-if (isset($_GET['curltest2'])) {
-    $apiKey = getApiKey('deepseek');
-    if (!$apiKey) {
-        echo "API ключ не настроен";
-        exit;
-    }
-    $data = [
-        'model' => 'deepseek-chat',
-        'messages' => [
-            ['role' => 'system', 'content' => 'Проверь соединение.'],
-            ['role' => 'user', 'content' => 'Скажи: соединение работает.']
-        ]
-    ];
-    $ch = curl_init('https://api.deepseek.com/v1/chat/completions');
-    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-    curl_setopt($ch, CURLOPT_POST, true);
-    curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($data));
-    curl_setopt($ch, CURLOPT_HTTPHEADER, [
-        'Content-Type: application/json',
-        'Authorization: Bearer ' . $apiKey,
-        'User-Agent: DnD-PHP-Test'
-    ]);
-    $result = curl_exec($ch);
-    $err = curl_error($ch);
-    curl_close($ch);
-    echo "CURL RESULT: " . htmlspecialchars($result) . "<br>ERROR: " . htmlspecialchars($err);
-    exit;
-}
+
 
 // --- Заметки ---
 if (!isset($_SESSION['notes'])) {
