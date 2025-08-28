@@ -2,6 +2,14 @@
 header('Content-Type: application/json');
 
 require_once __DIR__ . '/../config.php';
+require_once __DIR__ . '/../users.php';
+
+// Проверяем авторизацию
+if (!isLoggedIn()) {
+    http_response_code(401);
+    echo json_encode(['success' => false, 'error' => 'Не авторизован']);
+    exit;
+}
 
 class AIChat {
     private $context = '';
@@ -90,14 +98,27 @@ class AIChat {
      */
     private function processPDF($file) {
         $allowed_types = ['application/pdf'];
-        $max_size = 10 * 1024 * 1024; // 10MB
+        $max_size = MAX_FILE_SIZE;
         
+        // Проверяем тип файла
         if (!in_array($file['type'], $allowed_types)) {
             throw new Exception('Поддерживаются только PDF файлы');
         }
         
+        // Проверяем размер файла
         if ($file['size'] > $max_size) {
-            throw new Exception('Файл слишком большой (максимум 10MB)');
+            throw new Exception('Файл слишком большой (максимум ' . ($max_size / 1024 / 1024) . 'MB)');
+        }
+        
+        // Проверяем на ошибки загрузки
+        if ($file['error'] !== UPLOAD_ERR_OK) {
+            throw new Exception('Ошибка загрузки файла');
+        }
+        
+        // Проверяем расширение файла
+        $file_extension = strtolower(pathinfo($file['name'], PATHINFO_EXTENSION));
+        if ($file_extension !== 'pdf') {
+            throw new Exception('Файл должен иметь расширение .pdf');
         }
         
         // Простое извлечение текста из PDF (в реальном проекте лучше использовать библиотеку)
@@ -236,13 +257,20 @@ class AIChat {
 
 // Обработка запросов
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    // Проверяем CSRF токен
+    if (!isset($_POST['csrf_token']) || !verifyCSRFToken($_POST['csrf_token'])) {
+        http_response_code(403);
+        echo json_encode(['success' => false, 'error' => 'Неверный CSRF токен']);
+        exit;
+    }
+    
     $chat = new AIChat();
     $action = $_POST['action'] ?? '';
     
     try {
         switch ($action) {
             case 'send_message':
-                $message = $_POST['message'] ?? '';
+                $message = sanitizeInput($_POST['message'] ?? '', 'string');
                 $pdf_file = isset($_FILES['pdf']) ? $_FILES['pdf'] : null;
                 
                 if (empty($message)) {

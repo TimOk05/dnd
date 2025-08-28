@@ -1,7 +1,15 @@
 <?php
 require_once __DIR__ . '/../config.php';
+require_once __DIR__ . '/../users.php';
 require_once __DIR__ . '/CharacterService.php';
 require_once __DIR__ . '/CacheService.php';
+
+// Проверяем авторизацию
+if (!isLoggedIn()) {
+    http_response_code(401);
+    echo json_encode(['success' => false, 'error' => 'Не авторизован']);
+    exit;
+}
 
 class CharacterController {
     private $characterService;
@@ -251,7 +259,7 @@ if (php_sapi_name() !== 'cli') {
                     $input = json_decode(file_get_contents('php://input'), true) ?: $_POST;
                     $result = $controller->generateCharacter($input);
                 } else {
-                    $result = $controller->errorResponse('Метод не поддерживается', 405);
+                    $result = ['success' => false, 'error' => 'Метод не поддерживается', 'code' => 405, 'timestamp' => date('Y-m-d H:i:s')];
                 }
                 break;
                 
@@ -268,15 +276,15 @@ if (php_sapi_name() !== 'cli') {
                 break;
                 
             case 'clear-cache':
-                if (hasRole('admin')) {
+                if (function_exists('hasRole') && hasRole('admin')) {
                     $result = $controller->clearCache();
                 } else {
-                    $result = $controller->errorResponse('Недостаточно прав', 403);
+                    $result = ['success' => false, 'error' => 'Недостаточно прав', 'code' => 403, 'timestamp' => date('Y-m-d H:i:s')];
                 }
                 break;
                 
             default:
-                $result = $controller->errorResponse('Неизвестное действие', 404);
+                $result = ['success' => false, 'error' => 'Неизвестное действие', 'code' => 404, 'timestamp' => date('Y-m-d H:i:s')];
         }
         
         http_response_code($result['code'] ?? 200);

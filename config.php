@@ -1,21 +1,29 @@
 <?php
-// Загружаем переменные окружения
-require_once __DIR__ . '/config/EnvironmentLoader.php';
-
-try {
-    $env = new EnvironmentLoader();
-    
-    // Конфигурация API ключей из переменных окружения
-    if (!defined('DEEPSEEK_API_KEY')) {
-        define('DEEPSEEK_API_KEY', $env->get('DEEPSEEK_API_KEY', 'sk-1e898ddba737411e948af435d767e893'));
-    }
-    
-} catch (Exception $e) {
-    // Fallback для разработки
-    if (!defined('DEEPSEEK_API_KEY')) {
-        define('DEEPSEEK_API_KEY', 'sk-1e898ddba737411e948af435d767e893');
+// Загрузка переменных окружения
+function loadEnv($file) {
+    if (file_exists($file)) {
+        $lines = file($file, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
+        foreach ($lines as $line) {
+            if (strpos($line, '#') === 0) continue; // Пропускаем комментарии
+            if (strpos($line, '=') !== false) {
+                list($key, $value) = explode('=', $line, 2);
+                $key = trim($key);
+                $value = trim($value);
+                if (!getenv($key)) {
+                    putenv("$key=$value");
+                    $_ENV[$key] = $value;
+                }
+            }
+        }
     }
 }
+
+// Загружаем .env файл
+loadEnv(__DIR__ . '/.env');
+
+// Конфигурация API ключей
+// Используйте переменные окружения для безопасности
+define('DEEPSEEK_API_KEY', getenv('DEEPSEEK_API_KEY') ?: '');
 
 // Настройки приложения
 define('APP_NAME', 'DnD Copilot');

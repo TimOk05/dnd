@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="ru">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -8,7 +9,8 @@
     <link rel="stylesheet" href="utilities.css">
     <style>
         /* Базовые стили из template.html */
-        :root {
+        
+         :root {
             /* Spacing System */
             --space-1: 0.25rem;
             --space-2: 0.5rem;
@@ -16,12 +18,10 @@
             --space-4: 1rem;
             --space-6: 1.5rem;
             --space-8: 2rem;
-            
             /* Typography */
             --font-primary: 'Roboto', system-ui, sans-serif;
             --font-display: 'UnifrakturCook', serif;
             --font-mono: 'JetBrains Mono', 'Fira Code', monospace;
-            
             --text-xs: 0.75rem;
             --text-sm: 0.875rem;
             --text-base: 1rem;
@@ -29,17 +29,14 @@
             --text-xl: 1.25rem;
             --text-2xl: 1.5rem;
             --text-3xl: 1.875rem;
-            
             --line-height-tight: 1.25;
             --line-height-normal: 1.5;
             --line-height-relaxed: 1.75;
-            
             /* Border Radius */
             --radius-sm: 0.25rem;
             --radius-md: 0.5rem;
             --radius-lg: 0.75rem;
             --radius-xl: 1rem;
-            
             /* Z-index */
             --z-dropdown: 1000;
             --z-sticky: 1020;
@@ -47,14 +44,12 @@
             --z-modal: 1040;
             --z-popover: 1050;
             --z-tooltip: 1060;
-            
             /* Shadows */
             --shadow-xs: 0 1px 2px 0 rgb(0 0 0 / 0.05);
             --shadow-sm: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);
             --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
             --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
             --shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
-            
             /* Светлая тема */
             --bg-primary: #e8d8b0;
             --bg-secondary: #f0e6c0;
@@ -314,11 +309,9 @@
             .demo-grid {
                 grid-template-columns: 1fr;
             }
-            
             .demo-buttons {
                 flex-direction: column;
             }
-            
             .demo-animations {
                 flex-direction: column;
                 align-items: center;
@@ -326,6 +319,7 @@
         }
     </style>
 </head>
+
 <body>
     <!-- Переключатель тем -->
     <div class="theme-switcher">
@@ -373,7 +367,7 @@
                         <button class="btn btn-primary interactive">Интерактивная</button>
                     </div>
                 </div>
-                
+
                 <div class="demo-item">
                     <h3>Кнопки с иконками</h3>
                     <p>Кнопки с эмодзи и tooltips</p>
@@ -426,7 +420,7 @@
                         <button class="btn btn-primary">Сохранить</button>
                     </div>
                 </div>
-                
+
                 <div class="card">
                     <div class="card-header">
                         <h3>Противник</h3>
@@ -481,7 +475,7 @@
                     </div>
                     <code class="text-sm">.flex .gap-4 .mb-4</code>
                 </div>
-                
+
                 <div class="demo-item">
                     <h3>Grid</h3>
                     <div class="grid grid-cols-2 gap-2 mb-4">
@@ -492,7 +486,7 @@
                     </div>
                     <code class="text-sm">.grid .grid-cols-2 .gap-2</code>
                 </div>
-                
+
                 <div class="demo-item">
                     <h3>Spacing</h3>
                     <div class="space-y-2">
@@ -502,7 +496,7 @@
                     </div>
                     <code class="text-sm">.p-1 .p-2 .p-4</code>
                 </div>
-                
+
                 <div class="demo-item">
                     <h3>Shadows</h3>
                     <div class="space-y-2">
@@ -528,7 +522,7 @@
                         <input type="text" class="form-input" placeholder="Попробуйте Tab">
                     </div>
                 </div>
-                
+
                 <div class="demo-item">
                     <h3>ARIA-атрибуты</h3>
                     <p>Поддержка скринридеров</p>
@@ -551,7 +545,7 @@
                         <button class="btn btn-secondary">Еще кнопка</button>
                     </div>
                 </div>
-                
+
                 <div class="demo-item">
                     <h3>Адаптивная сетка</h3>
                     <p>На мобильных устройствах сетка автоматически перестраивается</p>
@@ -570,7 +564,7 @@
         // Переключение тем
         const themeOptions = document.querySelectorAll('.theme-option');
         const themeIcon = document.querySelector('#theme-toggle .theme-icon');
-        
+
         themeOptions.forEach(option => {
             option.addEventListener('click', function() {
                 const selectedTheme = this.getAttribute('data-theme');
@@ -580,7 +574,7 @@
                 updateActiveOption(selectedTheme);
             });
         });
-        
+
         function updateActiveOption(theme) {
             themeOptions.forEach(option => {
                 option.classList.remove('active');
@@ -589,7 +583,7 @@
                 }
             });
         }
-        
+
         function updateThemeIcon(theme) {
             if (theme === 'dark') {
                 themeIcon.textContent = '🌙';
@@ -601,7 +595,7 @@
                 themeIcon.textContent = '☀️';
             }
         }
-        
+
         // Загружаем сохраненную тему
         document.addEventListener('DOMContentLoaded', function() {
             const savedTheme = localStorage.getItem('theme') || 'light';
@@ -609,7 +603,7 @@
             updateThemeIcon(savedTheme);
             updateActiveOption(savedTheme);
         });
-        
+
         // Демонстрация анимаций
         document.querySelectorAll('.animation-demo').forEach(demo => {
             demo.addEventListener('click', function() {
@@ -621,4 +615,5 @@
         });
     </script>
 </body>
+
 </html>

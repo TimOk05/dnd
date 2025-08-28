@@ -21,7 +21,11 @@ if (isset($_GET['curltest'])) {
     exit;
 }
 if (isset($_GET['curltest2'])) {
-    $apiKey = 'sk-1e898ddba737411e948af435d767e893';
+    $apiKey = getApiKey('deepseek');
+    if (!$apiKey) {
+        echo "API ключ не настроен";
+        exit;
+    }
     $data = [
         'model' => 'deepseek-chat',
         'messages' => [
