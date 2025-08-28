@@ -19,8 +19,8 @@ DEBUG_MODE=false
 ENVIRONMENT=production
 
 # Security
-JWT_SECRET=" . bin2hex(random_bytes(32)) . "
-SESSION_SECRET=" . bin2hex(random_bytes(32)) . "
+JWT_SECRET=your-secret-key-here-change-in-production
+SESSION_SECRET=your-session-secret-change-in-production
 
 # Rate Limiting
 RATE_LIMIT_LOGIN=5
@@ -49,7 +49,7 @@ SECURITY_LOG_FILE=logs/security.log
 $directories = ['cache', 'cache/api', 'cache/rate_limits', 'logs', 'uploads'];
 foreach ($directories as $dir) {
     if (!is_dir($dir)) {
-        mkdir($dir, 0755, true);
+        @mkdir($dir, 0755, true);
     }
 }
 
@@ -81,11 +81,18 @@ if (!file_exists('users.json')) {
 }
 
 // Простая система сессий
-session_start();
+@session_start();
 
 // Простая функция аутентификации
 function authenticateUser($username, $password) {
+    if (!file_exists('users.json')) {
+        return false;
+    }
+    
     $users = json_decode(file_get_contents('users.json'), true);
+    if (!$users) {
+        return false;
+    }
     
     foreach ($users as $user) {
         if ($user['username'] === $username && password_verify($password, $user['password_hash'])) {
@@ -99,7 +106,7 @@ function authenticateUser($username, $password) {
 }
 
 // Обработка входа
-if ($_POST['action'] === 'login') {
+if (isset($_POST['action']) && $_POST['action'] === 'login') {
     $username = $_POST['username'] ?? '';
     $password = $_POST['password'] ?? '';
     
@@ -111,7 +118,7 @@ if ($_POST['action'] === 'login') {
 }
 
 // Обработка выхода
-if ($_POST['action'] === 'logout') {
+if (isset($_POST['action']) && $_POST['action'] === 'logout') {
     session_destroy();
     header('Location: ' . $_SERVER['PHP_SELF']);
     exit;
