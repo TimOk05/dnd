@@ -1,5 +1,11 @@
 <?php
 require_once 'config.php';
+require_once 'services/RateLimiter.php';
+require_once 'services/InputValidator.php';
+
+// Инициализируем системы безопасности
+$rateLimiter = new RateLimiter();
+$validator = new InputValidator();
 
 // Файл для хранения пользователей
 $users_file = 'users.json';
@@ -158,8 +164,20 @@ function registerUser($username, $password, $email = null) {
 
 // Функция для аутентификации пользователя
 function authenticateUser($username, $password) {
+    global $rateLimiter;
+    
     $users = loadUsers();
     $ip = $_SERVER['REMOTE_ADDR'] ?? 'unknown';
+    
+    // Проверяем rate limiting для входа
+    if (!$rateLimiter->check('login', $ip)) {
+        $resetTime = $rateLimiter->getResetTime('login', $ip);
+        logActivity('login_rate_limited', $username, $ip, false, ['reset_time' => $resetTime]);
+        return [
+            'success' => false, 
+            'message' => 'Слишком много попыток входа. Попробуйте через ' . ceil($resetTime / 60) . ' минут'
+        ];
+    }
     
     // Проверяем блокировку IP
     if (isIPBlocked($ip)) {
@@ -198,6 +216,9 @@ function authenticateUser($username, $password) {
     
     // Успешный вход
     recordLoginAttempt($ip, true);
+    
+    // Сбрасываем rate limit при успешном входе
+    $rateLimiter->reset('login', $ip);
     
     // Обновляем данные пользователя
     $user['last_login'] = date('Y-m-d H:i:s');

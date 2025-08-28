@@ -1,7 +1,21 @@
 <?php
-// Конфигурация API ключей
-// Используйте переменные окружения для безопасности
-define('DEEPSEEK_API_KEY', getenv('DEEPSEEK_API_KEY') ?: 'sk-1e898ddba737411e948af435d767e893');
+// Загружаем переменные окружения
+require_once __DIR__ . '/config/EnvironmentLoader.php';
+
+try {
+    $env = new EnvironmentLoader();
+    
+    // Конфигурация API ключей из переменных окружения
+    if (!defined('DEEPSEEK_API_KEY')) {
+        define('DEEPSEEK_API_KEY', $env->get('DEEPSEEK_API_KEY', 'sk-1e898ddba737411e948af435d767e893'));
+    }
+    
+} catch (Exception $e) {
+    // Fallback для разработки
+    if (!defined('DEEPSEEK_API_KEY')) {
+        define('DEEPSEEK_API_KEY', 'sk-1e898ddba737411e948af435d767e893');
+    }
+}
 
 // Настройки приложения
 define('APP_NAME', 'DnD Copilot');
