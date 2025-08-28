@@ -12,6 +12,7 @@ function loadEnv($file) {
                 if (!getenv($key)) {
                     putenv("$key=$value");
                     $_ENV[$key] = $value;
+                    $_SERVER[$key] = $value; // Добавляем в $_SERVER для совместимости
                 }
             }
         }
@@ -52,6 +53,12 @@ function getApiKey($service) {
         'deepseek' => DEEPSEEK_API_KEY,
         'dnd_api' => null // D&D API не требует ключа
     ];
+    
+    // Дополнительная проверка через getenv
+    if ($service === 'deepseek' && empty($keys['deepseek'])) {
+        $keys['deepseek'] = getenv('DEEPSEEK_API_KEY') ?: '';
+    }
+    
     return $keys[$service] ?? null;
 }
 
